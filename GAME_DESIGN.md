@@ -67,6 +67,48 @@ Boss chuyển sang `Enraged` khi còn 50% máu. Sang phase 2, tăng tốc và xe
 - Lưu: `localStorage` với khóa phiên bản v1, tránh phá dữ liệu khi bổ sung tính năng.
 
 ## 6. Milestone
+## 8. Roadmap triển khai 2026-10-12
+
+Phạm vi: chương 1 single-player fantasy Văn Lang, chơi 10–15 phút; giữ scene hiện có. Checklist là việc cần thực hiện, không phải bằng chứng hoàn tất.
+
+| Mốc | Owner / file | Deliverable | Acceptance |
+|---|---|---|---|
+| P0 | Codex: GameState.ts, utils/SaveCodec.ts | Save version, validation số hữu hạn/range/quest, migration, bảo vệ save hỏng/tương lai, xử lý quota/denied storage | Fixtures save hợp lệ/hỏng/cũ/tương lai; lỗi write không phá save cũ; build |
+| P1 | Codex: Player.ts, Enemy.ts, CombatSystem.ts, config.ts, Hud.ts | Combo 100/120/170%, cửa sổ 690ms; windup/active/recovery, input buffer; hit một lần/mục tiêu; hit-stop hiển thị, knockback, stagger, flash, damage number, cooldown UI | Timing/geometry checks; browser combo/Q/E/né, cooldown không kéo dài bởi hit-stop |
+| P2 | Codex: Enemy.ts, data/enemies.ts, EnemyFSM.ts khi cần | Một nguồn FSM; Mộc Tinh cận chiến, Ma Trơi giữ khoảng cách/bắn; boss phase 50%, vồ/quét/slam | FSM tests; dead không attack, reward một lần, ra khỏi telegraph tránh được hit |
+| P3 | Coordinator: VillageScene.ts, ForestScene.ts, world/CollisionGrid.ts | Collision, portal, spawn/camera bounds; map Tiled JSON production | Né không xuyên vật cản; portal hai chiều; 20 lần đổi scene không tăng listener |
+| P4 | Codex: data/npcs.ts, data/quests.ts, NPCSystem.ts, QuestSystem.ts | Dialogue/Quest/Upgrade/Healing, hội thoại theo state; Locked/Available/Active/Completed/RewardClaimed | Nhận quest, sáu kill, boss, quay làng claim; reload không nhận lặp |
+| P5 | Codex: data/items.ts, InventorySystem.ts, EquipmentSystem.ts, StatsSystem.ts | Stack, consumable, shop, weapon/armor/accessory; upgrade/crafting và skill tree nhỏ; stats tính tập trung | Không âm item/gold; equip không nhân buff; migration giữ tiến trình |
+| P6 | Antigravity: game/assets/*; coordinator nối renderer | Tự vẽ sprite/props/VFX/UI/animation; preview sheet, metadata, fallback primitive | Frame bounds, texture keys, screenshot làng/rừng/combat; asset thiếu không crash |
+| P7 | Coordinator + reviewer | Vertical slice từ save mới đến Victory, pause Esc, death/checkpoint/reload, cân bằng 10–15 phút | Chơi hết không sửa state; đo thời lượng, console sạch, không soft-lock |
+| P8 | QA + coordinator: main.ts, TouchControls.ts, release assets | Landscape/safe-area, multitouch, background pause, audio sau gesture, offline cache | Production build; PC Chrome, Android Chrome, iPhone Safari thực; offline reload |
+
+### Dependency và phân công
+
+P0 trước P1; P1 trước P2; P3 trước P4; P4 trước P5. Art P6 sản xuất song song P1/P2, tích hợp sau review. P2/P3/P4/P5/P6 cùng đạt mới nghiệm thu P7, rồi P8. Không hai worker cùng sửa một file; build nặng nối tiếp. Wave sau tối đa hai worker triển khai để giảm tải máy. Coordinator giữ scene integration và acceptance; Codex sở hữu domain/tests; Antigravity sở hữu art source mới. Review diff thực và chạy acceptance trước release worker. Không commit/merge/push/deploy tiếp nếu chưa được Admin duyệt cụ thể.
+
+### Hợp đồng asset và animation
+
+- Palette: đồng #a57738/#dfb15b, lúa #7fa958, gỗ #6e4a28, rừng #1c3a2b, yêu khí #77558f, lửa #ef8c4a. Nhà sàn, tre, ruộng, trống đồng, chim Lạc là cảm hứng fantasy; không trình bày hư cấu là lịch sử.
+- Player/NPC frame 32x48, Mộc Tinh 40x48, Ma Trơi 32x32, boss 80x80; tile 16x16. Origin chân (0.5, 0.9), collision radius riêng. Scale nguyên, nearest filtering.
+- Key: hero-idle-down, hero-run-down, hero-attack1-down, hero-attack2-down, hero-attack3-down, hero-dodge-down, hero-hurt-down, hero-death-down. Bốn hướng down/up/left/right. Enemy prefix moc-tinh/ma-troi/ho-yeu. VFX: vfx-slash, vfx-impact, vfx-earth, vfx-flame.
+- Idle 2 frame/4fps; run 4 frame/10fps; attack 4 frame; dodge 3; hurt 2; death 4. Combat clock quyết định hit frame, không dùng animation callback làm nguồn damage/cooldown thứ hai.
+- Antigravity vẽ frame/props; Codex tạo procedural Canvas texture và metadata. Ưu tiên player/enemy, sau đó slash/Q/E/impact, NPC, nhà sàn/tre/lúa/suối và UI đồng/gỗ. Mỗi lô có preview sheet; atlas chưa import không được coi là đã tích hợp.
+- Không download asset không rõ license, không job trả phí/dependency mới khi chưa duyệt. Fallback tối thiểu: texture tự tạo, thiếu thì primitive hiện tại. Không xây loader ba tầng khi chưa cần atlas ngoài.
+
+### Test và proof boundaries
+
+- TDD domain: combo boundary 689/690/691ms, mỗi active window hit một lần, phía sau không trúng cone; thiếu MP; cooldown boundary; dodge i-frame; stagger/death; boss 50%; claim reward một lần; inventory không âm; migration và malformed save.
+- Baseline chưa có test script. Bắt đầu bằng assert self-check cho module thuần, không thêm framework khi chưa cần. Target coverage domain 80% trở lên; chỉ công bố nếu đo được. Unit không thay thế scene integration/browser E2E.
+- Lệnh hiện có: npm run build chạy tsc --noEmit và Vite. npm test chỉ dùng sau khi script thực sự tồn tại. Bàn giao từng task phải ghi runner/output, không ghi test giả định là pass.
+- Integration: payout + kill/boss marker lưu cùng transaction; không persist reward trước marker. Death/transition không thực thi hai lần trong cùng frame. Write storage lỗi phải giữ dữ liệu cũ.
+- Browser: Menu → Village → nhận quest → Forest → combo/Q/E/né → boss hai phase → Village → claim → Victory. Reload từng checkpoint; thu console errors, screenshot/video; không chỉnh localStorage để giả hoàn thành gameplay.
+- Touch: giữ joystick cùng attack/né/skill; thả ngoài canvas, pointercancel, blur/background rồi trở lại không kẹt. Emulation không thay thế Android/iPhone thật.
+- Visual: preview mọi frame, bốn hướng và weapon đúng; chân khớp collision; VFX không che telegraph; HUD đọc được ở 640x360 và landscape mobile. Admin duyệt art trước khi gọi là đẹp/hoàn chỉnh.
+- Performance: mục tiêu 60fps máy đủ mạnh, đo frame-time p95 thiết bị yếu; không hứa 60fps mọi máy. Ban đầu cap 7 enemy thường + 1 boss, VFX có TTL/cap. Đo heap sau 20 scene transitions. Cảnh báo chunk >500kB cần đo, không tự động split.
+- Offline: localStorage chỉ lưu state, không bảo đảm reload mất mạng. P8 cache app shell/assets có version; kiểm update/rollback và offline reload sau lần tải đầu.
+- Bàn giao: ownership diff, lệnh/output, browser/device đã kiểm, phần chưa kiểm; chạy npm run dev, hoặc npm run build rồi npm run preview. Không chứng nhận production chỉ từ build xanh.
+
 
 **M1 — Vertical slice (đã có mã mẫu):** scene + di chuyển + đánh + boss + NPC + quest + save.
 
