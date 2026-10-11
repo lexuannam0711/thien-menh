@@ -6,6 +6,7 @@ import { CombatSystem } from '../systems/CombatSystem';
 import { gameState } from '../systems/GameState';
 import { label, paintForest, floatText } from '../ui/art';
 import { Hud, toast } from '../ui/Hud';
+import { loadGameAssets, createGameAnimations } from '../assets/assetLoader';
 
 export class ForestScene extends Phaser.Scene {
   private player!: Player;
@@ -17,7 +18,12 @@ export class ForestScene extends Phaser.Scene {
 
   constructor() { super('Forest'); }
 
+  preload(): void {
+    loadGameAssets(this);
+  }
+
   create(): void {
+    createGameAnimations(this);
     paintForest(this);
     this.enemies = [];
     this.bossSpawned = false;

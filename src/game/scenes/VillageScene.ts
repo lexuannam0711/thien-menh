@@ -5,6 +5,7 @@ import { CombatSystem } from '../systems/CombatSystem';
 import { gameState } from '../systems/GameState';
 import { actor, button, label, paintVillage } from '../ui/art';
 import { Hud, toast } from '../ui/Hud';
+import { loadGameAssets, createGameAnimations } from '../assets/assetLoader';
 
 interface NpcInfo { name: string; x: number; y: number; color: number; }
 interface Choice { title: string; select: () => void; }
@@ -22,7 +23,12 @@ export class VillageScene extends Phaser.Scene {
 
   constructor() { super('Village'); }
 
+  preload(): void {
+    loadGameAssets(this);
+  }
+
   create(data?: { notice?: string }): void {
+    createGameAnimations(this);
     this.overlay = null;
     paintVillage(this);
     this.npcs.forEach((npc) => {
