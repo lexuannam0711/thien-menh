@@ -1,0 +1,379 @@
+{
+  "url": "http://127.0.0.1:4187/",
+  "before": {
+    "htmlSha256": "1e46f0a687b7032666694bb06069dd67034b0a5dbfc0ea50459acf9700c5677c",
+    "bundleSha256": "125fab15da0089e67f2d97262488bfd8a9037625515296dab2edd81f02c5ee69",
+    "bundleUrl": "http://127.0.0.1:4187/assets/index-DAgfL7dU.js"
+  },
+  "after": {
+    "htmlSha256": "1e46f0a687b7032666694bb06069dd67034b0a5dbfc0ea50459acf9700c5677c",
+    "bundleSha256": "125fab15da0089e67f2d97262488bfd8a9037625515296dab2edd81f02c5ee69",
+    "bundleUrl": "http://127.0.0.1:4187/assets/index-DAgfL7dU.js"
+  },
+  "errors": [],
+  "baselineWarnings": [
+    {
+      "url": "http://127.0.0.1:4187/favicon.ico",
+      "status": 404,
+      "statusText": "Not Found",
+      "headers": {
+        "Transfer-Encoding": "chunked",
+        "Keep-Alive": "timeout=5",
+        "Date": "Mon, 12 Oct 2026 21:25:20 GMT",
+        "Vary": "Origin",
+        "Connection": "keep-alive"
+      },
+      "mimeType": "text/plain",
+      "charset": "",
+      "connectionReused": false,
+      "connectionId": 289,
+      "remoteIPAddress": "127.0.0.1",
+      "remotePort": 4187,
+      "fromDiskCache": false,
+      "fromServiceWorker": false,
+      "fromPrefetchCache": false,
+      "encodedDataLength": 152,
+      "timing": {
+        "requestTime": 20787.533266,
+        "proxyStart": -1,
+        "proxyEnd": -1,
+        "dnsStart": 0.859,
+        "dnsEnd": 1.172,
+        "connectStart": 1.172,
+        "connectEnd": 1.658,
+        "sslStart": -1,
+        "sslEnd": -1,
+        "workerStart": -1,
+        "workerReady": -1,
+        "workerFetchStart": -1,
+        "workerRespondWithSettled": -1,
+        "sendStart": 1.734,
+        "sendEnd": 1.808,
+        "pushStart": 0,
+        "pushEnd": 0,
+        "receiveHeadersStart": 10.832,
+        "receiveHeadersEnd": 11.206
+      },
+      "responseTime": 1791840320737.885,
+      "protocol": "http/1.1",
+      "alternateProtocolUsage": "unspecifiedReason",
+      "securityState": "secure"
+    },
+    {
+      "source": "network",
+      "level": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "timestamp": 1791840320743.098,
+      "url": "http://127.0.0.1:4187/favicon.ico",
+      "networkRequestId": "167296.11"
+    },
+    {
+      "url": "http://127.0.0.1:4187/favicon.ico",
+      "status": 404,
+      "statusText": "Not Found",
+      "headers": {
+        "Transfer-Encoding": "chunked",
+        "Keep-Alive": "timeout=5",
+        "Date": "Mon, 12 Oct 2026 21:25:23 GMT",
+        "Vary": "Origin",
+        "Connection": "keep-alive"
+      },
+      "mimeType": "text/plain",
+      "charset": "",
+      "connectionReused": true,
+      "connectionId": 344,
+      "remoteIPAddress": "127.0.0.1",
+      "remotePort": 4187,
+      "fromDiskCache": false,
+      "fromServiceWorker": false,
+      "fromPrefetchCache": false,
+      "encodedDataLength": 152,
+      "timing": {
+        "requestTime": 20790.140415,
+        "proxyStart": -1,
+        "proxyEnd": -1,
+        "dnsStart": -1,
+        "dnsEnd": -1,
+        "connectStart": -1,
+        "connectEnd": -1,
+        "sslStart": -1,
+        "sslEnd": -1,
+        "workerStart": -1,
+        "workerReady": -1,
+        "workerFetchStart": -1,
+        "workerRespondWithSettled": -1,
+        "sendStart": 2.409,
+        "sendEnd": 2.57,
+        "pushStart": 0,
+        "pushEnd": 0,
+        "receiveHeadersStart": 3.4,
+        "receiveHeadersEnd": 3.639
+      },
+      "responseTime": 1791840323337.601,
+      "protocol": "http/1.1",
+      "alternateProtocolUsage": "unspecifiedReason",
+      "securityState": "secure"
+    },
+    {
+      "source": "network",
+      "level": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "timestamp": 1791840323362.847,
+      "url": "http://127.0.0.1:4187/favicon.ico",
+      "networkRequestId": "167296.151"
+    }
+  ],
+  "assetFailures": [],
+  "failures": [
+    {
+      "phase": "equipment",
+      "message": "Overlay child order\n\n3 !== 2\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Overlay child order\n\n3 !== 2\n\n    at F:\\CODE\\thienmenh\\thienmenh\\scripts\\check-equipment-browser.cjs:31:12\n    at Array.forEach (<anonymous>)\n    at validateAlignment (F:\\CODE\\thienmenh\\thienmenh\\scripts\\check-equipment-browser.cjs:26:19)\n    at sample (F:\\CODE\\thienmenh\\thienmenh\\scripts\\check-equipment-browser.cjs:188:3)\n    at async measure (F:\\CODE\\thienmenh\\thienmenh\\scripts\\check-equipment-browser.cjs:219:3)\n    at async run (F:\\CODE\\thienmenh\\thienmenh\\scripts\\check-equipment-browser.cjs:281:7)"
+    }
+  ],
+  "assetResponses": [
+    {
+      "url": "http://127.0.0.1:4187/assets/equipment/bamboo-armor_hero.png",
+      "status": 200,
+      "mimeType": "image/png",
+      "fromDiskCache": false,
+      "requestId": "167296.48"
+    },
+    {
+      "url": "http://127.0.0.1:4187/assets/equipment/bamboo-armor_hero_axe.png",
+      "status": 200,
+      "mimeType": "image/png",
+      "fromDiskCache": false,
+      "requestId": "167296.49"
+    },
+    {
+      "url": "http://127.0.0.1:4187/assets/equipment/bamboo-armor_hero_sword.png",
+      "status": 200,
+      "mimeType": "image/png",
+      "fromDiskCache": false,
+      "requestId": "167296.50"
+    },
+    {
+      "url": "http://127.0.0.1:4187/assets/equipment/jade-charm_hero.png",
+      "status": 200,
+      "mimeType": "image/png",
+      "fromDiskCache": false,
+      "requestId": "167296.51"
+    },
+    {
+      "url": "http://127.0.0.1:4187/assets/equipment/jade-charm_hero_axe.png",
+      "status": 200,
+      "mimeType": "image/png",
+      "fromDiskCache": false,
+      "requestId": "167296.52"
+    },
+    {
+      "url": "http://127.0.0.1:4187/assets/equipment/jade-charm_hero_sword.png",
+      "status": 200,
+      "mimeType": "image/png",
+      "fromDiskCache": false,
+      "requestId": "167296.53"
+    }
+  ],
+  "fixtures": [
+    {
+      "hero": "hero",
+      "equipped": true,
+      "requested": {
+        "version": 1,
+        "hp": 100,
+        "mp": 100,
+        "maxHp": 100,
+        "maxMp": 100,
+        "attack": 12,
+        "level": 3,
+        "xp": 0,
+        "gold": 0,
+        "chapter": 1,
+        "kills": 0,
+        "quest": "active",
+        "bossDead": true,
+        "storyFlags": {},
+        "checkpoint": "village-gate",
+        "playtimeSeconds": 0,
+        "upgrades": 0,
+        "rpg": {
+          "inventory": {
+            "capacity": 24,
+            "slots": [
+              {
+                "itemId": "bronze-spear",
+                "quantity": 1
+              },
+              {
+                "itemId": "battle-axe",
+                "quantity": 1
+              },
+              {
+                "itemId": "lac-sword",
+                "quantity": 1
+              },
+              {
+                "itemId": "bamboo-armor",
+                "quantity": 1
+              },
+              {
+                "itemId": "jade-charm",
+                "quantity": 1
+              }
+            ]
+          },
+          "equipment": {
+            "slots": {
+              "weapon": "bronze-spear",
+              "armor": "bamboo-armor",
+              "accessory": "jade-charm"
+            }
+          },
+          "quests": {
+            "hunt-ho-yeu": {
+              "questId": "hunt-ho-yeu",
+              "stage": "active",
+              "counts": {},
+              "flags": {},
+              "rewardClaimed": false
+            },
+            "main-c1-02-mo-duong-rung-truc": {
+              "questId": "main-c1-02-mo-duong-rung-truc",
+              "stage": "active",
+              "counts": {},
+              "flags": {},
+              "rewardClaimed": false
+            },
+            "main-c1-03-tru-ma-troi": {
+              "questId": "main-c1-03-tru-ma-troi",
+              "stage": "active",
+              "counts": {},
+              "flags": {},
+              "rewardClaimed": false
+            }
+          }
+        }
+      },
+      "normalized": {
+        "version": 1,
+        "hp": 100,
+        "mp": 100,
+        "maxHp": 100,
+        "maxMp": 100,
+        "attack": 12,
+        "level": 3,
+        "chapter": 1,
+        "xp": 0,
+        "gold": 0,
+        "kills": 0,
+        "quest": "active",
+        "bossDead": true,
+        "storyFlags": {},
+        "checkpoint": "village-gate",
+        "playtimeSeconds": 0,
+        "upgrades": 0,
+        "rpg": {
+          "inventory": {
+            "capacity": 24,
+            "slots": [
+              {
+                "itemId": "bronze-spear",
+                "quantity": 1
+              },
+              {
+                "itemId": "battle-axe",
+                "quantity": 1
+              },
+              {
+                "itemId": "lac-sword",
+                "quantity": 1
+              },
+              {
+                "itemId": "bamboo-armor",
+                "quantity": 1
+              },
+              {
+                "itemId": "jade-charm",
+                "quantity": 1
+              }
+            ]
+          },
+          "equipment": {
+            "slots": {
+              "weapon": "bronze-spear",
+              "armor": "bamboo-armor",
+              "accessory": "jade-charm"
+            }
+          },
+          "quests": {
+            "hunt-ho-yeu": {
+              "questId": "hunt-ho-yeu",
+              "stage": "active",
+              "counts": {},
+              "flags": {},
+              "rewardClaimed": false
+            },
+            "main-c1-02-mo-duong-rung-truc": {
+              "questId": "main-c1-02-mo-duong-rung-truc",
+              "stage": "active",
+              "counts": {},
+              "flags": {},
+              "rewardClaimed": false
+            },
+            "main-c1-03-tru-ma-troi": {
+              "questId": "main-c1-03-tru-ma-troi",
+              "stage": "active",
+              "counts": {},
+              "flags": {},
+              "rewardClaimed": false
+            }
+          },
+          "skills": {
+            "unlockedSkillIds": [
+              "earth-shockwave",
+              "flame-beam",
+              "tidal-surge"
+            ],
+            "equippedSlots": {
+              "slot-1": "earth-shockwave",
+              "slot-2": "flame-beam",
+              "slot-3": "tidal-surge"
+            },
+            "cooldownUntil": {},
+            "activeDivinePower": "earth",
+            "unlockedDivinePowers": [
+              "earth"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "observed": [],
+  "actions": [],
+  "screenshots": [
+    {
+      "file": "F:\\CODE\\thienmenh\\thienmenh\\artifacts\\graphics-qa\\2026-10-13\\equipment-browser-01\\failure.png",
+      "sha256": "4aca946470329b9d3841c41f8c3731777a1688758eace967acbc22177f4d6a7b",
+      "label": "failure"
+    }
+  ],
+  "cleanup": {
+    "pid": 166360,
+    "profile": "C:\\Users\\MYLAPT~1\\AppData\\Local\\Temp\\than-menh-graphics-stress-t9nJk5",
+    "exitCode": 0,
+    "profileRemoved": true
+  },
+  "limits": "Headless Chrome only; six legitimate save reload fixtures, not continuous stress; no device/GPU/art approval; missing-art fallback remains source test gate; no live game/frame/stat/clock mutation.",
+  "browserPid": 166360,
+  "profile": "C:\\Users\\MYLAPT~1\\AppData\\Local\\Temp\\than-menh-graphics-stress-t9nJk5",
+  "browserVersion": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/155.0.8059.39",
+    "revision": "@3ff7ac5a9224be9156d7f8703a06e22890aafd34",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36",
+    "jsVersion": "15.5.35.20"
+  },
+  "verdict": "FAILED"
+}

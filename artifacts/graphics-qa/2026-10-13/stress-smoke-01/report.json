@@ -1,0 +1,233 @@
+{
+  "fixture": "seeded combat; not natural campaign; normal attack/default skills; 10000 HP/MP; active quest + bossDead prevents boss progression",
+  "minutes": 1,
+  "url": "http://127.0.0.1:4187/",
+  "continuous": true,
+  "measured": false,
+  "elapsedMs": 0,
+  "errors": [
+    {
+      "source": "network",
+      "level": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "timestamp": 1791835824122.571,
+      "url": "http://127.0.0.1:4187/favicon.ico",
+      "networkRequestId": "110784.21"
+    }
+  ],
+  "assetFailures": [
+    {
+      "url": "http://127.0.0.1:4187/favicon.ico",
+      "status": 404,
+      "statusText": "Not Found",
+      "headers": {
+        "Transfer-Encoding": "chunked",
+        "Keep-Alive": "timeout=5",
+        "Date": "Mon, 12 Oct 2026 20:10:24 GMT",
+        "Vary": "Origin",
+        "Connection": "keep-alive"
+      },
+      "mimeType": "text/plain",
+      "charset": "",
+      "connectionReused": true,
+      "connectionId": 256,
+      "remoteIPAddress": "127.0.0.1",
+      "remotePort": 4187,
+      "fromDiskCache": false,
+      "fromServiceWorker": false,
+      "fromPrefetchCache": false,
+      "encodedDataLength": 152,
+      "timing": {
+        "requestTime": 16290.925313,
+        "proxyStart": -1,
+        "proxyEnd": -1,
+        "dnsStart": -1,
+        "dnsEnd": -1,
+        "connectStart": -1,
+        "connectEnd": -1,
+        "sslStart": -1,
+        "sslEnd": -1,
+        "workerStart": -1,
+        "workerReady": -1,
+        "workerFetchStart": -1,
+        "workerRespondWithSettled": -1,
+        "sendStart": 0.551,
+        "sendEnd": 0.62,
+        "pushStart": 0,
+        "pushEnd": 0,
+        "receiveHeadersStart": 1.735,
+        "receiveHeadersEnd": 1.91
+      },
+      "responseTime": 1791835824120.836,
+      "protocol": "http/1.1",
+      "alternateProtocolUsage": "unspecifiedReason",
+      "securityState": "secure"
+    }
+  ],
+  "failures": [
+    {
+      "classification": "harness",
+      "message": "Seed fixture rejected: hp\n\n100 !== 10000\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Seed fixture rejected: hp\n\n100 !== 10000\n\n    at run (F:\\CODE\\thienmenh\\thienmenh\\scripts\\check-graphics-stress.cjs:378:128)"
+    }
+  ],
+  "samples": [],
+  "sceneChanges": [],
+  "deaths": 0,
+  "presets": {
+    "low": {
+      "activeMs": 0,
+      "hits": 0,
+      "basics": 0,
+      "skills": 0,
+      "dodges": 0,
+      "frames": 0,
+      "combatWindows": 0,
+      "transitions": [],
+      "frameIntervals": {
+        "histogram": [
+          {
+            "upperMs": 8.34,
+            "count": 0
+          },
+          {
+            "upperMs": 16.67,
+            "count": 0
+          },
+          {
+            "upperMs": 25,
+            "count": 0
+          },
+          {
+            "upperMs": 33.34,
+            "count": 0
+          },
+          {
+            "upperMs": 50,
+            "count": 0
+          },
+          {
+            "upperMs": 100,
+            "count": 0
+          },
+          {
+            "upperMs": null,
+            "count": 0
+          }
+        ],
+        "distribution": null
+      },
+      "trends": {
+        "heap": null,
+        "dom": null,
+        "display": null,
+        "enemies": null
+      }
+    },
+    "medium": {
+      "activeMs": 0,
+      "hits": 0,
+      "basics": 0,
+      "skills": 0,
+      "dodges": 0,
+      "frames": 0,
+      "combatWindows": 0,
+      "transitions": [],
+      "frameIntervals": {
+        "histogram": [
+          {
+            "upperMs": 8.34,
+            "count": 0
+          },
+          {
+            "upperMs": 16.67,
+            "count": 0
+          },
+          {
+            "upperMs": 25,
+            "count": 0
+          },
+          {
+            "upperMs": 33.34,
+            "count": 0
+          },
+          {
+            "upperMs": 50,
+            "count": 0
+          },
+          {
+            "upperMs": 100,
+            "count": 0
+          },
+          {
+            "upperMs": null,
+            "count": 0
+          }
+        ],
+        "distribution": null
+      },
+      "trends": {
+        "heap": null,
+        "dom": null,
+        "display": null,
+        "enemies": null
+      }
+    },
+    "high": {
+      "activeMs": 0,
+      "hits": 0,
+      "basics": 0,
+      "skills": 0,
+      "dodges": 0,
+      "frames": 0,
+      "combatWindows": 0,
+      "transitions": [],
+      "frameIntervals": {
+        "histogram": [
+          {
+            "upperMs": 8.34,
+            "count": 0
+          },
+          {
+            "upperMs": 16.67,
+            "count": 0
+          },
+          {
+            "upperMs": 25,
+            "count": 0
+          },
+          {
+            "upperMs": 33.34,
+            "count": 0
+          },
+          {
+            "upperMs": 50,
+            "count": 0
+          },
+          {
+            "upperMs": 100,
+            "count": 0
+          },
+          {
+            "upperMs": null,
+            "count": 0
+          }
+        ],
+        "distribution": null
+      },
+      "trends": {
+        "heap": null,
+        "dom": null,
+        "display": null,
+        "enemies": null
+      }
+    }
+  },
+  "limits": "rAF intervals, JS heap, DOM/display samples only; not native GPU FPS, memory-leak absence, natural campaign or device proof",
+  "bundleUrl": "http://127.0.0.1:4187/assets/index-D71EOpKB.js",
+  "bundleBefore": "501549219ba7dd50b84d0d7c6c9e77da416ca2ad23e628acd8e9402646749bd6",
+  "browserPid": 102988,
+  "profile": "C:\\Users\\MYLAPT~1\\AppData\\Local\\Temp\\than-menh-graphics-stress-ZpmwMa",
+  "bundleAfter": "501549219ba7dd50b84d0d7c6c9e77da416ca2ad23e628acd8e9402646749bd6",
+  "verdict": "FAILED"
+}

@@ -1,0 +1,43 @@
+{
+  "url": "http://127.0.0.1:4187/",
+  "viewport": "960x640 browser, 960x540 logical canvas",
+  "renderer": "headless Chrome --disable-gpu",
+  "quality": "medium",
+  "reducedMotion": true,
+  "sample": "one-second rAF per seeded boss encounter",
+  "limitation": "Not native FPS/GPU/mobile/stress/30-minute acceptance. Frame scheduling only.",
+  "profiles": [
+    {
+      "chapter": 1,
+      "frames": 60,
+      "durationMs": 1000,
+      "fps": 60,
+      "p95FrameMs": 16.700000000000728,
+      "jsHeapUsedBytes": 12054344
+    },
+    {
+      "chapter": 2,
+      "frames": 60,
+      "durationMs": 1000,
+      "fps": 60,
+      "p95FrameMs": 16.700000000000728,
+      "jsHeapUsedBytes": 21032488
+    },
+    {
+      "chapter": 3,
+      "frames": 60,
+      "durationMs": 1000,
+      "fps": 60,
+      "p95FrameMs": 16.700000000000728,
+      "jsHeapUsedBytes": 14457936
+    },
+    {
+      "chapter": 4,
+      "frames": 61,
+      "durationMs": 1016.6000000000004,
+      "fps": 60.00393468424157,
+      "p95FrameMs": 16.700000000000728,
+      "jsHeapUsedBytes": 25025872
+    }
+  ]
+}

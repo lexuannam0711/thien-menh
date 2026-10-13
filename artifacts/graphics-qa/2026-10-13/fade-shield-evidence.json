@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-13",
+  "bundle": "dist/assets/index-D71EOpKB.js",
+  "bundleSha256": "501549219ba7dd50b84d0d7c6c9e77da416ca2ad23e628acd8e9402646749bd6",
+  "validation": {
+    "fullCheck": "npm run check:all: exit 0, session63919",
+    "nativeScene": "native Phaser Fade/EventEmitter reentrancy, foreign-fade ownership, replacement preload-cycle regressions: PASS",
+    "statusCheck": "seven source-VM groups: PASS",
+    "statusReview": "independent read-only: no HIGH/MEDIUM findings",
+    "browser": "session72585 exit 0: seeded native shield cost/cooldown/movement/expiry, prior extended settings/UI/asset/dungeon checks PASS"
+  },
+  "sourceFiles": {
+    "src/game/entities/Player.ts": "c154ad7b3b32bb17ffb72299c9d5d87ea4ba0fc4caf071a9075e1d71ea47f2c5",
+    "src/game/rendering/ScenePresentation.ts": "41fa7618b19c94189de5599299f784812dbe18168d8efa35cfb8b5e423c45cf5",
+    "scripts/check-player-status.cjs": "53a67c439154eb8eb995e4d153e427cd5f7d4bf2fee6563ed30eac8aa778892e",
+    "scripts/check-scene-presentation.cjs": "c542fee2f7162ce029610a783e3aa898914f9334a528c2d6d2097be3d87505db",
+    "scripts/check-browser.cjs": "9908735c6810a313b5084c535a5b82f574be802776ab699b3c877b87b2d035c3"
+  },
+  "inspectedCaptures": [
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/fade-shield-final/shield-active.png",
+      "sha256": "25141f82e482d903d49e5d419710b6b2f3c512c8691fc25500ec9fb6a0429939"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/fade-shield-final/shield-moved.png",
+      "sha256": "a84ffa6bbe6ea38b3a17c5e28b071468948b0006a8b903398e72cabfaf214402"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/fade-shield-final/shield-expired.png",
+      "sha256": "da0b3538ff5f71b9ea1629d1ad095b5b67d8c5fe154444aea309be1097b28a31"
+    }
+  ],
+  "visualObservation": "Distinct gold shield polygon tracks equipped hero, disappears after canonical 6000ms; instantaneous large cast motif is separate.",
+  "limits": [
+    "Seeded fixture, not natural campaign",
+    "Static screenshot review, no automated pixel assertion",
+    "Canonical invulnerable skill absent; dormant compatibility is source-tested only",
+    "Browser reducedMotion true; entry-fade visual runtime not independently captured",
+    "Headless software renderer; no native GPU/mobile/30-minute performance claim",
+    "Full graphics1.0/art/legal/accessibility remain open"
+  ]
+}

@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import { H, PALETTE, W } from '../../data/config';
+import { paintEnvironment } from '../rendering/Environment';
+import { VILLAGE_BARRIERS } from '../world/WorldBounds';
 
 export function label(scene: Phaser.Scene, x: number, y: number, text: string,
   fontSize = 17, color = PALETTE.cream, align: 'left' | 'center' = 'left'): Phaser.GameObjects.Text {
@@ -243,6 +245,11 @@ function drawDongSonPlaza(scene: Phaser.Scene, x: number, y: number, radius: num
 }
 
 export function paintVillage(scene: Phaser.Scene): void {
+  if (paintEnvironment(scene, 'village', VILLAGE_BARRIERS)) {
+    drawDongSonPlaza(scene, 480, 310, 78);
+    label(scene, 914, 220, 'RỪNG TRÚC →', 16, '#ffe79a').setOrigin(1, 0.5);
+    return;
+  }
   // Rich tropical earth & lush grassy ground
   scene.add.rectangle(W / 2, H / 2, W, H, 0x4f7042).setDepth(0);
 
@@ -297,67 +304,474 @@ export function paintVillage(scene: Phaser.Scene): void {
   gate.fillRect(925, 205, 30, 175);
   gate.lineStyle(3, PALETTE.gold, 1);
   gate.strokeRect(925, 205, 30, 175);
-  label(scene, 810, 220, '→ RỪNG TRÚC', 18, '#ffe79a');
-
-  // Title header banner
-  const banner = scene.add.rectangle(170, 52, 270, 56, 0x142c26, 0.85)
-    .setStrokeStyle(2, PALETTE.bronze).setDepth(200);
-  banner.setAlpha(0.92);
-  label(scene, 50, 40, 'LÀNG LẠC THỦY', 22, '#ffeed0').setDepth(201);
-  label(scene, 50, 68, 'Bản làng thanh bình thời Hùng Vương', 13, '#c9dcb9').setDepth(201);
+  label(scene, 914, 220, 'RỪNG TRÚC →', 16, '#ffe79a').setOrigin(1, 0.5);
 }
 
-export function paintForest(scene: Phaser.Scene): void {
-  // Deep primeval jungle floor (Rừng đại ngàn u uất)
-  scene.add.rectangle(W / 2, H / 2, W, H, 0x162c21).setDepth(0);
+import { getChapterWorldConfig, type ChapterWorldConfig } from '../world/ChapterWorld';
 
-  // Miasma / fog floor ripples
+/**
+ * Draws water reeds and cattails for swamp areas.
+ */
+function swampReedCluster(scene: Phaser.Scene, x: number, y: number, scale = 1): void {
+  const g = scene.add.graphics();
+  g.setDepth(20 + y / 10);
+  const stalks = [-6, 0, 7];
+  stalks.forEach((sx, idx) => {
+    const height = (46 + idx * 7) * scale;
+    const stalkX = x + sx * scale;
+    const stalkY = y - height + 8 * scale;
+    g.lineStyle(2.5 * scale, 0x366347, 1);
+    g.lineBetween(stalkX, y + 6 * scale, stalkX + (idx - 1) * 4 * scale, stalkY);
+    // Cattail head (bông lau/sậy nâu)
+    g.fillStyle(0x5a3d28, 1);
+    g.fillRoundedRect(stalkX + (idx - 1) * 4 * scale - 2 * scale, stalkY, 4 * scale, 14 * scale, 2 * scale);
+  });
+  // Water mud tuft base
+  scene.add.ellipse(x, y + 8 * scale, 22 * scale, 7 * scale, 0x143329, 0.6).setDepth(19 + y / 10);
+}
+
+/**
+ * Draws floating lotus pads with small blossom accents for swamp/water areas.
+ */
+function lotusPadCluster(scene: Phaser.Scene, x: number, y: number, scale = 1): void {
+  const g = scene.add.graphics();
+  g.setDepth(2);
+  g.fillStyle(0x1e5a42, 0.95);
+  g.fillCircle(x, y, 14 * scale);
+  g.lineStyle(1.5, 0x2f7d5e, 0.9);
+  g.strokeCircle(x, y, 14 * scale);
+  // Notch cut in lily pad
+  g.fillStyle(0x0f2924, 1);
+  g.fillTriangle(x, y, x + 15 * scale, y - 6 * scale, x + 15 * scale, y + 6 * scale);
+  // Little lotus blossom
+  g.fillStyle(0xeb7b9b, 1);
+  g.fillCircle(x - 5 * scale, y - 4 * scale, 3.5 * scale);
+}
+
+/**
+ * Draws a sacred mountain megalith stele (vách thạch bích) for mountain areas.
+ */
+function mountainStele(scene: Phaser.Scene, x: number, y: number, scale = 1): void {
+  const g = scene.add.graphics();
+  const depth = 20 + y / 10;
+  g.setDepth(depth);
+  const w = 18 * scale;
+  const h = 42 * scale;
+  // Shadow
+  scene.add.ellipse(x, y + 4, w + 12, 10, 0x171a1c, 0.6).setDepth(depth - 1);
+  // Stone body
+  g.fillStyle(0x40474b, 1);
+  g.fillRect(x - w / 2, y - h, w, h);
+  g.lineStyle(2, 0x626c71, 0.9);
+  g.strokeRect(x - w / 2, y - h, w, h);
+  // Carved ancient rune glyph lines
+  g.lineStyle(1.5, 0xd4af37, 0.7);
+  g.lineBetween(x - 4 * scale, y - h + 10 * scale, x + 4 * scale, y - h + 10 * scale);
+  g.lineBetween(x, y - h + 8 * scale, x, y - h + 24 * scale);
+  g.lineBetween(x - 5 * scale, y - h + 20 * scale, x + 5 * scale, y - h + 20 * scale);
+}
+
+/**
+ * Draws a mountain temple stone lantern with warm fire glow.
+ */
+function templeLantern(scene: Phaser.Scene, x: number, y: number, scale = 1): void {
+  const g = scene.add.graphics();
+  const depth = 20 + y / 10;
+  g.setDepth(depth);
+  // Stone pedestal & pillar
+  g.fillStyle(0x383e42, 1);
+  g.fillRect(x - 6 * scale, y - 28 * scale, 12 * scale, 28 * scale);
+  // Light box
+  g.fillStyle(0x272c2f, 1);
+  g.fillRect(x - 10 * scale, y - 42 * scale, 20 * scale, 16 * scale);
+  // Glowing golden lamp fire
+  g.fillStyle(0xf6d365, 0.95);
+  g.fillCircle(x, y - 34 * scale, 5 * scale);
+  // Little glow ring
+  g.fillStyle(0xfff1aa, 0.35);
+  g.fillCircle(x, y - 34 * scale, 11 * scale);
+  // Pagoda roof cap
+  g.fillStyle(0x4f585d, 1);
+  g.fillTriangle(x - 14 * scale, y - 42 * scale, x, y - 52 * scale, x + 14 * scale, y - 42 * scale);
+}
+
+/**
+ * Draws an imperial citadel crimson battle banner (cờ lệnh hoàng thành).
+ */
+function citadelBanner(scene: Phaser.Scene, x: number, y: number, scale = 1): void {
+  const g = scene.add.graphics();
+  const depth = 20 + y / 10;
+  g.setDepth(depth);
+  // Bronze flagpole
+  g.fillStyle(0x735534, 1);
+  g.fillRect(x - 2 * scale, y - 60 * scale, 4 * scale, 62 * scale);
+  g.fillStyle(0xd4af37, 1);
+  g.fillTriangle(x - 4 * scale, y - 60 * scale, x, y - 68 * scale, x + 4 * scale, y - 60 * scale);
+  // Crimson cloth pennant
+  g.fillStyle(0xb82736, 0.95);
+  g.beginPath();
+  g.moveTo(x + 2 * scale, y - 58 * scale);
+  g.lineTo(x + 28 * scale, y - 48 * scale);
+  g.lineTo(x + 2 * scale, y - 36 * scale);
+  g.closePath();
+  g.fillPath();
+  g.lineStyle(1.5, 0xf6d365, 0.85);
+  g.strokePath();
+}
+
+/**
+ * Draws an imperial bronze ceremonial brazier with leaping flames.
+ */
+function bronzeBrazier(scene: Phaser.Scene, x: number, y: number, scale = 1): void {
+  const g = scene.add.graphics();
+  const depth = 20 + y / 10;
+  g.setDepth(depth);
+  // Bronze tripod bowl
+  g.fillStyle(0x5a3e26, 1);
+  g.fillRect(x - 12 * scale, y - 22 * scale, 24 * scale, 14 * scale);
+  g.fillStyle(0x996d3d, 1);
+  g.fillRect(x - 14 * scale, y - 24 * scale, 28 * scale, 4 * scale);
+  // Legs
+  g.fillRect(x - 10 * scale, y - 8 * scale, 4 * scale, 8 * scale);
+  g.fillRect(x + 6 * scale, y - 8 * scale, 4 * scale, 8 * scale);
+  // Fire
+  g.fillStyle(0xe24b2b, 0.95);
+  g.fillTriangle(x - 9 * scale, y - 24 * scale, x, y - 38 * scale, x + 9 * scale, y - 24 * scale);
+  g.fillStyle(0xf6d365, 0.95);
+  g.fillTriangle(x - 5 * scale, y - 24 * scale, x, y - 34 * scale, x + 5 * scale, y - 24 * scale);
+}
+
+/**
+ * Vẽ cổng dịch chuyển an toàn trở về làng cho bất kỳ chương nào.
+ */
+function drawCommonChapterPortal(scene: Phaser.Scene, config: ChapterWorldConfig): void {
+  const p = config.portal;
+  const pal = config.theme.palette;
+  const returnGate = scene.add.graphics().setDepth(25);
+  returnGate.fillStyle(pal.gateFill, 0.95);
+  returnGate.fillRect(p.x, p.y, p.width, p.height);
+  returnGate.lineStyle(3, pal.gateBorder, 1);
+  returnGate.strokeRect(p.x, p.y, p.width, p.height);
+  label(scene, p.x + 38, p.y + 15, p.label, 17, '#ffe79a');
+}
+
+/**
+ * BỐ CỤC CHƯƠNG 1: Rừng Trúc U Minh (Bamboo Forest Presentation).
+ */
+export function paintBambooForest(scene: Phaser.Scene, config: ChapterWorldConfig): void {
+  if (paintEnvironment(scene, 'forest', config.barriers, config.arenaCenter)) {
+    drawCommonChapterPortal(scene, config);
+    return;
+  }
+  // 1. Nền rừng nguyên sinh u uất
+  scene.add.rectangle(W / 2, H / 2, W, H, config.theme.palette.groundColor).setDepth(0);
+
+  // 2. Chướng khí lượn sóng trên nền đất
   for (let i = 0; i < 24; i++) {
     const x = 30 + (i * 157) % 920;
     const y = 80 + (i * 117) % 430;
-    scene.add.ellipse(x, y, 90, 50, 0x224231, 0.55).setDepth(1);
+    scene.add.ellipse(x, y, 90, 50, config.theme.palette.groundDetailColor, 0.55).setDepth(1);
   }
 
-  // Segmented bamboo groves everywhere
+  // 3. Rặng trúc rậm rạp (chừa thông thoáng lối vào và đấu trường trùm)
   for (let i = 0; i < 18; i++) {
     const x = 30 + (i * 179) % 910;
     const y = 90 + (i * 137) % 400;
-    if (x < 220 && Math.abs(y - 270) < 95) continue; // Keep entrance clear
+    if (x < 220 && Math.abs(y - 270) < 95) continue;
+    if (Math.hypot(x - config.arenaCenter.x, y - config.arenaCenter.y) < 105) continue;
     bambooCluster(scene, x, y, 0.7 + (i % 4) * 0.15);
   }
 
-  // Ancient Demonic Altar Clearing (Tế đàn yêu khí của Hổ Yêu U Minh)
+  // 4. Tế đàn yêu khí của Hổ Yêu U Minh
+  const arena = config.arenaCenter;
   const altar = scene.add.graphics().setDepth(2);
-  altar.fillStyle(0x213a2d, 0.85);
-  altar.fillCircle(750, 280, 85);
-  altar.lineStyle(2, 0x7c4987, 0.7); // Tím ma mị
-  altar.strokeCircle(750, 280, 85);
-  altar.lineStyle(1.5, 0x9b59b6, 0.6);
-  altar.strokeCircle(750, 280, 55);
+  altar.fillStyle(config.theme.palette.arenaFloorColor, 0.85);
+  altar.fillCircle(arena.x, arena.y, arena.radius);
+  altar.lineStyle(2, config.theme.palette.arenaRuneColor, 0.75);
+  altar.strokeCircle(arena.x, arena.y, arena.radius);
+  altar.lineStyle(1.5, config.theme.palette.arenaAccentColor, 0.65);
+  altar.strokeCircle(arena.x, arena.y, arena.radius * 0.65);
 
-  // Ancient runic stones around altar
+  // Runic stones xung quanh tế đàn
   for (let a = 0; a < 6; a++) {
     const angle = (a / 6) * Math.PI * 2;
-    const sx = 750 + Math.cos(angle) * 72;
-    const sy = 280 + Math.sin(angle) * 72;
+    const sx = arena.x + Math.cos(angle) * (arena.radius - 12);
+    const sy = arena.y + Math.sin(angle) * (arena.radius - 12);
     scene.add.rectangle(sx, sy, 12, 18, 0x4a5d52).setDepth(20 + sy / 10)
-      .setStrokeStyle(1.5, 0xa569bd, 0.7);
+      .setStrokeStyle(1.5, config.theme.palette.arenaAccentColor, 0.7);
   }
 
-  // Gate return to village
-  const returnGate = scene.add.graphics().setDepth(25);
-  returnGate.fillStyle(0x274938, 0.95);
-  returnGate.fillRect(10, 205, 30, 175);
-  returnGate.lineStyle(3, PALETTE.bronze, 1);
-  returnGate.strokeRect(10, 205, 30, 175);
-  label(scene, 48, 220, '← VỀ LÀNG', 17, '#ffe79a');
+  // 5. Cổng dịch chuyển & Tiêu đề biểu ngữ
+  drawCommonChapterPortal(scene, config);
+}
 
-  // Title header banner
-  const banner = scene.add.rectangle(195, 52, 320, 56, 0x142c26, 0.85)
-    .setStrokeStyle(2, PALETTE.bronze).setDepth(200);
-  banner.setAlpha(0.92);
-  label(scene, 50, 40, 'RỪNG TRÚC U MINH', 22, '#ffeed0').setDepth(201);
-  label(scene, 50, 68, 'Yêu khí bao phủ — Sào huyệt Hổ Yêu', 13, '#c9dcb9').setDepth(201);
+/**
+ * BỐ CỤC CHƯƠNG 2: Đầm Thiêng Ba Vì (Swamp & Water Cues Presentation).
+ */
+export function paintSwampWater(scene: Phaser.Scene, config: ChapterWorldConfig): void {
+  if (paintEnvironment(scene, 'swamp', config.barriers, config.arenaCenter)) {
+    drawCommonChapterPortal(scene, config);
+    return;
+  }
+  // 1. Nền nước đầm lầy u uất sâu thẳm
+  scene.add.rectangle(W / 2, H / 2, W, H, config.theme.palette.groundColor).setDepth(0);
+
+  // 2. Những gợn sóng nước & xoáy bùn đầm lầy
+  for (let i = 0; i < 26; i++) {
+    const x = 25 + (i * 151) % 920;
+    const y = 85 + (i * 113) % 430;
+    const color = i % 2 === 0 ? config.theme.palette.groundDetailColor : 0x1d4d44;
+    scene.add.ellipse(x, y, 105, 54, color, 0.62).setDepth(1);
+  }
+
+  // Làn sương ẩm bảng lảng mặt nước
+  for (let i = 0; i < 10; i++) {
+    const x = 50 + (i * 211) % 890;
+    const y = 100 + (i * 163) % 400;
+    scene.add.ellipse(x, y, 140, 42, 0x19433e, 0.35).setDepth(1);
+  }
+
+  // 3. Tín hiệu đầm lầy: Bụi sậy & Cụm lá sen khổng lồ
+  for (let i = 0; i < 16; i++) {
+    const x = 35 + (i * 181 + 20) % 910;
+    const y = 95 + (i * 139 + 30) % 395;
+    if (x < 220 && Math.abs(y - 270) < 95) continue;
+    if (Math.hypot(x - config.arenaCenter.x, y - config.arenaCenter.y) < 105) continue;
+
+    if (i % 2 === 0) {
+      swampReedCluster(scene, x, y, 0.8 + (i % 3) * 0.2);
+    } else {
+      lotusPadCluster(scene, x, y, 0.85 + (i % 3) * 0.15);
+    }
+  }
+
+  // 4. Tế Đàn Xoáy Nước Thuồng Luồng Nhiễm Tà
+  const arena = config.arenaCenter;
+  const altar = scene.add.graphics().setDepth(2);
+  altar.fillStyle(config.theme.palette.arenaFloorColor, 0.9);
+  altar.fillCircle(arena.x, arena.y, arena.radius);
+  altar.lineStyle(2.5, config.theme.palette.arenaRuneColor, 0.85);
+  altar.strokeCircle(arena.x, arena.y, arena.radius);
+  altar.lineStyle(1.8, config.theme.palette.arenaAccentColor, 0.7);
+  altar.strokeCircle(arena.x, arena.y, arena.radius * 0.68);
+  altar.strokeCircle(arena.x, arena.y, arena.radius * 0.38);
+
+  // Trụ đá rồng chìm dưới nước bao quanh tế đàn
+  for (let a = 0; a < 6; a++) {
+    const angle = (a / 6) * Math.PI * 2;
+    const sx = arena.x + Math.cos(angle) * (arena.radius - 12);
+    const sy = arena.y + Math.sin(angle) * (arena.radius - 12);
+    scene.add.rectangle(sx, sy, 14, 18, 0x1f4640).setDepth(20 + sy / 10)
+      .setStrokeStyle(1.5, config.theme.palette.arenaAccentColor, 0.75);
+  }
+
+  // 5. Cổng bến nước & Biểu ngữ
+  drawCommonChapterPortal(scene, config);
+}
+
+/**
+ * BỐ CỤC CHƯƠNG 3: Núi Tản Viên (Mountain & Temple Cues Presentation).
+ */
+export function paintMountainTemple(scene: Phaser.Scene, config: ChapterWorldConfig): void {
+  if (paintEnvironment(scene, 'mountain', config.barriers, config.arenaCenter)) {
+    drawCommonChapterPortal(scene, config);
+    return;
+  }
+  // 1. Nền đá phiến non cao hùng vĩ
+  scene.add.rectangle(W / 2, H / 2, W, H, config.theme.palette.groundColor).setDepth(0);
+
+  // 2. Vách đá gồ ghề & Mây mù đỉnh thiêng
+  for (let i = 0; i < 24; i++) {
+    const x = 30 + (i * 163) % 920;
+    const y = 80 + (i * 127) % 430;
+    const color = i % 2 === 0 ? config.theme.palette.groundDetailColor : 0x3d4447;
+    scene.add.rectangle(x, y, 95, 52, color, 0.65).setDepth(1);
+  }
+
+  // Dải mây trắng mỏng ngang đỉnh Ba Vì
+  for (let i = 0; i < 12; i++) {
+    const x = 40 + (i * 197) % 900;
+    const y = 90 + (i * 149) % 410;
+    scene.add.ellipse(x, y, 160, 36, 0x475155, 0.3).setDepth(1);
+  }
+
+  // 3. Tín hiệu núi non & đền thờ: Vách thạch bích, Đèn đá Sơn Thần
+  for (let i = 0; i < 16; i++) {
+    const x = 35 + (i * 177 + 25) % 910;
+    const y = 95 + (i * 137 + 35) % 390;
+    if (x < 220 && Math.abs(y - 270) < 95) continue;
+    if (Math.hypot(x - config.arenaCenter.x, y - config.arenaCenter.y) < 105) continue;
+
+    if (i % 2 === 0) {
+      mountainStele(scene, x, y, 0.85 + (i % 3) * 0.15);
+    } else {
+      templeLantern(scene, x, y, 0.85 + (i % 3) * 0.15);
+    }
+  }
+
+  // 4. Đàn Bàn Thạch Thạch Tướng Cổ
+  const arena = config.arenaCenter;
+  const altar = scene.add.graphics().setDepth(2);
+  altar.fillStyle(config.theme.palette.arenaFloorColor, 0.9);
+  altar.fillCircle(arena.x, arena.y, arena.radius);
+  altar.lineStyle(3, config.theme.palette.arenaRuneColor, 0.9);
+  altar.strokeCircle(arena.x, arena.y, arena.radius);
+  altar.lineStyle(1.8, config.theme.palette.arenaAccentColor, 0.8);
+  altar.strokeCircle(arena.x, arena.y, arena.radius * 0.62);
+
+  // Họa tiết thái dương 8 tia bàn thạch ở giữa
+  const rays = 8;
+  const innerR = arena.radius * 0.12;
+  const outerR = arena.radius * 0.42;
+  altar.fillStyle(0xf6d365, 0.85);
+  for (let i = 0; i < rays; i++) {
+    const a1 = (i / rays) * Math.PI * 2;
+    const aMid = ((i + 0.5) / rays) * Math.PI * 2;
+    const a2 = ((i + 1) / rays) * Math.PI * 2;
+    altar.fillTriangle(
+      arena.x + Math.cos(a1) * innerR, arena.y + Math.sin(a1) * innerR,
+      arena.x + Math.cos(aMid) * outerR, arena.y + Math.sin(aMid) * outerR,
+      arena.x + Math.cos(a2) * innerR, arena.y + Math.sin(a2) * innerR,
+    );
+  }
+
+  // Trụ đá thiêng cổ kính xung quanh
+  for (let a = 0; a < 6; a++) {
+    const angle = (a / 6) * Math.PI * 2;
+    const sx = arena.x + Math.cos(angle) * (arena.radius - 12);
+    const sy = arena.y + Math.sin(angle) * (arena.radius - 12);
+    scene.add.rectangle(sx, sy, 14, 20, 0x4f575c).setDepth(20 + sy / 10)
+      .setStrokeStyle(1.8, config.theme.palette.arenaRuneColor, 0.85);
+  }
+
+  // 5. Cổng đường đèo & Biểu ngữ
+  drawCommonChapterPortal(scene, config);
+}
+
+/**
+ * BỐ CỤC CHƯƠNG 4: Hoàng Thành Phong Châu (Phong Châu / Final Arena Cues Presentation).
+ */
+export function paintPhongChauArena(scene: Phaser.Scene, config: ChapterWorldConfig): void {
+  if (paintEnvironment(scene, 'citadel', config.barriers, config.arenaCenter)) {
+    drawCommonChapterPortal(scene, config);
+    return;
+  }
+  // 1. Nền gạch đá hoàng thành cổ kính nhuốm màu chiến trận
+  scene.add.rectangle(W / 2, H / 2, W, H, config.theme.palette.groundColor).setDepth(0);
+
+  // 2. Gạch lát sân cung điện & Huyết ấn hắc ám
+  const flagstones = scene.add.graphics().setDepth(1);
+  flagstones.lineStyle(1.5, config.theme.palette.groundDetailColor, 0.7);
+  for (let x = 30; x < W - 20; x += 60) {
+    flagstones.lineBetween(x, 100, x, H - 35);
+  }
+  for (let y = 100; y < H - 30; y += 48) {
+    flagstones.lineBetween(30, y, W - 20, y);
+  }
+
+  // Tàn tro tà khí lơ lửng từ phong ấn Hắc Ấn
+  for (let i = 0; i < 20; i++) {
+    const x = 35 + (i * 173) % 910;
+    const y = 85 + (i * 131) % 420;
+    scene.add.ellipse(x, y, 70, 36, 0x4a1f26, 0.45).setDepth(1);
+  }
+
+  // 3. Tín hiệu hoàng thành: Cờ lệnh chim Lạc & Vạc đồng tế tự rực lửa
+  for (let i = 0; i < 16; i++) {
+    const x = 35 + (i * 183 + 15) % 910;
+    const y = 95 + (i * 137 + 35) % 390;
+    if (x < 220 && Math.abs(y - 270) < 95) continue;
+    if (Math.hypot(x - config.arenaCenter.x, y - config.arenaCenter.y) < 110) continue;
+
+    if (i % 2 === 0) {
+      citadelBanner(scene, x, y, 0.85 + (i % 3) * 0.15);
+    } else {
+      bronzeBrazier(scene, x, y, 0.85 + (i % 3) * 0.15);
+    }
+  }
+
+  // 4. Đại Trận Đồ Trống Đồng Phong Ấn Hắc Ấn
+  const arena = config.arenaCenter;
+  const altar = scene.add.graphics().setDepth(2);
+  altar.fillStyle(config.theme.palette.arenaFloorColor, 0.95);
+  altar.fillCircle(arena.x, arena.y, arena.radius);
+  altar.lineStyle(3, config.theme.palette.arenaRuneColor, 0.95);
+  altar.strokeCircle(arena.x, arena.y, arena.radius);
+
+  // Vòng răng cưa Đông Sơn huyết chiến
+  const sawRadius = arena.radius * 0.72;
+  const teeth = 20;
+  altar.lineStyle(2, 0xf6d365, 0.85);
+  for (let i = 0; i < teeth; i++) {
+    const a1 = (i / teeth) * Math.PI * 2;
+    const a2 = ((i + 0.5) / teeth) * Math.PI * 2;
+    const a3 = ((i + 1) / teeth) * Math.PI * 2;
+    altar.lineBetween(
+      arena.x + Math.cos(a1) * (sawRadius - 5), arena.y + Math.sin(a1) * (sawRadius - 5),
+      arena.x + Math.cos(a2) * (sawRadius + 5), arena.y + Math.sin(a2) * (sawRadius + 5),
+    );
+    altar.lineBetween(
+      arena.x + Math.cos(a2) * (sawRadius + 5), arena.y + Math.sin(a2) * (sawRadius + 5),
+      arena.x + Math.cos(a3) * (sawRadius - 5), arena.y + Math.sin(a3) * (sawRadius - 5),
+    );
+  }
+
+  // Ngôi sao 14 cánh Trống Đồng ở trung tâm
+  const rays = 14;
+  const innerR = arena.radius * 0.1;
+  const outerR = arena.radius * 0.35;
+  altar.fillStyle(0xf6d365, 0.95);
+  for (let i = 0; i < rays; i++) {
+    const a1 = (i / rays) * Math.PI * 2;
+    const aMid = ((i + 0.5) / rays) * Math.PI * 2;
+    const a2 = ((i + 1) / rays) * Math.PI * 2;
+    altar.fillTriangle(
+      arena.x + Math.cos(a1) * innerR, arena.y + Math.sin(a1) * innerR,
+      arena.x + Math.cos(aMid) * outerR, arena.y + Math.sin(aMid) * outerR,
+      arena.x + Math.cos(a2) * innerR, arena.y + Math.sin(a2) * innerR,
+    );
+  }
+
+  // 8 Trụ đồng trấn yểm hoàng cung xung quanh tế đàn
+  for (let a = 0; a < 8; a++) {
+    const angle = (a / 8) * Math.PI * 2;
+    const sx = arena.x + Math.cos(angle) * (arena.radius - 12);
+    const sy = arena.y + Math.sin(angle) * (arena.radius - 12);
+    scene.add.rectangle(sx, sy, 14, 22, 0x54262b).setDepth(20 + sy / 10)
+      .setStrokeStyle(2, config.theme.palette.arenaRuneColor, 0.9);
+  }
+
+  // 5. Cổng thành hậu tuyến & Biểu ngữ
+  drawCommonChapterPortal(scene, config);
+}
+
+/**
+ * Điều phối vẽ không gian thế giới theo Chapter ID với khả năng tương thích và fallback tự động.
+ */
+export function paintChapterArea(scene: Phaser.Scene, chapterId: number | unknown): void {
+  const config = getChapterWorldConfig(chapterId);
+  switch (config.chapterId) {
+    case 2:
+      paintSwampWater(scene, config);
+      break;
+    case 3:
+      paintMountainTemple(scene, config);
+      break;
+    case 4:
+      paintPhongChauArena(scene, config);
+      break;
+    case 1:
+    default:
+      paintBambooForest(scene, config);
+      break;
+  }
+}
+
+/**
+ * Tương thích ngược: paintForest mặc định vẽ Chương 1 Rừng Trúc U Minh.
+ */
+export function paintForest(scene: Phaser.Scene): void {
+  paintChapterArea(scene, 1);
 }
 
 /**

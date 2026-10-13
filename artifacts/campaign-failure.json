@@ -1,0 +1,646 @@
+{
+  "generatedAt": "2026-10-12T19:41:52.217Z",
+  "stage": "natural-chapter-1",
+  "error": "Flag did not finish: yeast-gathered\n\n'active' !== 'return'\n",
+  "bundlePath": "/assets/index-D71EOpKB.js",
+  "bundleSha256": "501549219ba7dd50b84d0d7c6c9e77da416ca2ad23e628acd8e9402646749bd6",
+  "save": {
+    "version": 1,
+    "hp": 180,
+    "mp": 140,
+    "maxHp": 180,
+    "maxMp": 140,
+    "attack": 28,
+    "level": 9,
+    "xp": 84,
+    "gold": 551,
+    "chapter": 1,
+    "kills": 7,
+    "quest": "return",
+    "bossDead": true,
+    "storyFlags": {
+      "boss:ho-yeu": true,
+      "dungeon-key:dong-am-hon": true,
+      "dungeon-floor:dong-am-hon:0": true,
+      "dungeon-floor:dong-am-hon:1": true,
+      "dungeon-reward:dong-am-hon": true,
+      "chapter:1:beacon-lit": true,
+      "chapter:1:spring-cleansed": true,
+      "chapter:1:relic-recovered": true,
+      "chapter:1:herbs-gathered": true,
+      "chapter:1:tea-leaves-picked": true,
+      "chapter:1:ore-delivered": true,
+      "chapter:1:jade-recovered": true,
+      "chapter:1:offering-prepared": true,
+      "chapter:1:bamboo-collected": true
+    },
+    "checkpoint": "village-gate",
+    "playtimeSeconds": 168.74180666668627,
+    "upgrades": 0,
+    "rpg": {
+      "inventory": {
+        "capacity": 24,
+        "slots": [
+          {
+            "itemId": "spirit-stone",
+            "quantity": 1
+          },
+          {
+            "itemId": "herbal-balm",
+            "quantity": 1
+          },
+          {
+            "itemId": "jade-charm",
+            "quantity": 1
+          }
+        ]
+      },
+      "equipment": {
+        "slots": {}
+      },
+      "quests": {
+        "hunt-ho-yeu": {
+          "questId": "hunt-ho-yeu",
+          "stage": "active",
+          "counts": {},
+          "flags": {},
+          "rewardClaimed": false
+        },
+        "main-c1-02-mo-duong-rung-truc": {
+          "questId": "main-c1-02-mo-duong-rung-truc",
+          "stage": "return",
+          "counts": {
+            "c1-kill-moc-tinh": 4
+          },
+          "flags": {
+            "beacon-lit": true,
+            "c1-flag-light-beacon": true
+          },
+          "rewardClaimed": false
+        },
+        "side-04-ngoc-boi-to-tien": {
+          "questId": "side-04-ngoc-boi-to-tien",
+          "stage": "return",
+          "counts": {
+            "side-kill-cave-beasts": 4
+          },
+          "flags": {
+            "beacon-lit": true,
+            "spring-cleansed": true,
+            "relic-recovered": true,
+            "herbs-gathered": true,
+            "tea-leaves-picked": true,
+            "ore-delivered": true,
+            "jade-recovered": true,
+            "side-flag-jade-recovered": true
+          },
+          "rewardClaimed": false
+        },
+        "side-05-san-ma-troi-dong-hoang": {
+          "questId": "side-05-san-ma-troi-dong-hoang",
+          "stage": "return",
+          "counts": {
+            "side-kill-night-spirits": 7
+          },
+          "flags": {},
+          "rewardClaimed": false
+        },
+        "side-09-le-vat-lang-lieu": {
+          "questId": "side-09-le-vat-lang-lieu",
+          "stage": "return",
+          "counts": {
+            "side-kill-field-pests": 5
+          },
+          "flags": {
+            "beacon-lit": true,
+            "spring-cleansed": true,
+            "relic-recovered": true,
+            "herbs-gathered": true,
+            "tea-leaves-picked": true,
+            "ore-delivered": true,
+            "jade-recovered": true,
+            "offering-prepared": true,
+            "side-flag-offering-prepared": true
+          },
+          "rewardClaimed": false
+        },
+        "side-11-tre-ngan-phu-dong": {
+          "questId": "side-11-tre-ngan-phu-dong",
+          "stage": "return",
+          "counts": {
+            "side-kill-bamboo-sprites": 6
+          },
+          "flags": {
+            "beacon-lit": true,
+            "spring-cleansed": true,
+            "relic-recovered": true,
+            "herbs-gathered": true,
+            "tea-leaves-picked": true,
+            "ore-delivered": true,
+            "jade-recovered": true,
+            "offering-prepared": true,
+            "bamboo-collected": true,
+            "side-flag-bamboo-collected": true
+          },
+          "rewardClaimed": false
+        },
+        "main-c1-04-khi-tuc-lam-son": {
+          "questId": "main-c1-04-khi-tuc-lam-son",
+          "stage": "return",
+          "counts": {
+            "c1-kill-forest-prowlers": 8
+          },
+          "flags": {
+            "beacon-lit": true,
+            "spring-cleansed": true,
+            "relic-recovered": true,
+            "c1-flag-deliver-relic": true
+          },
+          "rewardClaimed": false
+        },
+        "side-03-ren-giao-dong-do": {
+          "questId": "side-03-ren-giao-dong-do",
+          "stage": "return",
+          "counts": {
+            "side-kill-copper-thieves": 6
+          },
+          "flags": {
+            "beacon-lit": true,
+            "spring-cleansed": true,
+            "relic-recovered": true,
+            "herbs-gathered": true,
+            "tea-leaves-picked": true,
+            "ore-delivered": true,
+            "side-flag-ore-delivered": true
+          },
+          "rewardClaimed": false
+        },
+        "main-c1-03-tru-ma-troi": {
+          "questId": "main-c1-03-tru-ma-troi",
+          "stage": "return",
+          "counts": {
+            "c1-kill-ma-troi": 5
+          },
+          "flags": {
+            "beacon-lit": true,
+            "spring-cleansed": true,
+            "c1-flag-cleanse-spring": true
+          },
+          "rewardClaimed": false
+        },
+        "side-01-thuoc-tri-chuong-khi": {
+          "questId": "side-01-thuoc-tri-chuong-khi",
+          "stage": "return",
+          "counts": {
+            "side-kill-spiders": 5
+          },
+          "flags": {
+            "beacon-lit": true,
+            "spring-cleansed": true,
+            "relic-recovered": true,
+            "herbs-gathered": true,
+            "side-flag-herbs-gathered": true
+          },
+          "rewardClaimed": false
+        },
+        "side-02-tra-than-luc-ba-mo": {
+          "questId": "side-02-tra-than-luc-ba-mo",
+          "stage": "return",
+          "counts": {
+            "side-kill-wild-crows": 4
+          },
+          "flags": {
+            "beacon-lit": true,
+            "spring-cleansed": true,
+            "relic-recovered": true,
+            "herbs-gathered": true,
+            "tea-leaves-picked": true,
+            "side-flag-tea-leaves": true
+          },
+          "rewardClaimed": false
+        },
+        "side-12-ruou-can-lac-hong": {
+          "questId": "side-12-ruou-can-lac-hong",
+          "stage": "active",
+          "counts": {
+            "side-kill-forest-badgers": 5
+          },
+          "flags": {
+            "beacon-lit": true,
+            "spring-cleansed": true,
+            "relic-recovered": true,
+            "herbs-gathered": true,
+            "tea-leaves-picked": true,
+            "ore-delivered": true,
+            "jade-recovered": true,
+            "offering-prepared": true,
+            "bamboo-collected": true
+          },
+          "rewardClaimed": false
+        }
+      },
+      "skills": {
+        "unlockedSkillIds": [
+          "earth-shockwave",
+          "flame-beam",
+          "tidal-surge"
+        ],
+        "equippedSlots": {
+          "slot-1": "earth-shockwave",
+          "slot-2": "flame-beam",
+          "slot-3": "tidal-surge"
+        },
+        "cooldownUntil": {
+          "earth-shockwave": 1791834094729,
+          "flame-beam": 1791834090512,
+          "tidal-surge": 1791834092130
+        },
+        "activeDivinePower": "earth",
+        "unlockedDivinePowers": [
+          "earth"
+        ]
+      }
+    }
+  },
+  "scene": {
+    "key": "Forest",
+    "areaChapter": 1,
+    "time": 173276.4,
+    "player": {
+      "x": 427.18265232754385,
+      "y": 315.00256568099604,
+      "dead": true,
+      "direction": {
+        "x": 0,
+        "y": 1
+      },
+      "barriers": [
+        {
+          "x": 377,
+          "y": 396,
+          "width": 10,
+          "height": 14
+        },
+        {
+          "x": 550,
+          "y": 155,
+          "width": 10,
+          "height": 14
+        },
+        {
+          "x": 896,
+          "y": 433,
+          "width": 10,
+          "height": 14
+        },
+        {
+          "x": 332,
+          "y": 331,
+          "width": 10,
+          "height": 14
+        },
+        {
+          "x": 505,
+          "y": 470,
+          "width": 10,
+          "height": 14
+        },
+        {
+          "x": 851,
+          "y": 368,
+          "width": 10,
+          "height": 14
+        },
+        {
+          "x": 114,
+          "y": 127,
+          "width": 10,
+          "height": 14
+        },
+        {
+          "x": 287,
+          "y": 266,
+          "width": 10,
+          "height": 14
+        },
+        {
+          "x": 460,
+          "y": 405,
+          "width": 10,
+          "height": 14
+        },
+        {
+          "x": 633,
+          "y": 164,
+          "width": 10,
+          "height": 14
+        }
+      ]
+    },
+    "npcs": [],
+    "markers": [
+      {
+        "questId": "main-c1-02-mo-duong-rung-truc",
+        "flag": "beacon-lit",
+        "title": "Khai Thông Cổ Đạo Rừng Trúc",
+        "x": 325,
+        "y": 155
+      },
+      {
+        "questId": "main-c1-03-tru-ma-troi",
+        "flag": "spring-cleansed",
+        "title": "Trấn Áp Tà Khí Ma Trơi",
+        "x": 505,
+        "y": 155
+      },
+      {
+        "questId": "main-c1-04-khi-tuc-lam-son",
+        "flag": "relic-recovered",
+        "title": "Khí Tức Lam Sơn Cổ Mộc",
+        "x": 685,
+        "y": 155
+      },
+      {
+        "questId": "side-01-thuoc-tri-chuong-khi",
+        "flag": "herbs-gathered",
+        "title": "Dược Liệu Trừ Chướng Khí",
+        "x": 325,
+        "y": 235
+      },
+      {
+        "questId": "side-02-tra-than-luc-ba-mo",
+        "flag": "tea-leaves-picked",
+        "title": "Hương Trà Bách Thảo",
+        "x": 505,
+        "y": 235
+      },
+      {
+        "questId": "side-03-ren-giao-dong-do",
+        "flag": "ore-delivered",
+        "title": "Tôi Luyện Đồng Đỏ Cổ Loa",
+        "x": 685,
+        "y": 235
+      },
+      {
+        "questId": "side-04-ngoc-boi-to-tien",
+        "flag": "jade-recovered",
+        "title": "Kỷ Vật Ngọc Bội Lạc Việt",
+        "x": 325,
+        "y": 309
+      },
+      {
+        "questId": "side-09-le-vat-lang-lieu",
+        "flag": "offering-prepared",
+        "title": "Lễ Vật Bánh Chưng Bánh Giầy",
+        "x": 505,
+        "y": 315
+      },
+      {
+        "questId": "side-11-tre-ngan-phu-dong",
+        "flag": "bamboo-collected",
+        "title": "Bụi Tre Ngà Phù Đổng",
+        "x": 685,
+        "y": 315
+      },
+      {
+        "questId": "side-12-ruou-can-lac-hong",
+        "flag": "yeast-gathered",
+        "title": "Hương Men Rượu Cần Men Lá",
+        "x": 325,
+        "y": 395
+      }
+    ],
+    "dungeon": null,
+    "overlay": false,
+    "pause": false,
+    "texts": [
+      {
+        "text": "← VỀ LÀNG",
+        "x": 48,
+        "y": 220
+      },
+      {
+        "text": "Động Âm Hồn · F",
+        "x": 245,
+        "y": 137
+      },
+      {
+        "text": "Ma Trơi U Ám",
+        "x": 726.1039386623698,
+        "y": 206.63543149855792
+      },
+      {
+        "text": "Hắc Lang Nanh Dài",
+        "x": 562.3507759558065,
+        "y": 204.46390001267017
+      },
+      {
+        "text": "Mộc Tinh Ấu Thể",
+        "x": 530.1645810935113,
+        "y": 209.63436742599524
+      },
+      {
+        "text": "Mộc Tinh Ấu Thể",
+        "x": 530.1557294609081,
+        "y": 209.7469242199025
+      },
+      {
+        "text": "THIÊN MỆNH",
+        "x": 427.18265232754385,
+        "y": 277.00256568099604
+      },
+      {
+        "text": "Ma Trơi U Ám",
+        "x": 319.1563367475172,
+        "y": 299.94521128792564
+      },
+      {
+        "text": "Ma Trơi U Ám",
+        "x": 558.9107528963111,
+        "y": 426.16784350622225
+      },
+      {
+        "text": "Ma Trơi U Ám",
+        "x": 590.2920217131781,
+        "y": 426.7560078864617
+      },
+      {
+        "text": "Khai Thông Cổ Đạo Rừng · F",
+        "x": 325,
+        "y": 125
+      },
+      {
+        "text": "Trấn Áp Tà Khí Ma Trơi · F",
+        "x": 505,
+        "y": 125
+      },
+      {
+        "text": "Khí Tức Lam Sơn Cổ Mộc · F",
+        "x": 685,
+        "y": 125
+      },
+      {
+        "text": "Dược Liệu Trừ Chướng K · F",
+        "x": 325,
+        "y": 205
+      },
+      {
+        "text": "Hương Trà Bách Thảo · F",
+        "x": 505,
+        "y": 205
+      },
+      {
+        "text": "Tôi Luyện Đồng Đỏ Cổ L · F",
+        "x": 685,
+        "y": 205
+      },
+      {
+        "text": "Kỷ Vật Ngọc Bội Lạc Vi · F",
+        "x": 325,
+        "y": 279
+      },
+      {
+        "text": "Lễ Vật Bánh Chưng Bánh · F",
+        "x": 505,
+        "y": 285
+      },
+      {
+        "text": "Bụi Tre Ngà Phù Đổng · F",
+        "x": 685,
+        "y": 285
+      },
+      {
+        "text": "Hương Men Rượu Cần Men · F",
+        "x": 325,
+        "y": 365
+      },
+      {
+        "text": "-7",
+        "x": 427.18265232754385,
+        "y": 261.9428641884587
+      },
+      {
+        "text": "CHÉM",
+        "x": 847,
+        "y": 430
+      },
+      {
+        "text": "NÉ",
+        "x": 745,
+        "y": 464
+      },
+      {
+        "text": "Q",
+        "x": 780,
+        "y": 354
+      },
+      {
+        "text": "E",
+        "x": 891,
+        "y": 351
+      },
+      {
+        "text": "R",
+        "x": 780,
+        "y": 276
+      },
+      {
+        "text": "T",
+        "x": 891,
+        "y": 276
+      },
+      {
+        "text": "F",
+        "x": 656,
+        "y": 467
+      },
+      {
+        "text": "Đã hạ Hổ Yêu U Minh! Về báo trưởng làng",
+        "x": 421,
+        "y": 26
+      },
+      {
+        "text": "Rừng Trúc U Minh · Đánh J / Né Space / Q / E",
+        "x": 421,
+        "y": 49
+      },
+      {
+        "text": "HUYẾT 2/180",
+        "x": 70,
+        "y": 24
+      },
+      {
+        "text": "LINH 140/140",
+        "x": 70,
+        "y": 47
+      },
+      {
+        "text": "Lv.9\n561 đồng",
+        "x": 346,
+        "y": 35
+      },
+      {
+        "text": "TRÙM HUYỀN THOẠI",
+        "x": 480,
+        "y": 76
+      },
+      {
+        "text": "[GIAI ĐOẠN 1]",
+        "x": 480,
+        "y": 110
+      }
+    ],
+    "enemies": [
+      {
+        "kind": "moc-tinh",
+        "x": 530.1645810935113,
+        "y": 254.63436742599524,
+        "hp": 45,
+        "windup": false
+      },
+      {
+        "kind": "ma-troi",
+        "x": 558.9107528963111,
+        "y": 467.16784350622225,
+        "hp": 32,
+        "windup": false
+      },
+      {
+        "kind": "moc-tinh",
+        "x": 530.1557294609081,
+        "y": 254.7469242199025,
+        "hp": 45,
+        "windup": false
+      },
+      {
+        "kind": "ma-troi-u-am",
+        "x": 590.2920217131781,
+        "y": 467.7560078864617,
+        "hp": 32,
+        "windup": false
+      },
+      {
+        "kind": "ma-troi-u-am",
+        "x": 319.1563367475172,
+        "y": 340.94521128792564,
+        "hp": 32,
+        "windup": false
+      },
+      {
+        "kind": "soi-rung-hac-am",
+        "x": 562.3507759558065,
+        "y": 252.46390001267017,
+        "hp": 60,
+        "windup": true
+      },
+      {
+        "kind": "ma-troi-u-am",
+        "x": 726.1039386623698,
+        "y": 247.63543149855792,
+        "hp": 32,
+        "windup": false
+      }
+    ],
+    "boss": null
+  }
+}

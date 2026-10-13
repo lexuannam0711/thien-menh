@@ -1,78 +1,45 @@
-# THẦN MỆNH: HẬU DUỆ VĂN LANG — Hack & Slash RPG H5 (MVP)
+# Thần Mệnh: Hậu Duệ Văn Lang
 
-Prototype game Action RPG 2D thời Văn Lang **hư cấu**, xây dựng bằng Phaser 4 + TypeScript + Vite. **Đồ họa vẽ bằng code**, không cần tải sprite/tài nguyên có bản quyền.
+HTML5 2D Hack & Slash Action RPG, development build targeting `1.0.0`. Phaser 4.2.1 + TypeScript + Vite. Procedural art/audio; no backend required. Catalog completeness does not prove playable-content completeness.
 
-## Chạy game
-
-1. Cài Node.js 22.12+ (hoặc phiên bản Node đáp ứng yêu cầu Vite).
-2. Giải nén dự án, mở terminal tại thư mục chứa `package.json`.
-3. Chạy:
+## Run
 
 ```bash
 npm install
 npm run dev
+npm run check:all
+npm run preview -- --host 127.0.0.1
+npm run check:browser
+npm run check:campaign
+npm run build
 ```
 
-4. Mở URL do Vite thông báo (thường là `http://localhost:5173`).
-5. Để đóng gói lên host tĩnh: `npm run build`; thư mục xuất ra là `dist/`.
+Serve `dist/` from a static HTTPS host. Save uses browser `localStorage`; audio unlocks after user interaction.
+Browser checks require Node.js 22+ and Chrome/Chromium; run production preview first. They use an isolated profile, not the user's browser session.
 
-## Điều khiển
+## Controls
 
-| Hành động | Bàn phím | Điện thoại |
+| Action | Keyboard | Touch |
 |---|---|---|
-| Di chuyển | WASD / phím mũi tên | Joystick bên trái |
-| Chém combo 3 đòn | J (nhấn liên tiếp) | CHÉM |
-| Né (có miễn sát thương ngắn) | Space | NÉ |
-| Địa Chấn (AOE, 30 MP) | Q | Q |
-| Hỏa Trảm (theo hướng, 20 MP) | E | E |
-| Tương tác NPC gần nhất | F | F / chạm NPC khi đứng gần |
+| Move | WASD / arrows | Joystick |
+| Combo | J | CHÉM |
+| Dodge | Space | NÉ |
+| Equipped skills 1–4 | Q / E / R / T | Q / E / R / T |
+| Interact | F | F / NPC tap |
+| Pause | P / Escape | — |
 
-**Điện thoại**: nên xoay ngang. Đã thiết lập nhiều điểm chạm cho joystick và nút kỹ năng.
+## Campaign
 
-## Vòng chơi hiện tại
+Village → chapter area → enemies → boss → return → next chapter. Four chapters lead to Victory and Ending. Village includes NPC dialogue, quests, inventory, equipment, skills, shop and crafting.
 
-1. Ở làng Lạc Thủy, đến gần Trưởng làng và nhấn F để nhận nhiệm vụ.
-2. Đi đến cổng phía đông (bên phải màn hình), sang Rừng Trúc.
-3. Hạ 6 quái **Mộc Tinh / Ma Trơi**, dùng tiền đồng để nâng giáo ở Thợ rèn hoặc hồi phục ở Bà Mo.
-4. **Hổ Yêu U Minh** xuất hiện sau khi đạt mốc 6 quái. Hạ boss.
-5. Quay về bằng cổng phía tây, nói chuyện Trưởng làng để nhận thưởng và kết thúc chương 1.
+## Project docs
 
-Game tự lưu vào localStorage: HP/MP, tiền, cấp, công, nhiệm vụ và boss. Nút “Chơi lại từ đầu” ở Menu xóa tiến trình của demo.
+`GAME_VISION.md`, `GAME_DESIGN.md`, `TECHNICAL_ARCHITECTURE.md`, `CONTENT_BIBLE.md`, `ART_DIRECTION.md`, `ROADMAP.md`, `TASK_BACKLOG.md`, `PROGRESS.md`, `QA_REPORT.md`, `RELEASE_CHECKLIST.md`, `CHANGELOG.md`, `DEPLOYMENT.md`, `PLAY_GUIDE.md`, `KNOWN_LIMITATIONS.md`, `CREDITS.md`.
 
-## Cấu trúc
+## Acceptance boundary
 
-```
-src/
-├── data/config.ts                 # Cân bằng, hệ số, bảng quái
-├── game/entities/Player.ts        # Điều khiển, combo, né, kỹ năng, chỉ số
-├── game/entities/Enemy.ts         # AI truy đuổi, báo trước đòn, HP, chết
-├── game/systems/CombatSystem.ts   # Hitbox hình quạt/đường thẳng/vòng tròn
-├── game/systems/GameState.ts      # Dữ liệu nhân vật & localStorage
-├── game/scenes/MenuScene.ts       # Màn hình menu
-├── game/scenes/VillageScene.ts    # Làng, NPC đa chức năng
-├── game/scenes/ForestScene.ts     # Chiến trường, spawn quái/boss
-├── game/scenes/VictoryScene.ts    # Kết chương
-├── game/ui/TouchControls.ts       # Joystick ảo & phím H5
-├── game/ui/Hud.ts                 # HP/MP, tiền, nhiệm vụ, toast
-└── game/ui/art.ts                 # Đồ họa placeholder bằng Phaser primitives
-```
+Automated subsystem and browser checks do not establish release readiness. Runtime integration and natural production campaign progression now pass. Remaining gates include representative difficulty/pacing, measured coverage, real devices and FPS/heap/30-minute stability; see `RELEASE_CHECKLIST.md`.
 
-## Ranh giới MVP
+October 13, 2026: `npm run check:campaign` exit 0 on current equipment candidate `index-DAgfL7dU.js`, SHA-256 `125fab15da0089e67f2d97262488bfd8a9037625515296dab2edd81f02c5ee69`. Fresh save, no boosts/gameplay setters, four chapters, 32 rewarded quests/35 exact payout receipts, four bosses, three naturally unlocked dungeons/nine floors/items, Ending/credits and strict save/reload passed. Evidence: `artifacts/campaign-acceptance.json`, `artifacts/campaign-ending.png`; prior D71 receipt preserved in `artifacts/campaign-snapshots/index-D71EOpKB/`.
 
-**Đã có trong code**: chơi hai khu, 3 NPC tương tác (trưởng làng có quest, thợ rèn nâng cấp, bà mo hồi phục), combo 3 đòn, né, 2 kỹ năng, 2 quái + 1 boss có báo trước đòn đánh, HP/MP/XP/level/tiền đồng, save tiến trình, điều khiển cảm ứng, màn hình hoàn thành.
-
-**Chưa có**: spritesheet và animation nhân vật thật, tilemap Tiled, vật cản vật lý, pathfinding, mạng/backend, tài khoản, bảng xếp hạng, nhiều quest và chuỗi combo cao cấp (animation cancel, hit-stop), âm thanh. Đây là prototype gameplay, không phải bản game phát hành thương mại.
-
-### Việc nên làm tiếp theo
-
-1. Đổi `art.ts` sang pixel art 32/48px, dùng spritesheet cho đòn chém.
-2. Xuất map Tiled định dạng JSON, thêm lớp va chạm bằng Arcade Physics.
-3. Chuyển nội dung NPC và quest sang file JSON, có điều kiện theo tiến trình.
-4. Thêm animation states `idle/run/attack1/attack2/attack3/dodge/hit/death`.
-5. Thiết kế vòng chơi 10–15 phút, kiểm thử trên điện thoại màn hình nhỏ.
-
-## Ghi chú
-
-- Phaser: https://phaser.io/download/phaser4
-- Hướng dẫn Vite: https://vite.dev/guide/
-- Nội dung về thần lực, yêu khí và nhân vật là sáng tạo fantasy lấy cảm hứng từ lịch sử/truyền thuyết Việt Nam.
+The read-only-observer automated route takes about thirteen minutes, not representative human pacing or difficulty. The current uninstrumented run witnessed two natural deaths/revivals. Separate instrumented campaign/UI measured mapped union coverage 86.83% lines/82.90% observed functions; full relevant-source/branch coverage, real devices and sustained stability remain separate gates.

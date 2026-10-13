@@ -1,0 +1,89 @@
+{
+  "generatedAt": "2026-10-12T20:57:34.634Z",
+  "status": "ARTIFACT_CHECKED_RUNTIME_PENDING",
+  "generator": "scripts/generate-equipment.js",
+  "checker": "scripts/check-equipment.cjs",
+  "inputs": [
+    {
+      "path": "public/assets/sprites/hero.png",
+      "sha256": "1cdb516c4c3c48ccd723ff7ed5b876f3d8154c7a8986a59f6f32a5a7f22206dd"
+    },
+    {
+      "path": "public/assets/sprites/hero_axe.png",
+      "sha256": "f07c05ee08b1b91bf93ccde52f38927e3acbe89247b216b5d3f5da8275801c32"
+    },
+    {
+      "path": "public/assets/sprites/hero_sword.png",
+      "sha256": "0ae20e51c863507532d1ec2f472cea6feaa62b3434858eae82612552d2ae25fc"
+    },
+    {
+      "path": "src/game/assets/spriteManifest.ts",
+      "sha256": "d40e60ec8cfe5d6b1165363cffffbea6a796885afc5644190e4139064a88e61d"
+    }
+  ],
+  "assets": [
+    {
+      "path": "public/assets/equipment/bamboo-armor_hero.png",
+      "bytes": 8427,
+      "width": 2016,
+      "height": 336,
+      "sha256": "e14b124f567b4a9bb1ba3a9f842af622001556e1182b1d57f2540054c974aa5d",
+      "logicalFrames": 272
+    },
+    {
+      "path": "public/assets/equipment/bamboo-armor_hero_axe.png",
+      "bytes": 8048,
+      "width": 2016,
+      "height": 336,
+      "sha256": "7fdc47cf488487c1382099bb75fa03689bf37a5ec4709bbc78f7884fa32b5a4d",
+      "logicalFrames": 272
+    },
+    {
+      "path": "public/assets/equipment/bamboo-armor_hero_sword.png",
+      "bytes": 8091,
+      "width": 2016,
+      "height": 336,
+      "sha256": "faedb9d141b40f7db39f176af5531ed6a0b89979395a53f89dbf7be73e1c0c0b",
+      "logicalFrames": 272
+    },
+    {
+      "path": "public/assets/equipment/jade-charm_hero.png",
+      "bytes": 3951,
+      "width": 2016,
+      "height": 336,
+      "sha256": "3c5b1b22b24278383af71bf0962b29b2f723725664145cb0acd7314ef9dc53fd",
+      "logicalFrames": 272
+    },
+    {
+      "path": "public/assets/equipment/jade-charm_hero_axe.png",
+      "bytes": 3910,
+      "width": 2016,
+      "height": 336,
+      "sha256": "83ee2e298a236a9e6dc990e1bab227c0f853cf2d441af5378e17c289a3e74ffa",
+      "logicalFrames": 272
+    },
+    {
+      "path": "public/assets/equipment/jade-charm_hero_sword.png",
+      "bytes": 3887,
+      "width": 2016,
+      "height": 336,
+      "sha256": "23d97d62e7959b971e69f45b5ea95235f5781b76c986019b0ba957c9bf81c066",
+      "logicalFrames": 272
+    }
+  ],
+  "totalCompressedBytes": 36314,
+  "hypotheticalRGBA8BaseBytes": 16257024,
+  "contactSheet": "artifacts/graphics-qa/2026-10-13/equipment-before-after.png",
+  "checkerResult": "PASS six PNGs/1632 logical frames/51183 fitted pixels; deterministic regeneration, CRC/RGBA8/alpha/padding/body/face/weapon protection; canonical inputs unchanged",
+  "fullyOccludedCharmFrames": {
+    "hero": 7,
+    "hero_axe": 2,
+    "hero_sword": 6
+  },
+  "limits": [
+    "Frozen D71 does not include equipment overlays",
+    "Source/pixel checks do not prove runtime/browser/device integration",
+    "Hypothetical storage is not GPU residency or leak proof",
+    "Human premium art and contributor-rights/legal approval remain open"
+  ]
+}

@@ -10,10 +10,10 @@ Không mở rộng backend, tài khoản, multiplayer hoặc leaderboard trướ
 
 ## Trạng thái đầu vào
 
-- `master` hiện giữ prototype, build PASS.
+- `master` hiện giữ vertical slice playable, build PASS.
 - Worker commits chưa merge: `b3ea1ff` save; `6e6bdaa` combat; `c5a93cc` procedural art.
 - Ba worker build PASS; chưa có browser/mobile/save-reload/FPS proof.
-- Asset procedural chưa được tích hợp vào scene hiện tại.
+- Asset procedural đã tích hợp vào scene hiện tại; animation registry đã được mở rộng.
 
 ## Luật phối hợp
 

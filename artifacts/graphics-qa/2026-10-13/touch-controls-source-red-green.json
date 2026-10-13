@@ -1,0 +1,45 @@
+{
+  "capturedAt": "2026-10-12T23:18:49.048Z",
+  "scope": [
+    "src/game/ui/TouchControls.ts",
+    "scripts/check-graphics.cjs"
+  ],
+  "sourceSha256": "a80756b6ba8787cbb32a079a8cb872635236583c232b5eee9b3d9f396428ab3e",
+  "checkSha256": "10de92a5214c274277031a7e25f0b09c5e36ee2072c3805341a94161e4b00a4d",
+  "command": "node scripts/check-graphics.cjs --touch-only",
+  "red": [
+    {
+      "failure": "Touch target below44CSSpx at640x360: 32",
+      "exitCode": 1
+    },
+    {
+      "failure": "Reduced motion must suppress decorative button tweens;14 !==7",
+      "exitCode": 1
+    },
+    {
+      "failure": "Button feedback must not shrink44CSSpx interactive circles",
+      "exitCode": 1
+    }
+  ],
+  "green": {
+    "exitCode": 0,
+    "checks": [
+      "All7button targets>=44CSSpx under640x360FIT",
+      "Normal motion still animates text feedback",
+      "Interactive circles never tween scale",
+      "Live application and OS reduced-motion combinations suppress new feedback tweens",
+      "All7actions still execute under reduced motion",
+      "Disabled controls perform no actions"
+    ]
+  },
+  "historicalServedBundle": "index-DAgfL7dU.js",
+  "historicalServedSha256": "125fab15da0089e67f2d97262488bfd8a9037625515296dab2edd81f02c5ee69",
+  "measurementPreserved": true,
+  "deferred": [
+    "Fresh TypeScript/full check after exclusive stress window",
+    "Distinct source candidate build",
+    "Browser640x360/844x390 touch hitbox/actions/reduced-motion acceptance",
+    "Real Android/iOS safe-area and physical input"
+  ],
+  "limits": "Transpiled source unit mock only; not historical served-bundle proof of new behavior, current full-suite GREEN, physical-device or full graphics1.0 acceptance."
+}

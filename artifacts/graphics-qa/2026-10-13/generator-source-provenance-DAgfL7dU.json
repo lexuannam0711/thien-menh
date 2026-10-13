@@ -1,0 +1,48 @@
+{
+  "capturedAt": "2026-10-12T23:01:46.391Z",
+  "bundle": "dist/assets/index-DAgfL7dU.js",
+  "bundleSha256": "125fab15da0089e67f2d97262488bfd8a9037625515296dab2edd81f02c5ee69",
+  "assetInventory": "artifacts/graphics-qa/2026-10-13/texture-memory-inventory-DAgfL7dU.json",
+  "verifiedPNGCount": 74,
+  "verifiedPublicAndDistHashes": true,
+  "generators": [
+    {
+      "family": "sprites",
+      "count": 11,
+      "generator": "scripts/generate-sprites.js",
+      "sourceHash": "f013b257c3446567dc84eec9b495bfbb2cff1b6dd3a8e93520957dc21aa95cf1"
+    },
+    {
+      "family": "enemies",
+      "count": 16,
+      "generator": "scripts/generate-enemies.js",
+      "sourceHash": "653b27ee9166c0f3c3dcec3bb1cf0b67af987d559d9b1c4106080b0d79344214"
+    },
+    {
+      "family": "environments",
+      "count": 10,
+      "generator": "scripts/generate-environments.js",
+      "sourceHash": "b4c4ee3997f6379e9522bea556653c952e6084234ba8f43b8f677af0c5699b10"
+    },
+    {
+      "family": "npcs",
+      "count": 30,
+      "generator": "scripts/generate-npcs.js",
+      "sourceHash": "6f2fed9fb9bace51d4f921e257d64755e35f71b9cbbdce12bd2bd8ab4e88c897"
+    },
+    {
+      "family": "icons",
+      "count": 1,
+      "generator": "scripts/generate-icons.js",
+      "sourceHash": "f3a6c272fdf0fc2f9cf032b6131665c48368e47e5f4816d919cfbff8d77d2792"
+    },
+    {
+      "family": "equipment",
+      "count": 6,
+      "generator": "scripts/generate-equipment.js",
+      "sourceHash": "6771e1ebd9e68fb6231a21da1e82851539973e2b584a73b85133cacb58eb68aa"
+    }
+  ],
+  "rightsStatus": "OPEN: contributor attestation required; source attribution is not a license grant",
+  "limits": "Current source/disk hashes only. No regeneration performed during sustained measurement. Not third-party clearance, historical generator attribution, premium art approval or GPU/device proof."
+}

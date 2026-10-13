@@ -1,0 +1,203 @@
+{
+  "localDate": "2026-10-13",
+  "timezone": "Asia/Saigon",
+  "bundle": "index-Bvn4PVWq.js",
+  "bundleSha256": "28f6f83cc1e627c2684cd8d6c81344115712e4362b14635d4d998749551a78a5",
+  "runtime": "headless Chrome --disable-gpu, production preview4187",
+  "checks": [
+    "extended scripts/check-browser.cjs PASS",
+    "native UI hover/tab-switch and three equipped preview screenshots inspected",
+    "node scripts/check-rpg-visual.cjs PASS",
+    "node scripts/check-environment-atmosphere.cjs PASS",
+    "node scripts/check-combat-vfx.cjs PASS",
+    "noEmit PASS before loading-entry producer integration"
+  ],
+  "artifacts": [
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/current-ui-final/chapter-1-boss-fixture.png",
+      "bytes": 85601,
+      "sha256": "a850497016fbc27fe369e0b483b38ca84d286766cdf872e129f3f5c196bc01d6"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/current-ui-final/chapter-2-boss-fixture.png",
+      "bytes": 82873,
+      "sha256": "b9f7d942903446408494a21008e3897f6485fc1393033319219fe49439bc62a7"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/current-ui-final/chapter-3-boss-fixture.png",
+      "bytes": 88960,
+      "sha256": "0cbc2eaf5d33d7c50c218ad122c39f2cd0cc67d3ec5a4f329194fff7e2743b18"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/current-ui-final/chapter-4-boss-fixture.png",
+      "bytes": 88048,
+      "sha256": "771c52ecf3a6379f11c477a186608e5134ada81c6e0eb4e7207dc4386f6c166e"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/current-ui-final/equipment-icons.png",
+      "bytes": 79657,
+      "sha256": "ca3a7beb597df31cad849a81d6d5470f98ac84f9e14001171dda6245bb17d2fb"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/current-ui-final/inventory-icons.png",
+      "bytes": 77555,
+      "sha256": "45b052201b13f79a7fedf4ba06b80287bcf58ab3f9f42b4fcfb5e1ddb6b9bbc6"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/current-ui-final/menu-desktop.png",
+      "bytes": 69331,
+      "sha256": "3fda54dbf53c8986b47d20abf7a5d03a7116f8a2f044d3e3a91a131828a9a2cb"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/current-ui-final/npc-chief-dialogue.png",
+      "bytes": 64146,
+      "sha256": "5783d9ee51df5b1a8622673b0564bdb00c29ea689582aafc363a77116d3f34d7"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/current-ui-final/seeded-shop-open.png",
+      "bytes": 78379,
+      "sha256": "bc4cd71d9851183418a7726fdd956f0d5dfe3eb67d78d730f22be660415e5a78"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/current-ui-final/seeded-shop-tab.png",
+      "bytes": 93331,
+      "sha256": "587213517db710299bd9309a6703aa78466d6f5d96e78d5ebb3255f7b2f0e544"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/current-ui-final/settings-desktop.png",
+      "bytes": 61575,
+      "sha256": "f1995c225ec5f5c2bd773974616be1727bd31fa97c587c174bbd21ed728624f4"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/current-ui-final/settings-mobile.png",
+      "bytes": 44482,
+      "sha256": "7f6f883615532d5fc803831d6a5893b339fcea260a208a5f5477ce27379f9140"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/current-ui-final/skill-icons.png",
+      "bytes": 107521,
+      "sha256": "62b60edda325b23275bd46fc2961e72b57525886bd5ae84854d68ec5288409f7"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/current-ui-final/village-desktop.png",
+      "bytes": 79617,
+      "sha256": "38185b93ca3333c116911cfa61b0621f3ea8c6a5a3a85f5deb51ef9882b68aff"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/current-ui-final/village-mobile.png",
+      "bytes": 76082,
+      "sha256": "4d3c233e0b24cc365ef2d404034eb6c7ae5133ae232be5a840024bdc31676da7"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/current-ui-final/weapon-battle-axe.png",
+      "bytes": 86920,
+      "sha256": "6d9a11e466c15e0121cb8938b8a59a62b8585c4b8d1d25b58a015cbdfe16d9b5"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/current-ui-final/weapon-bronze-spear.png",
+      "bytes": 86620,
+      "sha256": "d5f9620d46c24746967400c0d74f1972debbf3b38899587cf24929439a67872b"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/current-ui-final/weapon-lac-sword.png",
+      "bytes": 86778,
+      "sha256": "a6664d0629457989e1ffca21092a44180551863bb40f25285180fca914320f46"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/native-ui-focus/equipment-icons.png",
+      "bytes": 79657,
+      "sha256": "ca3a7beb597df31cad849a81d6d5470f98ac84f9e14001171dda6245bb17d2fb"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/native-ui-focus/equipment-preview-battle-axe.png",
+      "bytes": 90848,
+      "sha256": "c3b39bf03783e08afb8a1368b305445ed078d35a58301023e8364eb842b646b7"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/native-ui-focus/equipment-preview-bronze-spear.png",
+      "bytes": 91290,
+      "sha256": "bb6a0d9206bd9a48ef306585be09ba4de806a37159ece0666664b8ec595adf7d"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/native-ui-focus/equipment-preview-lac-sword.png",
+      "bytes": 92807,
+      "sha256": "423a2e3773e209045fc63faafe6104290390f8ac9481b5aff3cd74a9c7aed637"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/native-ui-focus/inventory-icons.png",
+      "bytes": 77555,
+      "sha256": "45b052201b13f79a7fedf4ba06b80287bcf58ab3f9f42b4fcfb5e1ddb6b9bbc6"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/native-ui-focus/menu-desktop.png",
+      "bytes": 69331,
+      "sha256": "3fda54dbf53c8986b47d20abf7a5d03a7116f8a2f044d3e3a91a131828a9a2cb"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/native-ui-focus/seeded-shop-open.png",
+      "bytes": 78357,
+      "sha256": "3c245e6773ed6a6feb9de3f95247c0cc3f23b1757ffe565776cc35946434236f"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/native-ui-focus/seeded-shop-tab.png",
+      "bytes": 93320,
+      "sha256": "ad73e8b712fc4b310209949c1120c70a866d820e1034191493a34fd66adf9d24"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/native-ui-focus/settings-desktop.png",
+      "bytes": 61575,
+      "sha256": "f1995c225ec5f5c2bd773974616be1727bd31fa97c587c174bbd21ed728624f4"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/native-ui-focus/settings-mobile.png",
+      "bytes": 44482,
+      "sha256": "7f6f883615532d5fc803831d6a5893b339fcea260a208a5f5477ce27379f9140"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/native-ui-focus/skill-icons.png",
+      "bytes": 107521,
+      "sha256": "62b60edda325b23275bd46fc2961e72b57525886bd5ae84854d68ec5288409f7"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/native-ui-focus/skill-node-tooltip.png",
+      "bytes": 108963,
+      "sha256": "edf9002c6ffc1858c7e381e000c671ee9729a75b14bf38f735e321d9cb6fef62"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/native-ui-focus/tooltip-after-tab-switch.png",
+      "bytes": 77586,
+      "sha256": "54030caf25cf6b435f9b16cbc61eb55b9eb355f520e87692e5b5b70226f59120"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/native-ui-focus/village-desktop.png",
+      "bytes": 79617,
+      "sha256": "38185b93ca3333c116911cfa61b0621f3ea8c6a5a3a85f5deb51ef9882b68aff"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/native-ui-focus/village-mobile.png",
+      "bytes": 76104,
+      "sha256": "f1c4cd79b0ca4b05117e5a863a52aaded34f14977613960db295fa9fc7e33756"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/native-ui-focus/weapon-battle-axe.png",
+      "bytes": 86920,
+      "sha256": "514653ead6df390ee2d8e1e859aaae25471a30798037300a4a19d6a025d6db86"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/native-ui-focus/weapon-bronze-spear.png",
+      "bytes": 86585,
+      "sha256": "ec0a6f7a9b25c82baa3815e22d1e95f7f93c916988474662729c1d29fce82e61"
+    },
+    {
+      "path": "artifacts/graphics-qa/2026-10-13/native-ui-focus/weapon-lac-sword.png",
+      "bytes": 86810,
+      "sha256": "d6148db2133fe298747ecce91302b84e9df646512a206f44ba7c8df576317d00"
+    }
+  ],
+  "limits": [
+    "Not physical/mobile/GPU/FPS/stress/30minute acceptance",
+    "Snapshot predates bonus-text wrap and loading/entry transitions",
+    "Natural campaign P0 portal fix separately RED/GREEN actual-method tested, awaits corrected shared bundle campaign",
+    "Full premium/legal/whole-game coverage not established"
+  ]
+}

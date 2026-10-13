@@ -1,0 +1,407 @@
+{
+  "fixture": "seeded combat; not natural campaign; normal attack/default skills; 10000 HP/MP; active quest + bossDead prevents boss progression",
+  "minutes": 1,
+  "url": "http://127.0.0.1:4187/",
+  "continuous": true,
+  "measured": false,
+  "elapsedMs": 0,
+  "errors": [],
+  "baselineWarnings": [
+    {
+      "url": "http://127.0.0.1:4187/favicon.ico",
+      "status": 404,
+      "statusText": "Not Found",
+      "headers": {
+        "Transfer-Encoding": "chunked",
+        "Keep-Alive": "timeout=5",
+        "Date": "Mon, 12 Oct 2026 20:17:09 GMT",
+        "Vary": "Origin",
+        "Connection": "keep-alive"
+      },
+      "mimeType": "text/plain",
+      "charset": "",
+      "connectionReused": true,
+      "connectionId": 273,
+      "remoteIPAddress": "127.0.0.1",
+      "remotePort": 4187,
+      "fromDiskCache": false,
+      "fromServiceWorker": false,
+      "fromPrefetchCache": false,
+      "encodedDataLength": 152,
+      "timing": {
+        "requestTime": 16696.673035,
+        "proxyStart": -1,
+        "proxyEnd": -1,
+        "dnsStart": -1,
+        "dnsEnd": -1,
+        "connectStart": -1,
+        "connectEnd": -1,
+        "sslStart": -1,
+        "sslEnd": -1,
+        "workerStart": -1,
+        "workerReady": -1,
+        "workerFetchStart": -1,
+        "workerRespondWithSettled": -1,
+        "sendStart": 0.568,
+        "sendEnd": 0.687,
+        "pushStart": 0,
+        "pushEnd": 0,
+        "receiveHeadersStart": 3.754,
+        "receiveHeadersEnd": 3.927
+      },
+      "responseTime": 1791836229870.576,
+      "protocol": "http/1.1",
+      "alternateProtocolUsage": "unspecifiedReason",
+      "securityState": "secure"
+    },
+    {
+      "source": "network",
+      "level": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "timestamp": 1791836229871.725,
+      "url": "http://127.0.0.1:4187/favicon.ico",
+      "networkRequestId": "116156.21"
+    },
+    {
+      "url": "http://127.0.0.1:4187/favicon.ico",
+      "status": 404,
+      "statusText": "Not Found",
+      "headers": {
+        "Transfer-Encoding": "chunked",
+        "Keep-Alive": "timeout=5",
+        "Date": "Mon, 12 Oct 2026 20:17:11 GMT",
+        "Vary": "Origin",
+        "Connection": "keep-alive"
+      },
+      "mimeType": "text/plain",
+      "charset": "",
+      "connectionReused": true,
+      "connectionId": 273,
+      "remoteIPAddress": "127.0.0.1",
+      "remotePort": 4187,
+      "fromDiskCache": false,
+      "fromServiceWorker": false,
+      "fromPrefetchCache": false,
+      "encodedDataLength": 152,
+      "timing": {
+        "requestTime": 16698.478091,
+        "proxyStart": -1,
+        "proxyEnd": -1,
+        "dnsStart": -1,
+        "dnsEnd": -1,
+        "connectStart": -1,
+        "connectEnd": -1,
+        "sslStart": -1,
+        "sslEnd": -1,
+        "workerStart": -1,
+        "workerReady": -1,
+        "workerFetchStart": -1,
+        "workerRespondWithSettled": -1,
+        "sendStart": 1.116,
+        "sendEnd": 1.303,
+        "pushStart": 0,
+        "pushEnd": 0,
+        "receiveHeadersStart": 2.097,
+        "receiveHeadersEnd": 3.22
+      },
+      "responseTime": 1791836231673.975,
+      "protocol": "http/1.1",
+      "alternateProtocolUsage": "unspecifiedReason",
+      "securityState": "secure"
+    },
+    {
+      "source": "network",
+      "level": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "timestamp": 1791836231730.301,
+      "url": "http://127.0.0.1:4187/favicon.ico",
+      "networkRequestId": "116156.137"
+    }
+  ],
+  "requestedFixture": {
+    "version": 1,
+    "hp": 10000,
+    "mp": 10000,
+    "maxHp": 10000,
+    "maxMp": 10000,
+    "attack": 12,
+    "level": 1,
+    "xp": 0,
+    "gold": 0,
+    "chapter": 1,
+    "kills": 0,
+    "quest": "active",
+    "bossDead": true,
+    "storyFlags": {},
+    "checkpoint": "village-gate",
+    "playtimeSeconds": 0,
+    "upgrades": 0,
+    "rpg": {
+      "inventory": {
+        "capacity": 24,
+        "slots": []
+      },
+      "equipment": {
+        "slots": {}
+      },
+      "quests": {
+        "hunt-ho-yeu": {
+          "questId": "hunt-ho-yeu",
+          "stage": "active",
+          "counts": {},
+          "flags": {},
+          "rewardClaimed": false
+        },
+        "main-c1-02-mo-duong-rung-truc": {
+          "questId": "main-c1-02-mo-duong-rung-truc",
+          "stage": "active",
+          "counts": {},
+          "flags": {},
+          "rewardClaimed": false
+        },
+        "main-c1-03-tru-ma-troi": {
+          "questId": "main-c1-03-tru-ma-troi",
+          "stage": "active",
+          "counts": {},
+          "flags": {},
+          "rewardClaimed": false
+        }
+      }
+    }
+  },
+  "normalizedFixture": {
+    "version": 1,
+    "hp": 10000,
+    "mp": 10000,
+    "maxHp": 10000,
+    "maxMp": 10000,
+    "attack": 12,
+    "level": 1,
+    "chapter": 1,
+    "xp": 0,
+    "gold": 0,
+    "kills": 0,
+    "quest": "active",
+    "bossDead": true,
+    "storyFlags": {},
+    "checkpoint": "village-gate",
+    "playtimeSeconds": 0,
+    "upgrades": 0,
+    "rpg": {
+      "inventory": {
+        "capacity": 24,
+        "slots": []
+      },
+      "equipment": {
+        "slots": {}
+      },
+      "quests": {
+        "hunt-ho-yeu": {
+          "questId": "hunt-ho-yeu",
+          "stage": "active",
+          "counts": {},
+          "flags": {},
+          "rewardClaimed": false
+        },
+        "main-c1-02-mo-duong-rung-truc": {
+          "questId": "main-c1-02-mo-duong-rung-truc",
+          "stage": "active",
+          "counts": {},
+          "flags": {},
+          "rewardClaimed": false
+        },
+        "main-c1-03-tru-ma-troi": {
+          "questId": "main-c1-03-tru-ma-troi",
+          "stage": "active",
+          "counts": {},
+          "flags": {},
+          "rewardClaimed": false
+        }
+      },
+      "skills": {
+        "unlockedSkillIds": [
+          "earth-shockwave",
+          "flame-beam",
+          "tidal-surge"
+        ],
+        "equippedSlots": {
+          "slot-1": "earth-shockwave",
+          "slot-2": "flame-beam",
+          "slot-3": "tidal-surge"
+        },
+        "cooldownUntil": {},
+        "activeDivinePower": "earth",
+        "unlockedDivinePowers": [
+          "earth"
+        ]
+      }
+    }
+  },
+  "assetFailures": [],
+  "failures": [
+    {
+      "classification": "missing-metrics",
+      "message": "{\"exceptionId\":1,\"text\":\"Uncaught\",\"lineNumber\":3,\"columnNumber\":14,\"scriptId\":\"13\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"\",\"scriptId\":\"13\",\"url\":\"\",\"lineNumber\":3,\"columnNumber\":20}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"Error\",\"description\":\"Error: missing metric scene\\n    at Array.<anonymous> (<anonymous>:4:21)\",\"objectId\":\"-8783832415954094701.3.8\"}}",
+      "stack": "AssertionError [ERR_ASSERTION]: {\"exceptionId\":1,\"text\":\"Uncaught\",\"lineNumber\":3,\"columnNumber\":14,\"scriptId\":\"13\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"\",\"scriptId\":\"13\",\"url\":\"\",\"lineNumber\":3,\"columnNumber\":20}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"Error\",\"description\":\"Error: missing metric scene\\n    at Array.<anonymous> (<anonymous>:4:21)\",\"objectId\":\"-8783832415954094701.3.8\"}}\n    at observe (F:\\CODE\\thienmenh\\thienmenh\\scripts\\check-graphics-stress.cjs:115:10)\n    at async context.readScene (F:\\CODE\\thienmenh\\thienmenh\\scripts\\check-graphics-stress.cjs:400:21)\n    at async waitScene (F:\\CODE\\thienmenh\\thienmenh\\scripts\\check-graphics-stress.cjs:190:75)\n    at async run (F:\\CODE\\thienmenh\\thienmenh\\scripts\\check-graphics-stress.cjs:408:114)"
+    }
+  ],
+  "samples": [],
+  "sceneChanges": [],
+  "deaths": 0,
+  "presets": {
+    "low": {
+      "activeMs": 0,
+      "hits": 0,
+      "basics": 0,
+      "skills": 0,
+      "dodges": 0,
+      "frames": 0,
+      "combatWindows": 0,
+      "transitions": [],
+      "frameIntervals": {
+        "histogram": [
+          {
+            "upperMs": 8.34,
+            "count": 0
+          },
+          {
+            "upperMs": 16.67,
+            "count": 0
+          },
+          {
+            "upperMs": 25,
+            "count": 0
+          },
+          {
+            "upperMs": 33.34,
+            "count": 0
+          },
+          {
+            "upperMs": 50,
+            "count": 0
+          },
+          {
+            "upperMs": 100,
+            "count": 0
+          },
+          {
+            "upperMs": null,
+            "count": 0
+          }
+        ],
+        "distribution": null
+      },
+      "trends": {
+        "heap": null,
+        "dom": null,
+        "display": null,
+        "enemies": null
+      }
+    },
+    "medium": {
+      "activeMs": 0,
+      "hits": 0,
+      "basics": 0,
+      "skills": 0,
+      "dodges": 0,
+      "frames": 0,
+      "combatWindows": 0,
+      "transitions": [],
+      "frameIntervals": {
+        "histogram": [
+          {
+            "upperMs": 8.34,
+            "count": 0
+          },
+          {
+            "upperMs": 16.67,
+            "count": 0
+          },
+          {
+            "upperMs": 25,
+            "count": 0
+          },
+          {
+            "upperMs": 33.34,
+            "count": 0
+          },
+          {
+            "upperMs": 50,
+            "count": 0
+          },
+          {
+            "upperMs": 100,
+            "count": 0
+          },
+          {
+            "upperMs": null,
+            "count": 0
+          }
+        ],
+        "distribution": null
+      },
+      "trends": {
+        "heap": null,
+        "dom": null,
+        "display": null,
+        "enemies": null
+      }
+    },
+    "high": {
+      "activeMs": 0,
+      "hits": 0,
+      "basics": 0,
+      "skills": 0,
+      "dodges": 0,
+      "frames": 0,
+      "combatWindows": 0,
+      "transitions": [],
+      "frameIntervals": {
+        "histogram": [
+          {
+            "upperMs": 8.34,
+            "count": 0
+          },
+          {
+            "upperMs": 16.67,
+            "count": 0
+          },
+          {
+            "upperMs": 25,
+            "count": 0
+          },
+          {
+            "upperMs": 33.34,
+            "count": 0
+          },
+          {
+            "upperMs": 50,
+            "count": 0
+          },
+          {
+            "upperMs": 100,
+            "count": 0
+          },
+          {
+            "upperMs": null,
+            "count": 0
+          }
+        ],
+        "distribution": null
+      },
+      "trends": {
+        "heap": null,
+        "dom": null,
+        "display": null,
+        "enemies": null
+      }
+    }
+  },
+  "limits": "rAF intervals, JS heap, DOM/display samples only; not native GPU FPS, memory-leak absence, natural campaign or device proof",
+  "bundleUrl": "http://127.0.0.1:4187/assets/index-D71EOpKB.js",
+  "bundleBefore": "501549219ba7dd50b84d0d7c6c9e77da416ca2ad23e628acd8e9402646749bd6",
+  "browserPid": 116632,
+  "profile": "C:\\Users\\MYLAPT~1\\AppData\\Local\\Temp\\than-menh-graphics-stress-Q66gwz",
+  "bundleAfter": "501549219ba7dd50b84d0d7c6c9e77da416ca2ad23e628acd8e9402646749bd6",
+  "verdict": "FAILED"
+}

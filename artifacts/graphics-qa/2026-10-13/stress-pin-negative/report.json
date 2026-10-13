@@ -1,0 +1,231 @@
+{
+  "fixture": "seeded common-enemy pressure; not boss/natural campaign; normal attack/default skills; 10000 HP/MP; active quest + bossDead; actual outgoing/incoming damage evidence; slowed real input cadence",
+  "minutes": 1,
+  "url": "http://127.0.0.1:4187/",
+  "continuous": true,
+  "measured": false,
+  "elapsedMs": 0,
+  "errors": [],
+  "baselineWarnings": [],
+  "requestedFixture": {
+    "version": 1,
+    "hp": 10000,
+    "mp": 10000,
+    "maxHp": 10000,
+    "maxMp": 10000,
+    "attack": 12,
+    "level": 1,
+    "xp": 0,
+    "gold": 0,
+    "chapter": 1,
+    "kills": 0,
+    "quest": "active",
+    "bossDead": true,
+    "storyFlags": {},
+    "checkpoint": "village-gate",
+    "playtimeSeconds": 0,
+    "upgrades": 0,
+    "rpg": {
+      "inventory": {
+        "capacity": 24,
+        "slots": []
+      },
+      "equipment": {
+        "slots": {}
+      },
+      "quests": {
+        "hunt-ho-yeu": {
+          "questId": "hunt-ho-yeu",
+          "stage": "active",
+          "counts": {},
+          "flags": {},
+          "rewardClaimed": false
+        },
+        "main-c1-02-mo-duong-rung-truc": {
+          "questId": "main-c1-02-mo-duong-rung-truc",
+          "stage": "active",
+          "counts": {},
+          "flags": {},
+          "rewardClaimed": false
+        },
+        "main-c1-03-tru-ma-troi": {
+          "questId": "main-c1-03-tru-ma-troi",
+          "stage": "active",
+          "counts": {},
+          "flags": {},
+          "rewardClaimed": false
+        }
+      }
+    }
+  },
+  "normalizedFixture": null,
+  "assetFailures": [],
+  "failures": [
+    {
+      "classification": "harness",
+      "message": "Frozen production bundle SHA256 mismatch\n+ actual - expected\n\n+ '501549219ba7dd50b84d0d7c6c9e77da416ca2ad23e628acd8e9402646749bd6'\n- 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Frozen production bundle SHA256 mismatch\n+ actual - expected\n\n+ '501549219ba7dd50b84d0d7c6c9e77da416ca2ad23e628acd8e9402646749bd6'\n- 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'\n\n    at run (F:\\CODE\\thienmenh\\thienmenh\\scripts\\check-graphics-stress.cjs:428:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)"
+    }
+  ],
+  "samples": [],
+  "sceneChanges": [],
+  "deaths": 0,
+  "presets": {
+    "low": {
+      "activeMs": 0,
+      "hits": 0,
+      "incomingDamage": 0,
+      "basics": 0,
+      "skills": 0,
+      "dodges": 0,
+      "frames": 0,
+      "combatWindows": 0,
+      "transitions": [],
+      "frameIntervals": {
+        "histogram": [
+          {
+            "upperMs": 8.34,
+            "count": 0
+          },
+          {
+            "upperMs": 16.67,
+            "count": 0
+          },
+          {
+            "upperMs": 25,
+            "count": 0
+          },
+          {
+            "upperMs": 33.34,
+            "count": 0
+          },
+          {
+            "upperMs": 50,
+            "count": 0
+          },
+          {
+            "upperMs": 100,
+            "count": 0
+          },
+          {
+            "upperMs": null,
+            "count": 0
+          }
+        ],
+        "distribution": null
+      },
+      "trends": {
+        "heap": null,
+        "dom": null,
+        "display": null,
+        "enemies": null
+      }
+    },
+    "medium": {
+      "activeMs": 0,
+      "hits": 0,
+      "incomingDamage": 0,
+      "basics": 0,
+      "skills": 0,
+      "dodges": 0,
+      "frames": 0,
+      "combatWindows": 0,
+      "transitions": [],
+      "frameIntervals": {
+        "histogram": [
+          {
+            "upperMs": 8.34,
+            "count": 0
+          },
+          {
+            "upperMs": 16.67,
+            "count": 0
+          },
+          {
+            "upperMs": 25,
+            "count": 0
+          },
+          {
+            "upperMs": 33.34,
+            "count": 0
+          },
+          {
+            "upperMs": 50,
+            "count": 0
+          },
+          {
+            "upperMs": 100,
+            "count": 0
+          },
+          {
+            "upperMs": null,
+            "count": 0
+          }
+        ],
+        "distribution": null
+      },
+      "trends": {
+        "heap": null,
+        "dom": null,
+        "display": null,
+        "enemies": null
+      }
+    },
+    "high": {
+      "activeMs": 0,
+      "hits": 0,
+      "incomingDamage": 0,
+      "basics": 0,
+      "skills": 0,
+      "dodges": 0,
+      "frames": 0,
+      "combatWindows": 0,
+      "transitions": [],
+      "frameIntervals": {
+        "histogram": [
+          {
+            "upperMs": 8.34,
+            "count": 0
+          },
+          {
+            "upperMs": 16.67,
+            "count": 0
+          },
+          {
+            "upperMs": 25,
+            "count": 0
+          },
+          {
+            "upperMs": 33.34,
+            "count": 0
+          },
+          {
+            "upperMs": 50,
+            "count": 0
+          },
+          {
+            "upperMs": 100,
+            "count": 0
+          },
+          {
+            "upperMs": null,
+            "count": 0
+          }
+        ],
+        "distribution": null
+      },
+      "trends": {
+        "heap": null,
+        "dom": null,
+        "display": null,
+        "enemies": null
+      }
+    }
+  },
+  "limits": "rAF intervals, JS heap, DOM/display samples only; not native GPU FPS, memory-leak absence, natural campaign or device proof",
+  "bundleUrl": "http://127.0.0.1:4187/assets/index-D71EOpKB.js",
+  "bundleBefore": "501549219ba7dd50b84d0d7c6c9e77da416ca2ad23e628acd8e9402646749bd6",
+  "harnessAfter": "f6c47ad950786abc2d68e51aa8f8b215a17d4924a1d70ee03e0b70c7b1e3a16e",
+  "bundleAfter": "501549219ba7dd50b84d0d7c6c9e77da416ca2ad23e628acd8e9402646749bd6",
+  "verdict": "FAILED"
+}

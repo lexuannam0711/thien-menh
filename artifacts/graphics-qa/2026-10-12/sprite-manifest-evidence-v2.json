@@ -1,0 +1,109 @@
+{
+  "date": "2026-10-12",
+  "revision": "weapon-and-all-boss-slice",
+  "assets": [
+    {
+      "name": "hero.png",
+      "width": 2016,
+      "height": 336,
+      "frameSize": 48,
+      "frames": 272,
+      "bytes": 46680,
+      "sha256": "1cdb516c4c3c48ccd723ff7ed5b876f3d8154c7a8986a59f6f32a5a7f22206dd"
+    },
+    {
+      "name": "hero_axe.png",
+      "width": 2016,
+      "height": 336,
+      "frameSize": 48,
+      "frames": 272,
+      "bytes": 49037,
+      "sha256": "f07c05ee08b1b91bf93ccde52f38927e3acbe89247b216b5d3f5da8275801c32"
+    },
+    {
+      "name": "hero_sword.png",
+      "width": 2016,
+      "height": 336,
+      "frameSize": 48,
+      "frames": 272,
+      "bytes": 44718,
+      "sha256": "0ae20e51c863507532d1ec2f472cea6feaa62b3434858eae82612552d2ae25fc"
+    },
+    {
+      "name": "moctinh.png",
+      "width": 1152,
+      "height": 192,
+      "frameSize": 48,
+      "frames": 96,
+      "bytes": 21863,
+      "sha256": "4583e735afbd93ae2552fe768ed78a0b3d5f5d6f3cc7d2821c6e74fc32452f8d"
+    },
+    {
+      "name": "matroi.png",
+      "width": 768,
+      "height": 128,
+      "frameSize": 32,
+      "frames": 96,
+      "bytes": 10947,
+      "sha256": "051217c089029b69f25649d5b719015c3d354dee7d2eeeafcaa5ff992d7f26c8"
+    },
+    {
+      "name": "hoyer.png",
+      "width": 2016,
+      "height": 480,
+      "frameSize": 96,
+      "frames": 96,
+      "bytes": 32606,
+      "sha256": "f35d2cf5af6373409b41dd4bc6c2813c8ff22de4fdd7be77ce801e9593ce3308"
+    },
+    {
+      "name": "wolf.png",
+      "width": 1152,
+      "height": 192,
+      "frameSize": 48,
+      "frames": 96,
+      "bytes": 12479,
+      "sha256": "6a7ee78da6ff56b013c035c3c3f06cf350746b6c354402b4462dd2658305861c"
+    },
+    {
+      "name": "spider.png",
+      "width": 1152,
+      "height": 192,
+      "frameSize": 48,
+      "frames": 96,
+      "bytes": 21470,
+      "sha256": "d3f8ab4bc5ff50318841c50c2b0f0e25ee4cc0efcb79de61264ceb212b40d937"
+    },
+    {
+      "name": "thuongluong.png",
+      "width": 2016,
+      "height": 672,
+      "frameSize": 96,
+      "frames": 132,
+      "bytes": 90815,
+      "sha256": "49881eea0897d84ba9c62e582dce8b64589a7963c2abcf086c3d1ff349ec6b40"
+    },
+    {
+      "name": "thachtuong.png",
+      "width": 2016,
+      "height": 672,
+      "frameSize": 96,
+      "frames": 132,
+      "bytes": 87577,
+      "sha256": "1d65b26d042e0bb13e9777d3d5b7682056261c5fe608a87702866476c8b5a8c5"
+    },
+    {
+      "name": "hacan.png",
+      "width": 2016,
+      "height": 672,
+      "frameSize": 96,
+      "frames": 132,
+      "bytes": 93798,
+      "sha256": "7734791e6e03349c56cc90a01aadd3de3bd40abd78339ed5e7f26f31d894c92c"
+    }
+  ],
+  "totalFrames": 1692,
+  "totalEncodedBytes": 511990,
+  "totalDecodedRgbaBytes": 31303680,
+  "limitation": "CPU decoded RGBA estimate only; not GPU allocation, peak memory or device budget acceptance."
+}

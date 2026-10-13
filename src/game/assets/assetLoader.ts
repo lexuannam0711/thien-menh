@@ -1,98 +1,56 @@
 import Phaser from 'phaser';
+import { animationFrames, DIRECTIONS, SPRITE_MANIFEST, type SpriteName } from './spriteManifest';
+import { loadEnemyArtwork, createEnemyAnimations } from './enemyArtwork';
+import { loadEnvironmentArtwork } from './environmentArtwork';
+import { loadEquipmentArtwork } from './equipmentArtwork';
+import { presentScenePreload } from '../rendering/ScenePresentation';
 
 export const SPRITE_KEYS = {
-  hero: 'hero_sprite',
-  moctinh: 'moctinh_sprite',
-  matroi: 'matroi_sprite',
-  hoyer: 'hoyer_sprite',
+  hero: 'hero_sprite', hero_axe: 'hero_axe_sprite', hero_sword: 'hero_sword_sprite', moctinh: 'moctinh_sprite', matroi: 'matroi_sprite', hoyer: 'hoyer_sprite',
+  wolf: 'wolf_sprite', spider: 'spider_sprite',
+  thuongluong: 'thuongluong_sprite', thachtuong: 'thachtuong_sprite', hacan: 'hacan_sprite',
 } as const;
 
 export function loadGameAssets(scene: Phaser.Scene): void {
-  // Safe offline loading with error suppression
-  scene.load.spritesheet(SPRITE_KEYS.hero, '/assets/sprites/hero.png', {
-    frameWidth: 48, frameHeight: 48,
-  });
-  scene.load.spritesheet(SPRITE_KEYS.moctinh, '/assets/sprites/moctinh.png', {
-    frameWidth: 48, frameHeight: 48,
-  });
-  scene.load.spritesheet(SPRITE_KEYS.matroi, '/assets/sprites/matroi.png', {
-    frameWidth: 32, frameHeight: 32,
-  });
-  scene.load.spritesheet(SPRITE_KEYS.hoyer, '/assets/sprites/hoyer.png', {
-    frameWidth: 96, frameHeight: 96,
-  });
+  loadEnemyArtwork(scene);
+  loadEnvironmentArtwork(scene);
+  loadEquipmentArtwork(scene);
+  for (const [name, sheet] of Object.entries(SPRITE_MANIFEST)) {
+    if (scene.textures.exists(SPRITE_KEYS[name as SpriteName])) continue;
+    scene.load.spritesheet(SPRITE_KEYS[name as SpriteName], '/assets/sprites/' + name + '.png', {
+      frameWidth: sheet.size, frameHeight: sheet.size, endFrame: sheet.columns * DIRECTIONS.length - 1,
+    });
+  }
+  presentScenePreload(scene);
 }
 
 export function createGameAnimations(scene: Phaser.Scene): void {
-  const anims = scene.anims;
-
-  // Hero animations
-  if (scene.textures.exists(SPRITE_KEYS.hero) && !anims.exists('hero_walk')) {
-    anims.create({
-      key: 'hero_idle',
-      frames: anims.generateFrameNumbers(SPRITE_KEYS.hero, { start: 0, end: 0 }),
-      frameRate: 1,
-    });
-    anims.create({
-      key: 'hero_walk',
-      frames: anims.generateFrameNumbers(SPRITE_KEYS.hero, { frames: [1, 0, 2, 0] }),
-      frameRate: 8,
-      repeat: -1,
-    });
-    anims.create({
-      key: 'hero_attack',
-      frames: anims.generateFrameNumbers(SPRITE_KEYS.hero, { start: 3, end: 3 }),
-      frameRate: 12,
-    });
-  }
-
-  // Mộc Tinh animations
-  if (scene.textures.exists(SPRITE_KEYS.moctinh) && !anims.exists('moctinh_walk')) {
-    anims.create({
-      key: 'moctinh_idle',
-      frames: anims.generateFrameNumbers(SPRITE_KEYS.moctinh, { start: 0, end: 0 }),
-      frameRate: 1,
-    });
-    anims.create({
-      key: 'moctinh_walk',
-      frames: anims.generateFrameNumbers(SPRITE_KEYS.moctinh, { frames: [1, 0, 2, 0] }),
-      frameRate: 6,
-      repeat: -1,
-    });
-    anims.create({
-      key: 'moctinh_attack',
-      frames: anims.generateFrameNumbers(SPRITE_KEYS.moctinh, { start: 3, end: 3 }),
-      frameRate: 8,
-    });
-  }
-
-  // Ma Trơi animations
-  if (scene.textures.exists(SPRITE_KEYS.matroi) && !anims.exists('matroi_float')) {
-    anims.create({
-      key: 'matroi_float',
-      frames: anims.generateFrameNumbers(SPRITE_KEYS.matroi, { start: 0, end: 3 }),
-      frameRate: 7,
-      repeat: -1,
-    });
-  }
-
-  // Hổ Yêu animations
-  if (scene.textures.exists(SPRITE_KEYS.hoyer) && !anims.exists('hoyer_stalk')) {
-    anims.create({
-      key: 'hoyer_idle',
-      frames: anims.generateFrameNumbers(SPRITE_KEYS.hoyer, { start: 0, end: 0 }),
-      frameRate: 1,
-    });
-    anims.create({
-      key: 'hoyer_stalk',
-      frames: anims.generateFrameNumbers(SPRITE_KEYS.hoyer, { frames: [1, 0, 2, 0] }),
-      frameRate: 6,
-      repeat: -1,
-    });
-    anims.create({
-      key: 'hoyer_pounce',
-      frames: anims.generateFrameNumbers(SPRITE_KEYS.hoyer, { start: 3, end: 3 }),
-      frameRate: 8,
-    });
+  createEnemyAnimations(scene);
+  for (const [spriteName, sheet] of Object.entries(SPRITE_MANIFEST)) {
+    const name = spriteName as SpriteName;
+    const texture = SPRITE_KEYS[name];
+    if (!scene.textures.exists(texture)) continue;
+    for (const [state, pose] of Object.entries(sheet.poses)) {
+      for (const direction of DIRECTIONS) {
+        const key = name + '_' + state + '_' + direction;
+        if (scene.anims.exists(key)) continue;
+        const frames = animationFrames(name, state, direction);
+        if (frames.some(frame => !scene.textures.get(texture).has(String(frame)))) continue;
+        scene.anims.create({ key, frames: scene.anims.generateFrameNumbers(texture, { frames }), frameRate: pose.frameRate, repeat: pose.repeat });
+      }
+    }
+    const aliases = { ...Object.fromEntries(Object.keys(sheet.poses).map(state => [state, state])),
+      ...(sheet.poses.attack1 ? { attack: 'attack1' } : { run: 'walk' }),
+      ...(name === 'matroi' ? { float: 'walk' } : {}),
+      ...(name === 'hoyer' ? { stalk: 'walk', pounce: 'attack' } : {}),
+    };
+    for (const [alias, state] of Object.entries(aliases)) {
+      const key = name + '_' + alias;
+      if (scene.anims.exists(key)) continue;
+      const pose = sheet.poses[state];
+      const frames = animationFrames(name, state, 'down');
+      if (frames.some(frame => !scene.textures.get(texture).has(String(frame)))) continue;
+      scene.anims.create({ key, frames: scene.anims.generateFrameNumbers(texture, { frames }), frameRate: pose.frameRate, repeat: pose.repeat });
+    }
   }
 }

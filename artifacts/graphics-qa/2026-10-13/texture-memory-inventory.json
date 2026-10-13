@@ -1,0 +1,126 @@
+{
+  "date": "2026-10-13",
+  "bundle": "index-D71EOpKB.js",
+  "bundleSha256": "501549219ba7dd50b84d0d7c6c9e77da416ca2ad23e628acd8e9402646749bd6",
+  "inventory": {
+    "count": 68,
+    "pngBytes": 760063,
+    "rgba8BaseBytes": 52758528,
+    "maxEdge": 2016,
+    "distMatches": true
+  },
+  "groups": [
+    {
+      "group": "enemies",
+      "count": 16,
+      "pngBytes": 188470,
+      "rgba8BaseBytes": 16908288
+    },
+    {
+      "group": "environments",
+      "count": 10,
+      "pngBytes": 31208,
+      "rgba8BaseBytes": 2785280
+    },
+    {
+      "group": "icons",
+      "count": 1,
+      "pngBytes": 3476,
+      "rgba8BaseBytes": 102400
+    },
+    {
+      "group": "npcs",
+      "count": 30,
+      "pngBytes": 24919,
+      "rgba8BaseBytes": 1658880
+    },
+    {
+      "group": "sprites",
+      "count": 11,
+      "pngBytes": 511990,
+      "rgba8BaseBytes": 31303680
+    }
+  ],
+  "largestByRGBA8": [
+    {
+      "path": "public/assets/sprites/hacan.png",
+      "width": 2016,
+      "height": 672,
+      "pngBytes": 93798,
+      "rgba8BaseBytes": 5419008,
+      "sha256": "7734791e6e03349c56cc90a01aadd3de3bd40abd78339ed5e7f26f31d894c92c",
+      "distMatches": true
+    },
+    {
+      "path": "public/assets/sprites/thachtuong.png",
+      "width": 2016,
+      "height": 672,
+      "pngBytes": 87577,
+      "rgba8BaseBytes": 5419008,
+      "sha256": "1d65b26d042e0bb13e9777d3d5b7682056261c5fe608a87702866476c8b5a8c5",
+      "distMatches": true
+    },
+    {
+      "path": "public/assets/sprites/thuongluong.png",
+      "width": 2016,
+      "height": 672,
+      "pngBytes": 90815,
+      "rgba8BaseBytes": 5419008,
+      "sha256": "49881eea0897d84ba9c62e582dce8b64589a7963c2abcf086c3d1ff349ec6b40",
+      "distMatches": true
+    },
+    {
+      "path": "public/assets/sprites/hoyer.png",
+      "width": 2016,
+      "height": 480,
+      "pngBytes": 32606,
+      "rgba8BaseBytes": 3870720,
+      "sha256": "f35d2cf5af6373409b41dd4bc6c2813c8ff22de4fdd7be77ce801e9593ce3308",
+      "distMatches": true
+    },
+    {
+      "path": "public/assets/sprites/hero.png",
+      "width": 2016,
+      "height": 336,
+      "pngBytes": 46680,
+      "rgba8BaseBytes": 2709504,
+      "sha256": "1cdb516c4c3c48ccd723ff7ed5b876f3d8154c7a8986a59f6f32a5a7f22206dd",
+      "distMatches": true
+    },
+    {
+      "path": "public/assets/sprites/hero_axe.png",
+      "width": 2016,
+      "height": 336,
+      "pngBytes": 49037,
+      "rgba8BaseBytes": 2709504,
+      "sha256": "f07c05ee08b1b91bf93ccde52f38927e3acbe89247b216b5d3f5da8275801c32",
+      "distMatches": true
+    },
+    {
+      "path": "public/assets/sprites/hero_sword.png",
+      "width": 2016,
+      "height": 336,
+      "pngBytes": 44718,
+      "rgba8BaseBytes": 2709504,
+      "sha256": "0ae20e51c863507532d1ec2f472cea6feaa62b3434858eae82612552d2ae25fc",
+      "distMatches": true
+    },
+    {
+      "path": "public/assets/enemies/am-anh-quy-vuong.png",
+      "width": 1536,
+      "height": 256,
+      "pngBytes": 17242,
+      "rgba8BaseBytes": 1572864,
+      "sha256": "ff62d16ecb70f3852bb8ce19fbd72c95c7a02c0d63eab0923d81fdc4803bd9dc",
+      "distMatches": true
+    }
+  ],
+  "manifestSha256": "f48366e8dbe314acb60bc7543bdb8db913f38c27b37060274d088467f5a67e6b",
+  "limitations": [
+    "Disk PNG IHDR widths/heights and byte equality only; not GPU resident-memory measurement",
+    "RGBA8 base bytes are width*height*4, excluding compressed formats, copies, mipmaps and runtime canvases",
+    "Not every public asset is proven live/uploaded by this inventory",
+    "Maximum2016 edge is disk evidence, not browser/device texture capability",
+    "No native/mobile/stress performance PASS from static inventory"
+  ]
+}

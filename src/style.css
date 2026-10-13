@@ -4,5 +4,364 @@ html, body, #app { width: 100%; height: 100%; margin: 0; overflow: hidden; }
 #app { position: relative; display:flex; align-items:center; justify-content:center; background: radial-gradient(ellipse at center, #274c3c, #0c1716 80%); }
 #game-root { width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
 #game-root canvas { display:block; touch-action:none; }
-#rotate-tip { display:none; position:absolute; bottom:12px; left:10%; width:80%; padding:10px; color:#f4e9d0; background:#17392fe6; border:1px solid #baa26d; border-radius:12px; text-align:center; font-size:13px; pointer-events:none; }
+#rotate-tip { display:none; position:absolute; bottom:12px; left:10%; width:80%; padding:10px; color:#f4e9d0; background:#17392fe6; border:1px solid #baa26d; border-radius:12px; text-align:center; font-size:13px; pointer-events:none; z-index: 1500; }
 @media (max-width: 700px) and (orientation: portrait) { #rotate-tip { display:block; } }
+
+/* Tiện ích trợ năng: Ẩn thị giác cho bộ đọc màn hình (Screen Reader Only) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Nút tắt/bỏ qua dành riêng cho người dùng bàn phím khi ấn Tab */
+.sr-only-focusable:focus,
+.sr-only-focusable:focus-visible {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  width: auto;
+  height: auto;
+  padding: 10px 16px;
+  background: #173b30;
+  color: #fff3d6;
+  border: 2px solid #f3c66f;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  z-index: 3000;
+  clip: auto;
+  white-space: normal;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.75);
+}
+
+/* Thanh công cụ cài đặt & trợ năng nhanh trên Menu */
+.menu-accessible-dock {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  display: flex;
+  gap: 10px;
+  z-index: 1000;
+  pointer-events: auto;
+}
+
+.menu-dock-btn {
+  appearance: none;
+  background: #19382f;
+  color: #fbe3a2;
+  border: 1.5px solid #c9a46a;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.menu-dock-btn:hover {
+  background: #275244;
+  border-color: #f3c66f;
+}
+
+.menu-dock-btn:active {
+  transform: scale(0.97);
+}
+
+.menu-dock-btn.is-active {
+  background: #204b3e;
+  border-color: #8cc48a;
+  color: #eaffdb;
+}
+
+.menu-dock-btn.is-muted {
+  background: #392b23;
+  border-color: #d6876c;
+  color: #ffd6cc;
+}
+
+/* Vòng lấy nét (Focus Ring) tiêu chuẩn trợ năng WCAG */
+.menu-dock-btn:focus-visible,
+.modal-btn-primary:focus-visible,
+.modal-close-btn:focus-visible,
+.quick-setting-toggle:focus-visible,
+.sr-only-focusable:focus-visible {
+  outline: 3px solid #f3c66f !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 12px rgba(243, 198, 111, 0.85) !important;
+}
+
+/* Hộp thoại Cài đặt & Hướng dẫn điều khiển (Settings & Controls Modal) */
+.controls-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 24, 21, 0.86);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2500;
+  padding: 16px;
+  animation: menuFadeIn 0.15s ease-out;
+}
+
+@keyframes menuFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.controls-modal-dialog {
+  background: #112823;
+  border: 2px solid #c9a46a;
+  border-radius: 14px;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  color: #f0e4c5;
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.85), inset 0 0 20px rgba(201, 164, 106, 0.08);
+  padding: 22px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #3c594b;
+  padding-bottom: 12px;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: bold;
+  color: #fbe3a2;
+  letter-spacing: 0.5px;
+}
+
+.modal-close-btn {
+  appearance: none;
+  background: transparent;
+  border: 1px solid #7c6848;
+  color: #e4c58e;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.modal-close-btn:hover {
+  background: #392b23;
+  color: #ffffff;
+  border-color: #f3c66f;
+}
+
+.modal-section-card {
+  background: #15322c;
+  border: 1px solid #2b5447;
+  border-radius: 10px;
+  padding: 14px 18px;
+}
+
+.modal-section-title {
+  margin: 0 0 10px 0;
+  font-size: 15px;
+  font-weight: bold;
+  color: #e4c58e;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quick-setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.quick-setting-label {
+  font-size: 14px;
+  color: #f0e4c5;
+  font-weight: bold;
+}
+
+.quick-setting-desc {
+  font-size: 12px;
+  color: #a2b79e;
+  display: block;
+  margin-top: 2px;
+}
+
+.quick-setting-toggle {
+  appearance: none;
+  background: #87623d;
+  border: 1.5px solid #c9a46a;
+  border-radius: 8px;
+  color: #fff3d6;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.quick-setting-toggle:hover {
+  background: #ab824f;
+  border-color: #f3c66f;
+}
+
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 8px 14px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.controls-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 7px 10px;
+  background: #112621;
+  border-radius: 6px;
+  border-left: 3px solid #c9a46a;
+}
+
+.controls-item-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.controls-label {
+  font-size: 13px;
+  font-weight: bold;
+  color: #fbe3a2;
+}
+
+.controls-badge {
+  display: inline-block;
+  background: #1e453a;
+  border: 1px solid #7c6848;
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #fff3d6;
+  font-family: monospace, Arial, sans-serif;
+}
+
+.controls-desc {
+  font-size: 12px;
+  color: #c4d4be;
+  line-height: 1.4;
+}
+
+.tips-list {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 12.5px;
+  color: #b9ccb3;
+  line-height: 1.5;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid #3c594b;
+  padding-top: 12px;
+}
+
+.graphics-setting {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  color: #fff3d6;
+  font-size: 14px;
+}
+
+.graphics-setting select {
+  min-height: 44px;
+  background: #1b3a32;
+  border: 2px solid #c9a46a;
+  color: #fff3d6;
+  padding: 6px 12px;
+}
+
+.graphics-setting input { width: 24px; height: 24px; accent-color: #c9a46a; }
+.graphics-setting input[type=range] { flex: 1; min-width: 0; width: 100px; height: 44px; }
+.graphics-setting:has(input) { min-height: 44px; cursor: pointer; }
+.graphics-setting :focus-visible { outline: 3px solid #f3c66f; outline-offset: 3px; }
+
+.sr-only:focus-within {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  width: auto;
+  height: auto;
+  clip: auto;
+  overflow: visible;
+  z-index: 3000;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .controls-modal-backdrop { animation: none; }
+}
+
+.modal-btn-primary {
+  appearance: none;
+  background: #87623d;
+  border: 2px solid #c9a46a;
+  border-radius: 8px;
+  color: #fff3d6;
+  padding: 9px 24px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.modal-btn-primary:hover {
+  background: #ab824f;
+  border-color: #f3c66f;
+}
+
+@media (max-width: 600px) {
+  .controls-modal-dialog {
+    padding: 16px;
+    max-height: 94vh;
+  }
+  .modal-title {
+    font-size: 17px;
+  }
+  .controls-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,236 @@
+{
+  "date": "2026-10-12",
+  "ids": 15,
+  "spriteFrames": 120,
+  "portraits": 15,
+  "pngBytes": 24919,
+  "decodedRgbaBytes": 1658880,
+  "limitations": "Decoded RGBA estimate only, not GPU residency. Original offline sources, contributor/legal and premium art approval remain open.",
+  "entries": [
+    {
+      "id": "chien-tuong-son-cuoc",
+      "sprite": {
+        "width": 384,
+        "height": 48,
+        "bytes": 930,
+        "sha256": "9ec225bef1f170b800781738dc29e15fb10e338e08aa6b1c42bfc9e552a424bb"
+      },
+      "portrait": {
+        "width": 96,
+        "height": 96,
+        "bytes": 575,
+        "sha256": "9b421081f195881280f58efb53820d48b99d93ae5078b4da76b6584602123351"
+      }
+    },
+    {
+      "id": "dao-si-truc-lam",
+      "sprite": {
+        "width": 384,
+        "height": 48,
+        "bytes": 869,
+        "sha256": "5512b626ba6c4b0b9b0b1d7e7f1698becb26ef72d0efdc100bc89354d59ae880"
+      },
+      "portrait": {
+        "width": 96,
+        "height": 96,
+        "bytes": 623,
+        "sha256": "9a73569fb3cfad6c94169a3adefdfd31ac2ca5b61163e54255a07d7ceba06ad6"
+      }
+    },
+    {
+      "id": "ky-nhan-khong-lo",
+      "sprite": {
+        "width": 384,
+        "height": 48,
+        "bytes": 1023,
+        "sha256": "04a0ebc5994baa0828ad088d2aed0057cff31d311ec662bae40ed6ef89dac5ab"
+      },
+      "portrait": {
+        "width": 96,
+        "height": 96,
+        "bytes": 642,
+        "sha256": "50885921df97fe2cd4696f0e79b4ae1b67c00e706973bed467974fddb83fa0db"
+      }
+    },
+    {
+      "id": "linh-y-nui-cao",
+      "sprite": {
+        "width": 384,
+        "height": 48,
+        "bytes": 973,
+        "sha256": "f7d3e0ed41ea92e67a35cf67daa841aa61ea317f740d05c13e7e7444248873fe"
+      },
+      "portrait": {
+        "width": 96,
+        "height": 96,
+        "bytes": 781,
+        "sha256": "26397a69e229b8ec20dcb6292cedfbbb12bfb1cf7d1f3226448707d3cd202582"
+      }
+    },
+    {
+      "id": "ngu-ong-ba-vi",
+      "sprite": {
+        "width": 384,
+        "height": 48,
+        "bytes": 992,
+        "sha256": "c972547a1f38dadd41261c28e97799aef43f6cb0a43a056667e8fbdd978660aa"
+      },
+      "portrait": {
+        "width": 96,
+        "height": 96,
+        "bytes": 786,
+        "sha256": "7798968bc985566e6898c83c7467abce0e347f353336a3500621954c34c96bfa"
+      }
+    },
+    {
+      "id": "quan-thi-ve-phong-chau",
+      "sprite": {
+        "width": 384,
+        "height": 48,
+        "bytes": 995,
+        "sha256": "68f9b3856bde8254870a25131b4615bf7ba2b0e22b87dfd164fdf22ff36dec0b"
+      },
+      "portrait": {
+        "width": 96,
+        "height": 96,
+        "bytes": 691,
+        "sha256": "4c7f67451ef43170397687c2965d99a58dba38bfccc2729d8b8e54f3ffaf2195"
+      }
+    },
+    {
+      "id": "te-tu-hoang-cung",
+      "sprite": {
+        "width": 384,
+        "height": 48,
+        "bytes": 985,
+        "sha256": "d69e0809bed88a0ed2369b5062a70fc545d0c60120a6d0d4f17c9004d3041e91"
+      },
+      "portrait": {
+        "width": 96,
+        "height": 96,
+        "bytes": 658,
+        "sha256": "e11737d5649d1a698088d76e37d6a13d9f98021ea1c51dad0452b364cc0ec9c8"
+      }
+    },
+    {
+      "id": "tho-san-tan-vien",
+      "sprite": {
+        "width": 384,
+        "height": 48,
+        "bytes": 975,
+        "sha256": "bfae5ca508861f6f8bcd875c9bc6a399fecb498362dbb9a6e470d0e3429c8a46"
+      },
+      "portrait": {
+        "width": 96,
+        "height": 96,
+        "bytes": 790,
+        "sha256": "2ea2571fe6df4601e6739266ea0e5ca225e4c5736ede683e4f6b913094b37f4e"
+      }
+    },
+    {
+      "id": "thuong-nhan-van-lang",
+      "sprite": {
+        "width": 384,
+        "height": 48,
+        "bytes": 876,
+        "sha256": "e028889aa93a1816f15f446d98d60cedd8edee259cf476f63481b0ca98c609ec"
+      },
+      "portrait": {
+        "width": 96,
+        "height": 96,
+        "bytes": 545,
+        "sha256": "edccb90dd0828362ed9f86a903a738e947c97294282631683925360c43be9bcf"
+      }
+    },
+    {
+      "id": "thuy-toc-lao-nhan",
+      "sprite": {
+        "width": 384,
+        "height": 48,
+        "bytes": 969,
+        "sha256": "2248c95ab12e7483b7ae6cff7657a659dab2563de4d248de8e16beb03caf282d"
+      },
+      "portrait": {
+        "width": 96,
+        "height": 96,
+        "bytes": 764,
+        "sha256": "d52a6a215d4d851e9b64dbced8715e854e4d7093fdf30c922b419068d10c6e9e"
+      }
+    },
+    {
+      "id": "tien-nu-dam-sen",
+      "sprite": {
+        "width": 384,
+        "height": 48,
+        "bytes": 1051,
+        "sha256": "c64fa921d7e9eeb87b6955467d700fa0f9f3eae70acebd53a426b7855eaef912"
+      },
+      "portrait": {
+        "width": 96,
+        "height": 96,
+        "bytes": 795,
+        "sha256": "6198dd9681b6d463549b15fb8ed708ef06118350301bfd1650e681323a19de97"
+      }
+    },
+    {
+      "id": "tu-si-tan-vien",
+      "sprite": {
+        "width": 384,
+        "height": 48,
+        "bytes": 972,
+        "sha256": "8596743f53c8150f0a0974e7518b164015d4aa237b26bf6af9928a8b1504f872"
+      },
+      "portrait": {
+        "width": 96,
+        "height": 96,
+        "bytes": 875,
+        "sha256": "79a653cbf24ad13f30b5f9b9239986fe395b43eb172e7b170b2a422a2d2ae5f8"
+      }
+    },
+    {
+      "id": "village-chief",
+      "sprite": {
+        "width": 384,
+        "height": 48,
+        "bytes": 958,
+        "sha256": "f2ad309ffc2b4fd9dc238b2804cf3ff6a11374d72cabe358df224f933a423d26"
+      },
+      "portrait": {
+        "width": 96,
+        "height": 96,
+        "bytes": 722,
+        "sha256": "5fd2322ba9496df8e831905b98fa207e5c142439d64260f4778363cec7985dc1"
+      }
+    },
+    {
+      "id": "village-healer",
+      "sprite": {
+        "width": 384,
+        "height": 48,
+        "bytes": 914,
+        "sha256": "e49086953e4e6e57ac8b8b73a9226c2bafc5e15bf0fc31d696475e1ecaeba896"
+      },
+      "portrait": {
+        "width": 96,
+        "height": 96,
+        "bytes": 635,
+        "sha256": "ca876ad6500e75f8b81fba8dc9ad2eafb6354bdd742dd892497f85d8211e32be"
+      }
+    },
+    {
+      "id": "village-smith",
+      "sprite": {
+        "width": 384,
+        "height": 48,
+        "bytes": 963,
+        "sha256": "ed24a1e81255282d27716765e19e674b352e3d14fa7449873bda51118fd6d3ed"
+      },
+      "portrait": {
+        "width": 96,
+        "height": 96,
+        "bytes": 592,
+        "sha256": "2622dcf34581927408a05bd7c33400641e688dbcbe59927e9f62e341882839fe"
+      }
+    }
+  ]
+}

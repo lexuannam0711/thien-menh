@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { UI_DEPTH } from '../../data/config';
+import { graphicsSettings } from '../rendering/GraphicsSettings';
 
-type Action = 'attack' | 'dodge' | 'earth' | 'flame' | 'interact';
+type Action = 'attack' | 'dodge' | 'earth' | 'flame' | 'water' | 'fourth' | 'interact';
 
 export class TouchControls {
   readonly direction = new Phaser.Math.Vector2();
@@ -23,20 +24,39 @@ export class TouchControls {
     };
     back.on('pointerdown', begin);
     this.joystickKnob.on('pointerdown', begin);
-    scene.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+    const move = (pointer: Phaser.Input.Pointer): void => {
       if (pointer.id === this.activePointerId) this.updateJoystick(pointer);
-    });
-    scene.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
-      if (pointer.id !== this.activePointerId) return;
+    };
+    scene.input.on('pointermove', move);
+    const reset = (): void => {
       this.activePointerId = null;
       this.direction.set(0, 0);
       this.joystickKnob.setPosition(this.origin.x, this.origin.y);
+    };
+    const release = (pointer: Phaser.Input.Pointer): void => {
+      if (pointer.id === this.activePointerId) reset();
+    };
+    scene.input.on('pointerup', release);
+    scene.input.on('pointerupoutside', release);
+    scene.input.on('pointercancel', release);
+    scene.game.events.on('blur', reset);
+    document.addEventListener('visibilitychange', reset);
+    scene.events.once('shutdown', () => {
+      scene.input.off('pointermove', move);
+      scene.input.off('pointerup', release);
+      scene.input.off('pointerupoutside', release);
+      scene.input.off('pointercancel', release);
+      scene.game.events.off('blur', reset);
+      document.removeEventListener('visibilitychange', reset);
+      reset();
     });
     this.makeButton(847, 430, 49, 'CHÉM', 'attack', 0xc4744c);
     this.makeButton(745, 464, 35, 'NÉ', 'dodge', 0x507c7d);
     this.makeButton(780, 354, 35, 'Q', 'earth', 0x877349);
     this.makeButton(891, 351, 35, 'E', 'flame', 0x9d5a37);
-    this.makeButton(656, 467, 32, 'F', 'interact', 0x777b66);
+    this.makeButton(780, 276, 33, 'R', 'water', 0x397f99);
+    this.makeButton(891, 276, 33, 'T', 'fourth', 0x66558a);
+    this.makeButton(656, 467, 33, 'F', 'interact', 0x777b66);
   }
 
   private makeButton(x: number, y: number, radius: number, title: string,
@@ -50,7 +70,9 @@ export class TouchControls {
     const down = (): void => {
       if (!this.enabled()) return;
       this.perform(action);
-      this.scene.tweens.add({ targets: [shape, text], scale: 0.90, yoyo: true, duration: 85 });
+      if (graphicsSettings.getState().reducedMotion ||
+        (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+      this.scene.tweens.add({ targets: text, scale: 0.90, yoyo: true, duration: 85 });
     };
     shape.on('pointerdown', down);
     text.on('pointerdown', down);

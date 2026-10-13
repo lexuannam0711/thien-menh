@@ -1,0 +1,60 @@
+'use strict';
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+const { pathToFileURL } = require('node:url');
+const { createHash } = require('node:crypto');
+const { execFileSync } = require('node:child_process');
+const script = path.join(__dirname, 'check-unit-coverage.cjs');
+assert.ok(fs.existsSync(script), 'Missing native RPG menu coverage collector');
+const { mapRuntime, removeTemp } = require(script);
+const hash = value => createHash('sha256').update(value).digest('hex');
+const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'thienmenh-unit-coverage-'));
+try {
+  const source = path.join(temporary, 'src', 'fixture.ts');
+  fs.mkdirSync(path.dirname(source));
+  fs.writeFileSync(source, 'work();');
+  const code = 'work();';
+  const map = JSON.stringify({ version: 3, sources: [pathToFileURL(source).href], sourcesContent: [code], names: [], mappings: 'AAAA' });
+  const runtime = path.join(temporary, 'fixture.js');
+  fs.writeFileSync(runtime, code);
+  fs.writeFileSync(runtime + '.map', map);
+  const module = { runtime, source, sourceName: 'src/fixture.ts', codeHash: hash(code), mapHash: hash(map), sourceHash: hash(code) };
+  const raw = { result: [{ url: pathToFileURL(runtime).href, functions: [{ functionName: 'work', ranges: [{ startOffset: 0, endOffset: code.length, count: 1 }], isBlockCoverage: true }] }] };
+  assert.equal(mapRuntime(raw, [module]).lineCoverage.covered, 1);
+  assert.equal(mapRuntime({ result: [{ ...raw.result[0], url: raw.result[0].url.replaceAll('%7E', '~') }] }, [module]).lineCoverage.covered, 1);
+  for (const malformed of [null, {}, { result: {} }, { result: [null] }, { result: [{ url: 'file:///bad', functions: null }] }]) {
+    assert.throws(() => mapRuntime(malformed, [module]), /Invalid raw coverage/);
+  }
+  assert.throws(() => mapRuntime({ result: [{ ...raw.result[0], functions: [{ ranges: [{ startOffset: 0, endOffset: 999, count: 1 }] }] }] }, [module]), /Invalid V8 range/);
+  assert.throws(() => mapRuntime(raw, [{ ...module, codeHash: 'wrong' }]), /Runtime hash mismatch/);
+  assert.throws(() => mapRuntime(raw, [{ ...module, mapHash: 'wrong' }]), /Map hash mismatch/);
+  assert.throws(() => mapRuntime(raw, [{ ...module, sourceHash: 'wrong' }]), /Source hash mismatch/);
+  const wrongSourceMap = JSON.stringify({ ...JSON.parse(map), sourcesContent: ['other();'] });
+  fs.writeFileSync(runtime + '.map', wrongSourceMap);
+  assert.throws(() => mapRuntime(raw, [{ ...module, mapHash: hash(wrongSourceMap) }]), /Source content mismatch/);
+  fs.writeFileSync(runtime + '.map', map);
+  const wrongPathMap = JSON.stringify({ ...JSON.parse(map), sources: [pathToFileURL(source + '.wrong').href] });
+  fs.writeFileSync(runtime + '.map', wrongPathMap);
+  assert.throws(() => mapRuntime(raw, [{ ...module, mapHash: hash(wrongPathMap) }]), /Source path mismatch/);
+  fs.writeFileSync(runtime + '.map', map);
+  assert.deepEqual(mapRuntime({ result: [] }, [module]).missingRuntimeModules, ['src/fixture.ts']);
+  assert.throws(() => mapRuntime({ result: [raw.result[0], raw.result[0]] }, [module]), /Duplicate runtime coverage/);
+  assert.throws(() => removeTemp(os.tmpdir()), /Unsafe temp cleanup/);
+  execFileSync(process.execPath, [script], { stdio: 'inherit', env: { ...process.env } });
+  const evidence = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'artifacts', 'unit-coverage', 'rpg-menu.json'), 'utf8'));
+  assert.equal(evidence.branchCoverage.status, 'UNMEASURED');
+  assert.ok(evidence.lineCoverage.total > 0);
+  assert.ok(evidence.functionCoverage.total > 0);
+  assert.ok(evidence.modules.some(module => module.sourceName === 'src/game/ui/rpgMenuSelfCheck.ts'));
+  assert.ok(!Object.keys(evidence.perFile).some(source => /selfcheck/i.test(source)), 'Test code excluded from runtime aggregate');
+  assert.ok(evidence.exclusions.testSources.includes('src/game/ui/rpgMenuSelfCheck.ts'));
+  assert.ok(evidence.modules.every(module => module.codeHash.length === 64 && module.mapHash.length === 64 && module.sourceHash.length === 64));
+  assert.deepEqual(evidence.missingRuntimeModules, evidence.modules.filter(module => module.coverage === null).map(module => module.sourceName));
+  assert.equal(evidence.scope.fullRepository, false);
+  assert.equal(evidence.scope.acceptance80Percent, 'NOT_ESTABLISHED');
+  console.log('Unit coverage control: PASS');
+} finally {
+  removeTemp(temporary);
+}

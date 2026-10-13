@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-12",
+  "asset": "public/assets/icons/rpg-icons.png",
+  "width": 160,
+  "height": 160,
+  "frameSize": 32,
+  "frames": 21,
+  "encodedBytes": 3476,
+  "decodedRgbaBytes": 102400,
+  "sha256": "aa276b2ae00035f65d5d752fc78dca22b0dcf591bb7418cc653fd338eb664031",
+  "source": "scripts/generate-icons.js",
+  "metadata": "src/game/assets/iconArtwork.ts",
+  "verification": [
+    "node scripts/check-icons.cjs",
+    "npx --no-install tsc --noEmit",
+    "npm run check:graphics"
+  ],
+  "limits": [
+    "Fresh runtime/browser readability pending",
+    "No premium art/legal/device acceptance",
+    "Production dist remains campaign-owned"
+  ]
+}

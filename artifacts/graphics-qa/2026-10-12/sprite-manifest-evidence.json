@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-12",
+  "assets": [
+    {
+      "name": "hero.png",
+      "width": 3264,
+      "height": 192,
+      "frameSize": 48,
+      "frames": 272,
+      "bytes": 45219,
+      "sha256": "2148a35c28d21a3a85b58da4db612a0afbe703e330c2b8b2765aff68697ff16c"
+    },
+    {
+      "name": "hoyer.png",
+      "width": 2304,
+      "height": 384,
+      "frameSize": 96,
+      "frames": 96,
+      "bytes": 31592,
+      "sha256": "e5ffd0015c3e4480db744c621c50600719b37f1c4e4b18ead4b0cfc85079f68a"
+    },
+    {
+      "name": "matroi.png",
+      "width": 768,
+      "height": 128,
+      "frameSize": 32,
+      "frames": 96,
+      "bytes": 10947,
+      "sha256": "051217c089029b69f25649d5b719015c3d354dee7d2eeeafcaa5ff992d7f26c8"
+    },
+    {
+      "name": "moctinh.png",
+      "width": 1152,
+      "height": 192,
+      "frameSize": 48,
+      "frames": 96,
+      "bytes": 21863,
+      "sha256": "4583e735afbd93ae2552fe768ed78a0b3d5f5d6f3cc7d2821c6e74fc32452f8d"
+    },
+    {
+      "name": "spider.png",
+      "width": 1152,
+      "height": 192,
+      "frameSize": 48,
+      "frames": 96,
+      "bytes": 21470,
+      "sha256": "d3f8ab4bc5ff50318841c50c2b0f0e25ee4cc0efcb79de61264ceb212b40d937"
+    },
+    {
+      "name": "wolf.png",
+      "width": 1152,
+      "height": 192,
+      "frameSize": 48,
+      "frames": 96,
+      "bytes": 12479,
+      "sha256": "6a7ee78da6ff56b013c035c3c3f06cf350746b6c354402b4462dd2658305861c"
+    }
+  ]
+}

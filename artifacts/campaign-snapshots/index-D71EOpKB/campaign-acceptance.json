@@ -1,0 +1,1030 @@
+{
+  "generatedAt": "2026-10-12T19:53:45.481Z",
+  "bundlePath": "/assets/index-D71EOpKB.js",
+  "bundleSha256": "501549219ba7dd50b84d0d7c6c9e77da416ca2ad23e628acd8e9402646749bd6",
+  "boosted": false,
+  "inputDriven": true,
+  "saveReload": true,
+  "elapsedSeconds": 611.992,
+  "deaths": 0,
+  "chapters": [
+    {
+      "chapter": 1,
+      "level": 14,
+      "gold": 1358,
+      "playtimeSeconds": 159.67546333335125,
+      "bossId": "ho-yeu"
+    },
+    {
+      "chapter": 2,
+      "level": 22,
+      "gold": 3130,
+      "playtimeSeconds": 321.102373333327,
+      "bossId": "thuong-luong"
+    },
+    {
+      "chapter": 3,
+      "level": 30,
+      "gold": 5239,
+      "playtimeSeconds": 465.73003333322777,
+      "bossId": "thach-tuong"
+    },
+    {
+      "chapter": 4,
+      "level": 38,
+      "gold": 8073,
+      "playtimeSeconds": 596.8247933331285,
+      "bossId": "hac-an"
+    }
+  ],
+  "dungeons": [
+    {
+      "id": "dong-am-hon",
+      "entryLevel": 8,
+      "naturalKey": true,
+      "floors": [
+        0,
+        1
+      ],
+      "rewardClaimed": true
+    },
+    {
+      "id": "thuy-cung-phe-tich",
+      "entryLevel": 18,
+      "naturalKey": true,
+      "floors": [
+        0,
+        1,
+        2
+      ],
+      "rewardClaimed": true
+    },
+    {
+      "id": "dia-cung-co-loa",
+      "entryLevel": 33,
+      "naturalKey": true,
+      "floors": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "rewardClaimed": true
+    }
+  ],
+  "rewardReceipts": [
+    {
+      "questIds": [
+        "main-c1-02-mo-duong-rung-truc",
+        "side-04-ngoc-boi-to-tien",
+        "side-05-san-ma-troi-dong-hoang",
+        "side-09-le-vat-lang-lieu",
+        "side-11-tre-ngan-phu-dong"
+      ],
+      "gold": 355,
+      "xp": 470,
+      "items": {
+        "herbal-balm": 2,
+        "jade-charm": 1,
+        "spirit-stone": 2,
+        "spirit-tea": 3,
+        "bamboo-armor": 1
+      }
+    },
+    {
+      "questIds": [
+        "main-c1-04-khi-tuc-lam-son",
+        "side-03-ren-giao-dong-do"
+      ],
+      "gold": 155,
+      "xp": 210,
+      "items": {
+        "bronze-scrap": 6
+      }
+    },
+    {
+      "questIds": [
+        "main-c1-03-tru-ma-troi",
+        "side-01-thuoc-tri-chuong-khi",
+        "side-02-tra-than-luc-ba-mo",
+        "side-12-ruou-can-lac-hong"
+      ],
+      "gold": 245,
+      "xp": 325,
+      "items": {
+        "spirit-tea": 4,
+        "herbal-balm": 4
+      }
+    },
+    {
+      "questIds": [],
+      "gold": 0,
+      "xp": 0,
+      "items": {}
+    },
+    {
+      "questIds": [],
+      "gold": 0,
+      "xp": 0,
+      "items": {}
+    },
+    {
+      "questIds": [],
+      "gold": 0,
+      "xp": 0,
+      "items": {}
+    },
+    {
+      "questIds": [
+        "hunt-ho-yeu"
+      ],
+      "gold": 100,
+      "xp": 140,
+      "items": {
+        "jade-charm": 1
+      }
+    },
+    {
+      "questIds": [
+        "main-c2-04-thuong-luong-hoa-kiep"
+      ],
+      "gold": 200,
+      "xp": 260,
+      "items": {
+        "bronze-spear": 1
+      }
+    },
+    {
+      "questIds": [],
+      "gold": 0,
+      "xp": 0,
+      "items": {}
+    },
+    {
+      "questIds": [
+        "main-c2-02-chu-dong-tu-di-tich",
+        "side-07-thanh-loc-nguon-nuoc"
+      ],
+      "gold": 195,
+      "xp": 260,
+      "items": {
+        "spirit-tea": 3,
+        "herbal-balm": 2
+      }
+    },
+    {
+      "questIds": [
+        "main-c2-01-song-du-da-trach",
+        "main-c2-03-ngu-tinh-tram-pha",
+        "side-08-tieng-hat-truong-chi",
+        "side-14-cau-ngu-lac-long-quan"
+      ],
+      "gold": 445,
+      "xp": 590,
+      "items": {
+        "spirit-stone": 5,
+        "jade-charm": 2
+      }
+    },
+    {
+      "questIds": [],
+      "gold": 0,
+      "xp": 0,
+      "items": {}
+    },
+    {
+      "questIds": [],
+      "gold": 0,
+      "xp": 0,
+      "items": {}
+    },
+    {
+      "questIds": [],
+      "gold": 0,
+      "xp": 0,
+      "items": {}
+    },
+    {
+      "questIds": [
+        "hunt-ho-yeu"
+      ],
+      "gold": 100,
+      "xp": 140,
+      "items": {
+        "jade-charm": 1
+      }
+    },
+    {
+      "questIds": [],
+      "gold": 0,
+      "xp": 0,
+      "items": {}
+    },
+    {
+      "questIds": [
+        "side-06-khi-luc-da-linh",
+        "side-10-long-chim-lac-canh"
+      ],
+      "gold": 155,
+      "xp": 205,
+      "items": {
+        "spirit-stone": 3,
+        "bronze-scrap": 4
+      }
+    },
+    {
+      "questIds": [
+        "main-c3-03-linh-moc-ngan-nam"
+      ],
+      "gold": 200,
+      "xp": 280,
+      "items": {
+        "bamboo-armor": 1
+      }
+    },
+    {
+      "questIds": [],
+      "gold": 0,
+      "xp": 0,
+      "items": {}
+    },
+    {
+      "questIds": [
+        "main-c3-01-tan-vien-phong-van",
+        "main-c3-02-thach-tran-son-tinh",
+        "main-c3-04-thach-tuong-chan-son",
+        "side-15-hon-da-vong-phu"
+      ],
+      "gold": 685,
+      "xp": 920,
+      "items": {
+        "herbal-balm": 3,
+        "spirit-stone": 4,
+        "jade-charm": 2
+      }
+    },
+    {
+      "questIds": [],
+      "gold": 0,
+      "xp": 0,
+      "items": {}
+    },
+    {
+      "questIds": [],
+      "gold": 0,
+      "xp": 0,
+      "items": {}
+    },
+    {
+      "questIds": [
+        "hunt-ho-yeu"
+      ],
+      "gold": 100,
+      "xp": 140,
+      "items": {
+        "jade-charm": 1
+      }
+    },
+    {
+      "questIds": [
+        "main-c4-02-kim-quy-chi-dan",
+        "main-c4-04-thien-menh-chi-quang"
+      ],
+      "gold": 620,
+      "xp": 870,
+      "items": {
+        "spirit-stone": 5,
+        "jade-charm": 2
+      }
+    },
+    {
+      "questIds": [
+        "main-c4-03-pha-tran-hac-an",
+        "side-13-tieng-trong-dong-thieng"
+      ],
+      "gold": 390,
+      "xp": 535,
+      "items": {
+        "spirit-tea": 4,
+        "bronze-spear": 1
+      }
+    },
+    {
+      "questIds": [],
+      "gold": 0,
+      "xp": 0,
+      "items": {}
+    },
+    {
+      "questIds": [],
+      "gold": 0,
+      "xp": 0,
+      "items": {}
+    },
+    {
+      "questIds": [
+        "main-c4-01-dien-kien-hung-vuong",
+        "side-16-mong-rua-vang-an-duong"
+      ],
+      "gold": 360,
+      "xp": 490,
+      "items": {
+        "bronze-scrap": 9
+      }
+    },
+    {
+      "questIds": [],
+      "gold": 0,
+      "xp": 0,
+      "items": {}
+    },
+    {
+      "questIds": [],
+      "gold": 0,
+      "xp": 0,
+      "items": {}
+    },
+    {
+      "questIds": [
+        "hunt-ho-yeu"
+      ],
+      "gold": 100,
+      "xp": 140,
+      "items": {
+        "jade-charm": 1
+      }
+    }
+  ],
+  "finalSave": {
+    "version": 1,
+    "hp": 470,
+    "mp": 285,
+    "maxHp": 470,
+    "maxMp": 285,
+    "attack": 86,
+    "level": 38,
+    "xp": 51,
+    "gold": 8073,
+    "chapter": 4,
+    "kills": 6,
+    "quest": "complete",
+    "bossDead": true,
+    "storyFlags": {
+      "dungeon-key:dong-am-hon": true,
+      "boss:ho-yeu": true,
+      "dungeon-floor:dong-am-hon:0": true,
+      "dungeon-floor:dong-am-hon:1": true,
+      "dungeon-reward:dong-am-hon": true,
+      "chapter:1:beacon-lit": true,
+      "chapter:1:spring-cleansed": true,
+      "chapter:1:relic-recovered": true,
+      "chapter:1:herbs-gathered": true,
+      "chapter:1:tea-leaves-picked": true,
+      "chapter:1:ore-delivered": true,
+      "chapter:1:jade-recovered": true,
+      "chapter:1:offering-prepared": true,
+      "chapter:1:bamboo-collected": true,
+      "chapter:1:yeast-gathered": true,
+      "boss:thuong-luong": true,
+      "dungeon-key:thuy-cung-phe-tich": true,
+      "dungeon-floor:thuy-cung-phe-tich:0": true,
+      "dungeon-floor:thuy-cung-phe-tich:1": true,
+      "dungeon-floor:thuy-cung-phe-tich:2": true,
+      "dungeon-reward:thuy-cung-phe-tich": true,
+      "chapter:2:palisade-raised": true,
+      "chapter:2:staff-relic-found": true,
+      "chapter:2:channel-unblocked": true,
+      "chapter:2:waters-purified": true,
+      "chapter:2:lotus-planted": true,
+      "chapter:2:boat-protected": true,
+      "chapter:2:ritual-safe": true,
+      "boss:thach-tuong": true,
+      "chapter:3:shrine-reached": true,
+      "chapter:3:pillars-activated": true,
+      "chapter:3:dew-sprinkled": true,
+      "chapter:3:seal-cleansed": true,
+      "chapter:3:vein-tapped": true,
+      "chapter:3:rubbing-taken": true,
+      "chapter:3:incense-offered": true,
+      "dungeon-key:dia-cung-co-loa": true,
+      "boss:hac-an": true,
+      "dungeon-floor:dia-cung-co-loa:0": true,
+      "dungeon-floor:dia-cung-co-loa:1": true,
+      "dungeon-floor:dia-cung-co-loa:2": true,
+      "dungeon-floor:dia-cung-co-loa:3": true,
+      "dungeon-reward:dia-cung-co-loa": true,
+      "chapter:4:audience-completed": true,
+      "chapter:4:kim-quy-blessed": true,
+      "chapter:4:pillars-shattered": true,
+      "chapter:4:peace-restored": true,
+      "chapter:4:drum-sounded": true,
+      "chapter:4:trigger-retrieved": true
+    },
+    "checkpoint": "village-gate",
+    "playtimeSeconds": 596.8247933331285,
+    "upgrades": 0,
+    "rpg": {
+      "inventory": {
+        "capacity": 24,
+        "slots": [
+          {
+            "itemId": "spirit-stone",
+            "quantity": 22
+          },
+          {
+            "itemId": "herbal-balm",
+            "quantity": 12
+          },
+          {
+            "itemId": "jade-charm",
+            "quantity": 1
+          },
+          {
+            "itemId": "jade-charm",
+            "quantity": 1
+          },
+          {
+            "itemId": "spirit-tea",
+            "quantity": 15
+          },
+          {
+            "itemId": "bamboo-armor",
+            "quantity": 1
+          },
+          {
+            "itemId": "bronze-scrap",
+            "quantity": 20
+          },
+          {
+            "itemId": "jade-charm",
+            "quantity": 1
+          },
+          {
+            "itemId": "bronze-spear",
+            "quantity": 1
+          },
+          {
+            "itemId": "bronze-spear",
+            "quantity": 1
+          },
+          {
+            "itemId": "jade-charm",
+            "quantity": 1
+          },
+          {
+            "itemId": "jade-charm",
+            "quantity": 1
+          },
+          {
+            "itemId": "jade-charm",
+            "quantity": 1
+          },
+          {
+            "itemId": "bamboo-armor",
+            "quantity": 1
+          },
+          {
+            "itemId": "jade-charm",
+            "quantity": 1
+          },
+          {
+            "itemId": "jade-charm",
+            "quantity": 1
+          },
+          {
+            "itemId": "jade-charm",
+            "quantity": 1
+          },
+          {
+            "itemId": "bamboo-armor",
+            "quantity": 1
+          },
+          {
+            "itemId": "jade-charm",
+            "quantity": 1
+          },
+          {
+            "itemId": "jade-charm",
+            "quantity": 1
+          },
+          {
+            "itemId": "bronze-spear",
+            "quantity": 1
+          },
+          {
+            "itemId": "jade-charm",
+            "quantity": 1
+          }
+        ]
+      },
+      "equipment": {
+        "slots": {}
+      },
+      "quests": {
+        "hunt-ho-yeu": {
+          "questId": "hunt-ho-yeu",
+          "stage": "complete",
+          "counts": {
+            "forest-kills": 6,
+            "ho-yeu": 1
+          },
+          "flags": {},
+          "rewardClaimed": true
+        },
+        "main-c1-02-mo-duong-rung-truc": {
+          "questId": "main-c1-02-mo-duong-rung-truc",
+          "stage": "complete",
+          "counts": {
+            "c1-kill-moc-tinh": 4
+          },
+          "flags": {
+            "beacon-lit": true,
+            "c1-flag-light-beacon": true
+          },
+          "rewardClaimed": true
+        },
+        "side-04-ngoc-boi-to-tien": {
+          "questId": "side-04-ngoc-boi-to-tien",
+          "stage": "complete",
+          "counts": {
+            "side-kill-cave-beasts": 4
+          },
+          "flags": {
+            "beacon-lit": true,
+            "spring-cleansed": true,
+            "relic-recovered": true,
+            "herbs-gathered": true,
+            "tea-leaves-picked": true,
+            "ore-delivered": true,
+            "jade-recovered": true,
+            "side-flag-jade-recovered": true
+          },
+          "rewardClaimed": true
+        },
+        "side-05-san-ma-troi-dong-hoang": {
+          "questId": "side-05-san-ma-troi-dong-hoang",
+          "stage": "complete",
+          "counts": {
+            "side-kill-night-spirits": 7
+          },
+          "flags": {},
+          "rewardClaimed": true
+        },
+        "side-09-le-vat-lang-lieu": {
+          "questId": "side-09-le-vat-lang-lieu",
+          "stage": "complete",
+          "counts": {
+            "side-kill-field-pests": 5
+          },
+          "flags": {
+            "beacon-lit": true,
+            "spring-cleansed": true,
+            "relic-recovered": true,
+            "herbs-gathered": true,
+            "tea-leaves-picked": true,
+            "ore-delivered": true,
+            "jade-recovered": true,
+            "offering-prepared": true,
+            "side-flag-offering-prepared": true
+          },
+          "rewardClaimed": true
+        },
+        "side-11-tre-ngan-phu-dong": {
+          "questId": "side-11-tre-ngan-phu-dong",
+          "stage": "complete",
+          "counts": {
+            "side-kill-bamboo-sprites": 6
+          },
+          "flags": {
+            "beacon-lit": true,
+            "spring-cleansed": true,
+            "relic-recovered": true,
+            "herbs-gathered": true,
+            "tea-leaves-picked": true,
+            "ore-delivered": true,
+            "jade-recovered": true,
+            "offering-prepared": true,
+            "bamboo-collected": true,
+            "side-flag-bamboo-collected": true
+          },
+          "rewardClaimed": true
+        },
+        "main-c1-04-khi-tuc-lam-son": {
+          "questId": "main-c1-04-khi-tuc-lam-son",
+          "stage": "complete",
+          "counts": {
+            "c1-kill-forest-prowlers": 8
+          },
+          "flags": {
+            "beacon-lit": true,
+            "spring-cleansed": true,
+            "relic-recovered": true,
+            "c1-flag-deliver-relic": true
+          },
+          "rewardClaimed": true
+        },
+        "side-03-ren-giao-dong-do": {
+          "questId": "side-03-ren-giao-dong-do",
+          "stage": "complete",
+          "counts": {
+            "side-kill-copper-thieves": 6
+          },
+          "flags": {
+            "beacon-lit": true,
+            "spring-cleansed": true,
+            "relic-recovered": true,
+            "herbs-gathered": true,
+            "tea-leaves-picked": true,
+            "ore-delivered": true,
+            "side-flag-ore-delivered": true
+          },
+          "rewardClaimed": true
+        },
+        "main-c1-03-tru-ma-troi": {
+          "questId": "main-c1-03-tru-ma-troi",
+          "stage": "complete",
+          "counts": {
+            "c1-kill-ma-troi": 5
+          },
+          "flags": {
+            "beacon-lit": true,
+            "spring-cleansed": true,
+            "c1-flag-cleanse-spring": true
+          },
+          "rewardClaimed": true
+        },
+        "side-01-thuoc-tri-chuong-khi": {
+          "questId": "side-01-thuoc-tri-chuong-khi",
+          "stage": "complete",
+          "counts": {
+            "side-kill-spiders": 5
+          },
+          "flags": {
+            "beacon-lit": true,
+            "spring-cleansed": true,
+            "relic-recovered": true,
+            "herbs-gathered": true,
+            "side-flag-herbs-gathered": true
+          },
+          "rewardClaimed": true
+        },
+        "side-02-tra-than-luc-ba-mo": {
+          "questId": "side-02-tra-than-luc-ba-mo",
+          "stage": "complete",
+          "counts": {
+            "side-kill-wild-crows": 4
+          },
+          "flags": {
+            "beacon-lit": true,
+            "spring-cleansed": true,
+            "relic-recovered": true,
+            "herbs-gathered": true,
+            "tea-leaves-picked": true,
+            "side-flag-tea-leaves": true
+          },
+          "rewardClaimed": true
+        },
+        "side-12-ruou-can-lac-hong": {
+          "questId": "side-12-ruou-can-lac-hong",
+          "stage": "complete",
+          "counts": {
+            "side-kill-forest-badgers": 5
+          },
+          "flags": {
+            "beacon-lit": true,
+            "spring-cleansed": true,
+            "relic-recovered": true,
+            "herbs-gathered": true,
+            "tea-leaves-picked": true,
+            "ore-delivered": true,
+            "jade-recovered": true,
+            "offering-prepared": true,
+            "bamboo-collected": true,
+            "yeast-gathered": true,
+            "side-flag-yeast-gathered": true
+          },
+          "rewardClaimed": true
+        },
+        "main-c2-04-thuong-luong-hoa-kiep": {
+          "questId": "main-c2-04-thuong-luong-hoa-kiep",
+          "stage": "complete",
+          "counts": {
+            "c2-kill-thuong-luong": 1
+          },
+          "flags": {
+            "palisade-raised": true,
+            "staff-relic-found": true,
+            "channel-unblocked": true,
+            "waters-purified": true,
+            "c2-flag-waters-purified": true
+          },
+          "rewardClaimed": true
+        },
+        "main-c2-02-chu-dong-tu-di-tich": {
+          "questId": "main-c2-02-chu-dong-tu-di-tich",
+          "stage": "complete",
+          "counts": {
+            "c2-kill-marsh-lurkers": 6
+          },
+          "flags": {
+            "palisade-raised": true,
+            "staff-relic-found": true,
+            "c2-flag-relic-staff": true
+          },
+          "rewardClaimed": true
+        },
+        "side-07-thanh-loc-nguon-nuoc": {
+          "questId": "side-07-thanh-loc-nguon-nuoc",
+          "stage": "complete",
+          "counts": {
+            "side-kill-poison-toads": 6
+          },
+          "flags": {
+            "palisade-raised": true,
+            "staff-relic-found": true,
+            "channel-unblocked": true,
+            "waters-purified": true,
+            "lotus-planted": true,
+            "side-flag-lotus-planted": true
+          },
+          "rewardClaimed": true
+        },
+        "main-c2-01-song-du-da-trach": {
+          "questId": "main-c2-01-song-du-da-trach",
+          "stage": "complete",
+          "counts": {
+            "c2-kill-water-fiends": 8
+          },
+          "flags": {
+            "palisade-raised": true,
+            "c2-flag-raise-palisade": true
+          },
+          "rewardClaimed": true
+        },
+        "main-c2-03-ngu-tinh-tram-pha": {
+          "questId": "main-c2-03-ngu-tinh-tram-pha",
+          "stage": "complete",
+          "counts": {
+            "c2-kill-ngu-tinh-spawn": 5
+          },
+          "flags": {
+            "palisade-raised": true,
+            "staff-relic-found": true,
+            "channel-unblocked": true,
+            "c2-flag-channel-unblocked": true
+          },
+          "rewardClaimed": true
+        },
+        "side-08-tieng-hat-truong-chi": {
+          "questId": "side-08-tieng-hat-truong-chi",
+          "stage": "complete",
+          "counts": {
+            "side-kill-river-monsters": 6
+          },
+          "flags": {
+            "palisade-raised": true,
+            "staff-relic-found": true,
+            "channel-unblocked": true,
+            "waters-purified": true,
+            "lotus-planted": true,
+            "boat-protected": true,
+            "side-flag-boat-protected": true
+          },
+          "rewardClaimed": true
+        },
+        "side-14-cau-ngu-lac-long-quan": {
+          "questId": "side-14-cau-ngu-lac-long-quan",
+          "stage": "complete",
+          "counts": {
+            "side-kill-sea-fiends": 8
+          },
+          "flags": {
+            "palisade-raised": true,
+            "staff-relic-found": true,
+            "channel-unblocked": true,
+            "waters-purified": true,
+            "lotus-planted": true,
+            "boat-protected": true,
+            "ritual-safe": true,
+            "side-flag-ritual-safe": true
+          },
+          "rewardClaimed": true
+        },
+        "side-06-khi-luc-da-linh": {
+          "questId": "side-06-khi-luc-da-linh",
+          "stage": "complete",
+          "counts": {
+            "side-kill-golem-scouts": 5
+          },
+          "flags": {
+            "shrine-reached": true,
+            "pillars-activated": true,
+            "dew-sprinkled": true,
+            "seal-cleansed": true,
+            "vein-tapped": true,
+            "side-flag-spirit-vein": true
+          },
+          "rewardClaimed": true
+        },
+        "side-10-long-chim-lac-canh": {
+          "questId": "side-10-long-chim-lac-canh",
+          "stage": "complete",
+          "counts": {
+            "side-kill-ruin-guardians": 4
+          },
+          "flags": {
+            "shrine-reached": true,
+            "pillars-activated": true,
+            "dew-sprinkled": true,
+            "seal-cleansed": true,
+            "vein-tapped": true,
+            "rubbing-taken": true,
+            "side-flag-rubbing-taken": true
+          },
+          "rewardClaimed": true
+        },
+        "main-c3-03-linh-moc-ngan-nam": {
+          "questId": "main-c3-03-linh-moc-ngan-nam",
+          "stage": "complete",
+          "counts": {
+            "c3-kill-corrupt-roots": 7
+          },
+          "flags": {
+            "shrine-reached": true,
+            "pillars-activated": true,
+            "dew-sprinkled": true,
+            "c3-flag-dew-sprinkled": true
+          },
+          "rewardClaimed": true
+        },
+        "main-c3-01-tan-vien-phong-van": {
+          "questId": "main-c3-01-tan-vien-phong-van",
+          "stage": "complete",
+          "counts": {
+            "c3-kill-mountain-beasts": 9
+          },
+          "flags": {
+            "shrine-reached": true,
+            "c3-flag-reach-shrine": true
+          },
+          "rewardClaimed": true
+        },
+        "main-c3-02-thach-tran-son-tinh": {
+          "questId": "main-c3-02-thach-tran-son-tinh",
+          "stage": "complete",
+          "counts": {
+            "c3-kill-stone-guardians": 6
+          },
+          "flags": {
+            "shrine-reached": true,
+            "pillars-activated": true,
+            "c3-flag-pillars-activated": true
+          },
+          "rewardClaimed": true
+        },
+        "main-c3-04-thach-tuong-chan-son": {
+          "questId": "main-c3-04-thach-tuong-chan-son",
+          "stage": "complete",
+          "counts": {
+            "c3-kill-thach-tuong": 1
+          },
+          "flags": {
+            "shrine-reached": true,
+            "pillars-activated": true,
+            "dew-sprinkled": true,
+            "seal-cleansed": true,
+            "c3-flag-seal-cleansed": true
+          },
+          "rewardClaimed": true
+        },
+        "side-15-hon-da-vong-phu": {
+          "questId": "side-15-hon-da-vong-phu",
+          "stage": "complete",
+          "counts": {
+            "side-kill-mourning-wraiths": 5
+          },
+          "flags": {
+            "shrine-reached": true,
+            "pillars-activated": true,
+            "dew-sprinkled": true,
+            "seal-cleansed": true,
+            "vein-tapped": true,
+            "rubbing-taken": true,
+            "incense-offered": true,
+            "side-flag-incense-offered": true
+          },
+          "rewardClaimed": true
+        },
+        "main-c4-02-kim-quy-chi-dan": {
+          "questId": "main-c4-02-kim-quy-chi-dan",
+          "stage": "complete",
+          "counts": {
+            "c4-kill-void-shades": 8
+          },
+          "flags": {
+            "audience-completed": true,
+            "kim-quy-blessed": true,
+            "c4-flag-kim-quy-blessing": true
+          },
+          "rewardClaimed": true
+        },
+        "main-c4-04-thien-menh-chi-quang": {
+          "questId": "main-c4-04-thien-menh-chi-quang",
+          "stage": "complete",
+          "counts": {
+            "c4-kill-hac-an": 1
+          },
+          "flags": {
+            "audience-completed": true,
+            "kim-quy-blessed": true,
+            "pillars-shattered": true,
+            "peace-restored": true,
+            "c4-flag-peace-restored": true
+          },
+          "rewardClaimed": true
+        },
+        "main-c4-03-pha-tran-hac-an": {
+          "questId": "main-c4-03-pha-tran-hac-an",
+          "stage": "complete",
+          "counts": {
+            "c4-kill-dark-cultists": 10
+          },
+          "flags": {
+            "audience-completed": true,
+            "kim-quy-blessed": true,
+            "pillars-shattered": true,
+            "c4-flag-pillars-shattered": true
+          },
+          "rewardClaimed": true
+        },
+        "side-13-tieng-trong-dong-thieng": {
+          "questId": "side-13-tieng-trong-dong-thieng",
+          "stage": "complete",
+          "counts": {
+            "side-kill-drum-ambushers": 7
+          },
+          "flags": {
+            "audience-completed": true,
+            "kim-quy-blessed": true,
+            "pillars-shattered": true,
+            "peace-restored": true,
+            "drum-sounded": true,
+            "side-flag-drum-sounded": true
+          },
+          "rewardClaimed": true
+        },
+        "main-c4-01-dien-kien-hung-vuong": {
+          "questId": "main-c4-01-dien-kien-hung-vuong",
+          "stage": "complete",
+          "counts": {
+            "c4-kill-infiltrators": 6
+          },
+          "flags": {
+            "audience-completed": true,
+            "c4-flag-audience-completed": true
+          },
+          "rewardClaimed": true
+        },
+        "side-16-mong-rua-vang-an-duong": {
+          "questId": "side-16-mong-rua-vang-an-duong",
+          "stage": "complete",
+          "counts": {
+            "side-kill-citadel-looters": 6
+          },
+          "flags": {
+            "audience-completed": true,
+            "kim-quy-blessed": true,
+            "pillars-shattered": true,
+            "peace-restored": true,
+            "drum-sounded": true,
+            "trigger-retrieved": true,
+            "side-flag-trigger-retrieved": true
+          },
+          "rewardClaimed": true
+        }
+      },
+      "skills": {
+        "unlockedSkillIds": [
+          "earth-shockwave",
+          "flame-beam",
+          "tidal-surge"
+        ],
+        "equippedSlots": {
+          "slot-1": "earth-shockwave",
+          "slot-2": "flame-beam",
+          "slot-3": "tidal-surge"
+        },
+        "cooldownUntil": {
+          "earth-shockwave": 1791834791151,
+          "flame-beam": 1791834789268,
+          "tidal-surge": 1791834788168
+        },
+        "activeDivinePower": "earth",
+        "unlockedDivinePowers": [
+          "earth"
+        ]
+      }
+    }
+  },
+  "limitation": "Read-only debugger observes actor positions; automated tester is not representative of player skill or3–5h pacing. Real devices and30min stability separate."
+}

@@ -1,0 +1,966 @@
+{
+  "url": "http://127.0.0.1:4187/",
+  "before": {
+    "htmlSha256": "ab992fed58e790187f501985211932e7eb15794791f169e8c227243332bd1f49",
+    "bundleSha256": "194d5a8fbe2323cb902d6236f6b89a3c41156988bcbfee9b5492523727d996d6",
+    "bundleUrl": "http://127.0.0.1:4187/assets/index-CdV_jToi.js"
+  },
+  "after": {
+    "htmlSha256": "ab992fed58e790187f501985211932e7eb15794791f169e8c227243332bd1f49",
+    "bundleSha256": "194d5a8fbe2323cb902d6236f6b89a3c41156988bcbfee9b5492523727d996d6",
+    "bundleUrl": "http://127.0.0.1:4187/assets/index-CdV_jToi.js"
+  },
+  "errors": [],
+  "baselineWarnings": [
+    {
+      "url": "http://127.0.0.1:4187/favicon.ico",
+      "status": 404,
+      "statusText": "Not Found",
+      "headers": {
+        "Transfer-Encoding": "chunked",
+        "Keep-Alive": "timeout=5",
+        "Date": "Tue, 13 Oct 2026 02:44:36 GMT",
+        "Vary": "Origin",
+        "Connection": "keep-alive"
+      },
+      "mimeType": "text/plain",
+      "charset": "",
+      "connectionReused": false,
+      "connectionId": 284,
+      "remoteIPAddress": "127.0.0.1",
+      "remotePort": 4187,
+      "fromDiskCache": false,
+      "fromServiceWorker": false,
+      "fromPrefetchCache": false,
+      "encodedDataLength": 152,
+      "timing": {
+        "requestTime": 39941.770306,
+        "proxyStart": -1,
+        "proxyEnd": -1,
+        "dnsStart": 0.641,
+        "dnsEnd": 0.653,
+        "connectStart": 0.653,
+        "connectEnd": 1.179,
+        "sslStart": -1,
+        "sslEnd": -1,
+        "workerStart": -1,
+        "workerReady": -1,
+        "workerFetchStart": -1,
+        "workerRespondWithSettled": -1,
+        "sendStart": 1.258,
+        "sendEnd": 1.335,
+        "pushStart": 0,
+        "pushEnd": 0,
+        "receiveHeadersStart": 1.876,
+        "receiveHeadersEnd": 2.025
+      },
+      "responseTime": 1791859476915.259,
+      "protocol": "http/1.1",
+      "alternateProtocolUsage": "unspecifiedReason",
+      "securityState": "secure"
+    },
+    {
+      "source": "network",
+      "level": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "timestamp": 1791859476921.492,
+      "url": "http://127.0.0.1:4187/favicon.ico",
+      "networkRequestId": "429080.11"
+    },
+    {
+      "url": "http://127.0.0.1:4187/favicon.ico",
+      "status": 404,
+      "statusText": "Not Found",
+      "headers": {
+        "Transfer-Encoding": "chunked",
+        "Keep-Alive": "timeout=5",
+        "Date": "Tue, 13 Oct 2026 02:44:40 GMT",
+        "Vary": "Origin",
+        "Connection": "keep-alive"
+      },
+      "mimeType": "text/plain",
+      "charset": "",
+      "connectionReused": true,
+      "connectionId": 371,
+      "remoteIPAddress": "127.0.0.1",
+      "remotePort": 4187,
+      "fromDiskCache": false,
+      "fromServiceWorker": false,
+      "fromPrefetchCache": false,
+      "encodedDataLength": 152,
+      "timing": {
+        "requestTime": 39945.366598,
+        "proxyStart": -1,
+        "proxyEnd": -1,
+        "dnsStart": -1,
+        "dnsEnd": -1,
+        "connectStart": -1,
+        "connectEnd": -1,
+        "sslStart": -1,
+        "sslEnd": -1,
+        "workerStart": -1,
+        "workerReady": -1,
+        "workerFetchStart": -1,
+        "workerRespondWithSettled": -1,
+        "sendStart": 4.902,
+        "sendEnd": 5.044,
+        "pushStart": 0,
+        "pushEnd": 0,
+        "receiveHeadersStart": 5.762,
+        "receiveHeadersEnd": 10.583
+      },
+      "responseTime": 1791859480515.437,
+      "protocol": "http/1.1",
+      "alternateProtocolUsage": "unspecifiedReason",
+      "securityState": "secure"
+    },
+    {
+      "source": "network",
+      "level": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "timestamp": 1791859480523.264,
+      "url": "http://127.0.0.1:4187/favicon.ico",
+      "networkRequestId": "429080.170"
+    }
+  ],
+  "assetFailures": [],
+  "failures": [
+    {
+      "phase": "equipment",
+      "message": "captured is not defined",
+      "stack": "ReferenceError: captured is not defined\n    at action (F:\\CODE\\thienmenh\\thienmenh\\scripts\\check-equipment-browser.cjs:213:3)\n    at async measure (F:\\CODE\\thienmenh\\thienmenh\\scripts\\check-equipment-browser.cjs:225:56)\n    at async run (F:\\CODE\\thienmenh\\thienmenh\\scripts\\check-equipment-browser.cjs:285:7)"
+    }
+  ],
+  "assetResponses": [
+    {
+      "url": "http://127.0.0.1:4187/assets/equipment/bamboo-armor_hero.png",
+      "status": 200,
+      "mimeType": "image/png",
+      "fromDiskCache": false,
+      "requestId": "429080.48"
+    },
+    {
+      "url": "http://127.0.0.1:4187/assets/equipment/bamboo-armor_hero_axe.png",
+      "status": 200,
+      "mimeType": "image/png",
+      "fromDiskCache": false,
+      "requestId": "429080.49"
+    },
+    {
+      "url": "http://127.0.0.1:4187/assets/equipment/bamboo-armor_hero_sword.png",
+      "status": 200,
+      "mimeType": "image/png",
+      "fromDiskCache": false,
+      "requestId": "429080.50"
+    },
+    {
+      "url": "http://127.0.0.1:4187/assets/equipment/jade-charm_hero.png",
+      "status": 200,
+      "mimeType": "image/png",
+      "fromDiskCache": false,
+      "requestId": "429080.51"
+    },
+    {
+      "url": "http://127.0.0.1:4187/assets/equipment/jade-charm_hero_axe.png",
+      "status": 200,
+      "mimeType": "image/png",
+      "fromDiskCache": false,
+      "requestId": "429080.52"
+    },
+    {
+      "url": "http://127.0.0.1:4187/assets/equipment/jade-charm_hero_sword.png",
+      "status": 200,
+      "mimeType": "image/png",
+      "fromDiskCache": false,
+      "requestId": "429080.53"
+    }
+  ],
+  "fixtures": [
+    {
+      "hero": "hero",
+      "equipped": true,
+      "requested": {
+        "version": 1,
+        "hp": 100,
+        "mp": 100,
+        "maxHp": 100,
+        "maxMp": 100,
+        "attack": 12,
+        "level": 3,
+        "xp": 0,
+        "gold": 0,
+        "chapter": 1,
+        "kills": 0,
+        "quest": "active",
+        "bossDead": true,
+        "storyFlags": {},
+        "checkpoint": "village-gate",
+        "playtimeSeconds": 0,
+        "upgrades": 0,
+        "rpg": {
+          "inventory": {
+            "capacity": 24,
+            "slots": [
+              {
+                "itemId": "bronze-spear",
+                "quantity": 1
+              },
+              {
+                "itemId": "battle-axe",
+                "quantity": 1
+              },
+              {
+                "itemId": "lac-sword",
+                "quantity": 1
+              },
+              {
+                "itemId": "bamboo-armor",
+                "quantity": 1
+              },
+              {
+                "itemId": "jade-charm",
+                "quantity": 1
+              }
+            ]
+          },
+          "equipment": {
+            "slots": {
+              "weapon": "bronze-spear",
+              "armor": "bamboo-armor",
+              "accessory": "jade-charm"
+            }
+          },
+          "quests": {
+            "hunt-ho-yeu": {
+              "questId": "hunt-ho-yeu",
+              "stage": "active",
+              "counts": {},
+              "flags": {},
+              "rewardClaimed": false
+            },
+            "main-c1-02-mo-duong-rung-truc": {
+              "questId": "main-c1-02-mo-duong-rung-truc",
+              "stage": "active",
+              "counts": {},
+              "flags": {},
+              "rewardClaimed": false
+            },
+            "main-c1-03-tru-ma-troi": {
+              "questId": "main-c1-03-tru-ma-troi",
+              "stage": "active",
+              "counts": {},
+              "flags": {},
+              "rewardClaimed": false
+            }
+          }
+        }
+      },
+      "normalized": {
+        "version": 1,
+        "hp": 100,
+        "mp": 100,
+        "maxHp": 100,
+        "maxMp": 100,
+        "attack": 12,
+        "level": 3,
+        "chapter": 1,
+        "xp": 0,
+        "gold": 0,
+        "kills": 0,
+        "quest": "active",
+        "bossDead": true,
+        "storyFlags": {},
+        "checkpoint": "village-gate",
+        "playtimeSeconds": 0,
+        "upgrades": 0,
+        "rpg": {
+          "inventory": {
+            "capacity": 24,
+            "slots": [
+              {
+                "itemId": "bronze-spear",
+                "quantity": 1
+              },
+              {
+                "itemId": "battle-axe",
+                "quantity": 1
+              },
+              {
+                "itemId": "lac-sword",
+                "quantity": 1
+              },
+              {
+                "itemId": "bamboo-armor",
+                "quantity": 1
+              },
+              {
+                "itemId": "jade-charm",
+                "quantity": 1
+              }
+            ]
+          },
+          "equipment": {
+            "slots": {
+              "weapon": "bronze-spear",
+              "armor": "bamboo-armor",
+              "accessory": "jade-charm"
+            }
+          },
+          "quests": {
+            "hunt-ho-yeu": {
+              "questId": "hunt-ho-yeu",
+              "stage": "active",
+              "counts": {},
+              "flags": {},
+              "rewardClaimed": false
+            },
+            "main-c1-02-mo-duong-rung-truc": {
+              "questId": "main-c1-02-mo-duong-rung-truc",
+              "stage": "active",
+              "counts": {},
+              "flags": {},
+              "rewardClaimed": false
+            },
+            "main-c1-03-tru-ma-troi": {
+              "questId": "main-c1-03-tru-ma-troi",
+              "stage": "active",
+              "counts": {},
+              "flags": {},
+              "rewardClaimed": false
+            }
+          },
+          "skills": {
+            "unlockedSkillIds": [
+              "earth-shockwave",
+              "flame-beam",
+              "tidal-surge"
+            ],
+            "equippedSlots": {
+              "slot-1": "earth-shockwave",
+              "slot-2": "flame-beam",
+              "slot-3": "tidal-surge"
+            },
+            "cooldownUntil": {},
+            "activeDivinePower": "earth",
+            "unlockedDivinePowers": [
+              "earth"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "observed": [
+    {
+      "fixture": "hero",
+      "equipped": true,
+      "action": "idle",
+      "scene": "Village",
+      "time": 3963,
+      "visible": true,
+      "world": {
+        "x": 406,
+        "y": 347
+      },
+      "hero": {
+        "key": "hero_sprite",
+        "frame": 137,
+        "x": 0,
+        "y": -6,
+        "originX": 0.5,
+        "originY": 0.5,
+        "flipX": false,
+        "flipY": false,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rotation": 0,
+        "alpha": 1,
+        "visible": true,
+        "depth": 0,
+        "order": 1,
+        "animation": "hero_idle_right"
+      },
+      "overlays": [
+        {
+          "key": "equipment_bamboo-armor_hero",
+          "frame": 137,
+          "x": 0,
+          "y": -6,
+          "originX": 0.5,
+          "originY": 0.5,
+          "flipX": false,
+          "flipY": false,
+          "scaleX": 1,
+          "scaleY": 1,
+          "rotation": 0,
+          "alpha": 1,
+          "visible": true,
+          "depth": 0.01,
+          "order": 3,
+          "animation": null
+        },
+        {
+          "key": "equipment_jade-charm_hero",
+          "frame": 137,
+          "x": 0,
+          "y": -6,
+          "originX": 0.5,
+          "originY": 0.5,
+          "flipX": false,
+          "flipY": false,
+          "scaleX": 1,
+          "scaleY": 1,
+          "rotation": 0,
+          "alpha": 1,
+          "visible": true,
+          "depth": 0.02,
+          "order": 4,
+          "animation": null
+        }
+      ],
+      "lastAttack": -3000,
+      "dodgeReadyAt": 0,
+      "dodging": false,
+      "dead": false
+    },
+    {
+      "fixture": "hero",
+      "equipped": true,
+      "action": "KeyW-before",
+      "scene": "Village",
+      "time": 4113,
+      "visible": true,
+      "world": {
+        "x": 406,
+        "y": 347
+      },
+      "hero": {
+        "key": "hero_sprite",
+        "frame": 137,
+        "x": 0,
+        "y": -6,
+        "originX": 0.5,
+        "originY": 0.5,
+        "flipX": false,
+        "flipY": false,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rotation": 0,
+        "alpha": 1,
+        "visible": true,
+        "depth": 0,
+        "order": 1,
+        "animation": "hero_idle_right"
+      },
+      "overlays": [
+        {
+          "key": "equipment_bamboo-armor_hero",
+          "frame": 137,
+          "x": 0,
+          "y": -6,
+          "originX": 0.5,
+          "originY": 0.5,
+          "flipX": false,
+          "flipY": false,
+          "scaleX": 1,
+          "scaleY": 1,
+          "rotation": 0,
+          "alpha": 1,
+          "visible": true,
+          "depth": 0.01,
+          "order": 3,
+          "animation": null
+        },
+        {
+          "key": "equipment_jade-charm_hero",
+          "frame": 137,
+          "x": 0,
+          "y": -6,
+          "originX": 0.5,
+          "originY": 0.5,
+          "flipX": false,
+          "flipY": false,
+          "scaleX": 1,
+          "scaleY": 1,
+          "rotation": 0,
+          "alpha": 1,
+          "visible": true,
+          "depth": 0.02,
+          "order": 4,
+          "animation": null
+        }
+      ],
+      "lastAttack": -3000,
+      "dodgeReadyAt": 0,
+      "dodging": false,
+      "dead": false
+    },
+    {
+      "fixture": "hero",
+      "equipped": true,
+      "action": "KeyW",
+      "scene": "Village",
+      "time": 4129.7,
+      "visible": true,
+      "world": {
+        "x": 406,
+        "y": 343.70396
+      },
+      "hero": {
+        "key": "hero_sprite",
+        "frame": 214,
+        "x": 0,
+        "y": -6,
+        "originX": 0.5,
+        "originY": 0.5,
+        "flipX": false,
+        "flipY": false,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rotation": 0,
+        "alpha": 1,
+        "visible": true,
+        "depth": 0,
+        "order": 1,
+        "animation": "hero_run_up"
+      },
+      "overlays": [
+        {
+          "key": "equipment_bamboo-armor_hero",
+          "frame": 214,
+          "x": 0,
+          "y": -6,
+          "originX": 0.5,
+          "originY": 0.5,
+          "flipX": false,
+          "flipY": false,
+          "scaleX": 1,
+          "scaleY": 1,
+          "rotation": 0,
+          "alpha": 1,
+          "visible": true,
+          "depth": 0.01,
+          "order": 3,
+          "animation": null
+        },
+        {
+          "key": "equipment_jade-charm_hero",
+          "frame": 214,
+          "x": 0,
+          "y": -6,
+          "originX": 0.5,
+          "originY": 0.5,
+          "flipX": false,
+          "flipY": false,
+          "scaleX": 1,
+          "scaleY": 1,
+          "rotation": 0,
+          "alpha": 1,
+          "visible": true,
+          "depth": 0.02,
+          "order": 4,
+          "animation": null
+        }
+      ],
+      "lastAttack": -3000,
+      "dodgeReadyAt": 0,
+      "dodging": false,
+      "dead": false
+    },
+    {
+      "fixture": "hero",
+      "equipped": true,
+      "action": "KeyW",
+      "scene": "Village",
+      "time": 4163,
+      "visible": true,
+      "world": {
+        "x": 406,
+        "y": 337.11188
+      },
+      "hero": {
+        "key": "hero_sprite",
+        "frame": 214,
+        "x": 0,
+        "y": -6,
+        "originX": 0.5,
+        "originY": 0.5,
+        "flipX": false,
+        "flipY": false,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rotation": 0,
+        "alpha": 1,
+        "visible": true,
+        "depth": 0,
+        "order": 1,
+        "animation": "hero_run_up"
+      },
+      "overlays": [
+        {
+          "key": "equipment_bamboo-armor_hero",
+          "frame": 214,
+          "x": 0,
+          "y": -6,
+          "originX": 0.5,
+          "originY": 0.5,
+          "flipX": false,
+          "flipY": false,
+          "scaleX": 1,
+          "scaleY": 1,
+          "rotation": 0,
+          "alpha": 1,
+          "visible": true,
+          "depth": 0.01,
+          "order": 3,
+          "animation": null
+        },
+        {
+          "key": "equipment_jade-charm_hero",
+          "frame": 214,
+          "x": 0,
+          "y": -6,
+          "originX": 0.5,
+          "originY": 0.5,
+          "flipX": false,
+          "flipY": false,
+          "scaleX": 1,
+          "scaleY": 1,
+          "rotation": 0,
+          "alpha": 1,
+          "visible": true,
+          "depth": 0.02,
+          "order": 4,
+          "animation": null
+        }
+      ],
+      "lastAttack": -3000,
+      "dodgeReadyAt": 0,
+      "dodging": false,
+      "dead": false
+    },
+    {
+      "fixture": "hero",
+      "equipped": true,
+      "action": "KeyW",
+      "scene": "Village",
+      "time": 4196.3,
+      "visible": true,
+      "world": {
+        "x": 406,
+        "y": 330.52112
+      },
+      "hero": {
+        "key": "hero_sprite",
+        "frame": 214,
+        "x": 0,
+        "y": -6,
+        "originX": 0.5,
+        "originY": 0.5,
+        "flipX": false,
+        "flipY": false,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rotation": 0,
+        "alpha": 1,
+        "visible": true,
+        "depth": 0,
+        "order": 1,
+        "animation": "hero_run_up"
+      },
+      "overlays": [
+        {
+          "key": "equipment_bamboo-armor_hero",
+          "frame": 214,
+          "x": 0,
+          "y": -6,
+          "originX": 0.5,
+          "originY": 0.5,
+          "flipX": false,
+          "flipY": false,
+          "scaleX": 1,
+          "scaleY": 1,
+          "rotation": 0,
+          "alpha": 1,
+          "visible": true,
+          "depth": 0.01,
+          "order": 3,
+          "animation": null
+        },
+        {
+          "key": "equipment_jade-charm_hero",
+          "frame": 214,
+          "x": 0,
+          "y": -6,
+          "originX": 0.5,
+          "originY": 0.5,
+          "flipX": false,
+          "flipY": false,
+          "scaleX": 1,
+          "scaleY": 1,
+          "rotation": 0,
+          "alpha": 1,
+          "visible": true,
+          "depth": 0.02,
+          "order": 4,
+          "animation": null
+        }
+      ],
+      "lastAttack": -3000,
+      "dodgeReadyAt": 0,
+      "dodging": false,
+      "dead": false
+    },
+    {
+      "fixture": "hero",
+      "equipped": true,
+      "action": "KeyW",
+      "scene": "Village",
+      "time": 4246.3,
+      "visible": true,
+      "world": {
+        "x": 406,
+        "y": 320.633
+      },
+      "hero": {
+        "key": "hero_sprite",
+        "frame": 215,
+        "x": 0,
+        "y": -6,
+        "originX": 0.5,
+        "originY": 0.5,
+        "flipX": false,
+        "flipY": false,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rotation": 0,
+        "alpha": 1,
+        "visible": true,
+        "depth": 0,
+        "order": 1,
+        "animation": "hero_run_up"
+      },
+      "overlays": [
+        {
+          "key": "equipment_bamboo-armor_hero",
+          "frame": 215,
+          "x": 0,
+          "y": -6,
+          "originX": 0.5,
+          "originY": 0.5,
+          "flipX": false,
+          "flipY": false,
+          "scaleX": 1,
+          "scaleY": 1,
+          "rotation": 0,
+          "alpha": 1,
+          "visible": true,
+          "depth": 0.01,
+          "order": 3,
+          "animation": null
+        },
+        {
+          "key": "equipment_jade-charm_hero",
+          "frame": 215,
+          "x": 0,
+          "y": -6,
+          "originX": 0.5,
+          "originY": 0.5,
+          "flipX": false,
+          "flipY": false,
+          "scaleX": 1,
+          "scaleY": 1,
+          "rotation": 0,
+          "alpha": 1,
+          "visible": true,
+          "depth": 0.02,
+          "order": 4,
+          "animation": null
+        }
+      ],
+      "lastAttack": -3000,
+      "dodgeReadyAt": 0,
+      "dodging": false,
+      "dead": false
+    },
+    {
+      "fixture": "hero",
+      "equipped": true,
+      "action": "KeyW",
+      "scene": "Village",
+      "time": 4412.9,
+      "visible": true,
+      "world": {
+        "x": 406,
+        "y": 287.6805199999998
+      },
+      "hero": {
+        "key": "hero_sprite",
+        "frame": 217,
+        "x": 0,
+        "y": -6,
+        "originX": 0.5,
+        "originY": 0.5,
+        "flipX": false,
+        "flipY": false,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rotation": 0,
+        "alpha": 1,
+        "visible": true,
+        "depth": 0,
+        "order": 1,
+        "animation": "hero_run_up"
+      },
+      "overlays": [
+        {
+          "key": "equipment_bamboo-armor_hero",
+          "frame": 217,
+          "x": 0,
+          "y": -6,
+          "originX": 0.5,
+          "originY": 0.5,
+          "flipX": false,
+          "flipY": false,
+          "scaleX": 1,
+          "scaleY": 1,
+          "rotation": 0,
+          "alpha": 1,
+          "visible": true,
+          "depth": 0.01,
+          "order": 3,
+          "animation": null
+        },
+        {
+          "key": "equipment_jade-charm_hero",
+          "frame": 217,
+          "x": 0,
+          "y": -6,
+          "originX": 0.5,
+          "originY": 0.5,
+          "flipX": false,
+          "flipY": false,
+          "scaleX": 1,
+          "scaleY": 1,
+          "rotation": 0,
+          "alpha": 1,
+          "visible": true,
+          "depth": 0.02,
+          "order": 4,
+          "animation": null
+        }
+      ],
+      "lastAttack": -3000,
+      "dodgeReadyAt": 0,
+      "dodging": false,
+      "dead": false
+    },
+    {
+      "fixture": "hero",
+      "equipped": true,
+      "action": "KeyW",
+      "scene": "Village",
+      "time": 4446.3,
+      "visible": true,
+      "world": {
+        "x": 406,
+        "y": 281.0897599999998
+      },
+      "hero": {
+        "key": "hero_sprite",
+        "frame": 218,
+        "x": 0,
+        "y": -6,
+        "originX": 0.5,
+        "originY": 0.5,
+        "flipX": false,
+        "flipY": false,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rotation": 0,
+        "alpha": 1,
+        "visible": true,
+        "depth": 0,
+        "order": 1,
+        "animation": "hero_run_up"
+      },
+      "overlays": [
+        {
+          "key": "equipment_bamboo-armor_hero",
+          "frame": 218,
+          "x": 0,
+          "y": -6,
+          "originX": 0.5,
+          "originY": 0.5,
+          "flipX": false,
+          "flipY": false,
+          "scaleX": 1,
+          "scaleY": 1,
+          "rotation": 0,
+          "alpha": 1,
+          "visible": true,
+          "depth": 0.01,
+          "order": 3,
+          "animation": null
+        },
+        {
+          "key": "equipment_jade-charm_hero",
+          "frame": 218,
+          "x": 0,
+          "y": -6,
+          "originX": 0.5,
+          "originY": 0.5,
+          "flipX": false,
+          "flipY": false,
+          "scaleX": 1,
+          "scaleY": 1,
+          "rotation": 0,
+          "alpha": 1,
+          "visible": true,
+          "depth": 0.02,
+          "order": 4,
+          "animation": null
+        }
+      ],
+      "lastAttack": -3000,
+      "dodgeReadyAt": 0,
+      "dodging": false,
+      "dead": false
+    }
+  ],
+  "actions": [],
+  "screenshots": [
+    {
+      "file": "F:\\CODE\\thienmenh\\thienmenh\\artifacts\\equipment-browser-1791859474871\\hero-equipped-idle.png",
+      "sha256": "48a1bd3aa839dba762772840debea0210c087a0e977fbd8a13eb5fc3ce0ba8f6",
+      "label": "hero-equipped-idle"
+    },
+    {
+      "file": "F:\\CODE\\thienmenh\\thienmenh\\artifacts\\equipment-browser-1791859474871\\hero-equipped-KeyW.png",
+      "sha256": "c050693b1970364edc22d2f4930ff35d98151f63e65f296972439d5914ccfe35",
+      "label": "hero-equipped-KeyW"
+    },
+    {
+      "file": "F:\\CODE\\thienmenh\\thienmenh\\artifacts\\equipment-browser-1791859474871\\failure.png",
+      "sha256": "f404140292be9c092f12afa3c84f4bfda25c9a648a75b76576cc3aed4678b180",
+      "label": "failure"
+    }
+  ],
+  "cleanup": {
+    "pid": 429036,
+    "profile": "C:\\Users\\MYLAPT~1\\AppData\\Local\\Temp\\than-menh-graphics-stress-K5Yade",
+    "exitCode": 0,
+    "profileRemoved": true
+  },
+  "limits": "Headless Chrome only; six legitimate save reload fixtures, not continuous stress; no device/GPU/art approval; missing-art fallback remains source test gate; no live game/frame/stat/clock mutation.",
+  "browserPid": 429036,
+  "profile": "C:\\Users\\MYLAPT~1\\AppData\\Local\\Temp\\than-menh-graphics-stress-K5Yade",
+  "browserVersion": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/155.0.8059.39",
+    "revision": "@3ff7ac5a9224be9156d7f8703a06e22890aafd34",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36",
+    "jsVersion": "15.5.35.20"
+  },
+  "verdict": "FAILED"
+}

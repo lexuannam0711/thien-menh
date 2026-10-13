@@ -1,0 +1,230 @@
+{
+  "module": "GraphicsSettings.ts (compiled JS, V8 precise coverage)",
+  "lines": {
+    "covered": 51,
+    "total": 53,
+    "percent": 96.22641509433963
+  },
+  "functions": {
+    "covered": 10,
+    "total": 10
+  },
+  "ranges": [
+    {
+      "startOffset": 0,
+      "endOffset": 2635,
+      "count": 1
+    },
+    {
+      "startOffset": 336,
+      "endOffset": 652,
+      "count": 22
+    },
+    {
+      "startOffset": 408,
+      "endOffset": 436,
+      "count": 12
+    },
+    {
+      "startOffset": 437,
+      "endOffset": 444,
+      "count": 10
+    },
+    {
+      "startOffset": 445,
+      "endOffset": 449,
+      "count": 12
+    },
+    {
+      "startOffset": 499,
+      "endOffset": 530,
+      "count": 18
+    },
+    {
+      "startOffset": 531,
+      "endOffset": 550,
+      "count": 6
+    },
+    {
+      "startOffset": 551,
+      "endOffset": 561,
+      "count": 16
+    },
+    {
+      "startOffset": 653,
+      "endOffset": 1025,
+      "count": 16
+    },
+    {
+      "startOffset": 762,
+      "endOffset": 788,
+      "count": 10
+    },
+    {
+      "startOffset": 789,
+      "endOffset": 792,
+      "count": 9
+    },
+    {
+      "startOffset": 793,
+      "endOffset": 829,
+      "count": 7
+    },
+    {
+      "startOffset": 820,
+      "endOffset": 824,
+      "count": 2
+    },
+    {
+      "startOffset": 825,
+      "endOffset": 829,
+      "count": 5
+    },
+    {
+      "startOffset": 873,
+      "endOffset": 876,
+      "count": 6
+    },
+    {
+      "startOffset": 877,
+      "endOffset": 944,
+      "count": 10
+    },
+    {
+      "startOffset": 904,
+      "endOffset": 907,
+      "count": 2
+    },
+    {
+      "startOffset": 908,
+      "endOffset": 944,
+      "count": 8
+    },
+    {
+      "startOffset": 937,
+      "endOffset": 940,
+      "count": 5
+    },
+    {
+      "startOffset": 941,
+      "endOffset": 944,
+      "count": 3
+    },
+    {
+      "startOffset": 988,
+      "endOffset": 1014,
+      "count": 10
+    },
+    {
+      "startOffset": 1026,
+      "endOffset": 1181,
+      "count": 2
+    },
+    {
+      "startOffset": 1119,
+      "endOffset": 1133,
+      "count": 0
+    },
+    {
+      "startOffset": 1145,
+      "endOffset": 1179,
+      "count": 0
+    },
+    {
+      "startOffset": 1211,
+      "endOffset": 1229,
+      "count": 11
+    },
+    {
+      "startOffset": 1235,
+      "endOffset": 1541,
+      "count": 11
+    },
+    {
+      "startOffset": 1389,
+      "endOffset": 1398,
+      "count": 7
+    },
+    {
+      "startOffset": 1429,
+      "endOffset": 1438,
+      "count": 5
+    },
+    {
+      "startOffset": 1460,
+      "endOffset": 1535,
+      "count": 2
+    },
+    {
+      "startOffset": 1546,
+      "endOffset": 1579,
+      "count": 8
+    },
+    {
+      "startOffset": 1584,
+      "endOffset": 1768,
+      "count": 3
+    },
+    {
+      "startOffset": 1636,
+      "endOffset": 1659,
+      "count": 2
+    },
+    {
+      "startOffset": 1660,
+      "endOffset": 1681,
+      "count": 2
+    },
+    {
+      "startOffset": 1695,
+      "endOffset": 1708,
+      "count": 1
+    },
+    {
+      "startOffset": 1708,
+      "endOffset": 1767,
+      "count": 2
+    },
+    {
+      "startOffset": 1773,
+      "endOffset": 1946,
+      "count": 3
+    },
+    {
+      "startOffset": 1867,
+      "endOffset": 1880,
+      "count": 1
+    },
+    {
+      "startOffset": 1880,
+      "endOffset": 1945,
+      "count": 2
+    },
+    {
+      "startOffset": 1951,
+      "endOffset": 2215,
+      "count": 3
+    },
+    {
+      "startOffset": 2220,
+      "endOffset": 2536,
+      "count": 4
+    },
+    {
+      "startOffset": 2338,
+      "endOffset": 2351,
+      "count": 1
+    },
+    {
+      "startOffset": 2351,
+      "endOffset": 2487,
+      "count": 3
+    },
+    {
+      "startOffset": 2487,
+      "endOffset": 2530,
+      "count": 1
+    }
+  ],
+  "note": "Only GraphicsSettings module; not full game coverage."
+}

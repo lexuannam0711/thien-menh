@@ -1,0 +1,225 @@
+{
+  "date": "2026-10-12",
+  "enemies": {
+    "sheets": 16,
+    "frames": 1536,
+    "pngBytes": 188470
+  },
+  "environment": {
+    "sheets": 10,
+    "frames": 80,
+    "pngBytes": 31208
+  },
+  "decodedRgbaBytes": 19693568,
+  "limits": "Offline authored coordinate source; dimensions/bytes/hash proof only, not GPU residency, premium art approval or real-device acceptance.",
+  "entries": [
+    {
+      "family": "enemies",
+      "file": "am-anh-quy-vuong.png",
+      "width": 1536,
+      "height": 256,
+      "bytes": 17242,
+      "sha256": "ff62d16ecb70f3852bb8ce19fbd72c95c7a02c0d63eab0923d81fdc4803bd9dc"
+    },
+    {
+      "family": "enemies",
+      "file": "bach-trao-ho-ma.png",
+      "width": 1536,
+      "height": 256,
+      "bytes": 15871,
+      "sha256": "6c86818134ab7a445c135e36fdf47d6450b42c17416ff14454c5d43c8dcb5b7a"
+    },
+    {
+      "family": "enemies",
+      "file": "bo-cap-dam-lay.png",
+      "width": 1152,
+      "height": 192,
+      "bytes": 10214,
+      "sha256": "ecce07e90d5518d807d574a3bbdf76ea8b3ff14d53e6d4ea0f10294602fb9f48"
+    },
+    {
+      "family": "enemies",
+      "file": "dia-dia-khong-lo.png",
+      "width": 1152,
+      "height": 192,
+      "bytes": 9008,
+      "sha256": "7d14ab99bb0a83e433d14f23e432bacb3058aebb6312397772bab9e0d97e9c29"
+    },
+    {
+      "family": "enemies",
+      "file": "dia-yeu-canh-truc.png",
+      "width": 1152,
+      "height": 192,
+      "bytes": 8956,
+      "sha256": "80ce62d3561e549455e5730abe90800b0d0c200a0630a9c7b2c46a83af81c6e1"
+    },
+    {
+      "family": "enemies",
+      "file": "dieu-sat-tan-vien.png",
+      "width": 1152,
+      "height": 192,
+      "bytes": 11316,
+      "sha256": "5e136d1a40a0aef79d35f6506a22868d01188f4fec709b0ad76a1f1f9ad37b98"
+    },
+    {
+      "family": "enemies",
+      "file": "giao-long-thuy-than.png",
+      "width": 1536,
+      "height": 256,
+      "bytes": 17472,
+      "sha256": "fd2aab4cd42d582a145be37d462f504f9ced380a8b00dff4302bf4c009c0d631"
+    },
+    {
+      "family": "enemies",
+      "file": "hac-an-ve-si.png",
+      "width": 1152,
+      "height": 192,
+      "bytes": 10141,
+      "sha256": "528a7d751ee0c7b789bc91bd3bf2c717e9bd873dbbdcea4c0349dd81eb12df18"
+    },
+    {
+      "family": "enemies",
+      "file": "ma-troi-u-am.png",
+      "width": 1152,
+      "height": 192,
+      "bytes": 9764,
+      "sha256": "edcc0507f20eb90880f6b3e303c2933e362faee156c933be73975d99b01a6e38"
+    },
+    {
+      "family": "enemies",
+      "file": "moc-tinh-con.png",
+      "width": 1152,
+      "height": 192,
+      "bytes": 11381,
+      "sha256": "45f9fc72cf94293b489b07f28bc8eaf53531cbe9e13f45f9bce5d59b6cdb627f"
+    },
+    {
+      "family": "enemies",
+      "file": "soi-rung-hac-am.png",
+      "width": 1152,
+      "height": 192,
+      "bytes": 9446,
+      "sha256": "e7fa3f17ff0bce35edb36edc5361523269506e46632c58196a1bfc389fad553b"
+    },
+    {
+      "family": "enemies",
+      "file": "thach-binh-co.png",
+      "width": 1152,
+      "height": 192,
+      "bytes": 10422,
+      "sha256": "ff7b913c776a9b83143d75ae14b038ad9162491537db8b8cc3bb942818edc0ed"
+    },
+    {
+      "family": "enemies",
+      "file": "thach-giap-nguu-ma.png",
+      "width": 1536,
+      "height": 256,
+      "bytes": 17345,
+      "sha256": "a8878c16148bd3674e5faa896013834734293ff5cc3e1031216041eb56320325"
+    },
+    {
+      "family": "enemies",
+      "file": "thach-hau-cuong-bao.png",
+      "width": 1152,
+      "height": 192,
+      "bytes": 10356,
+      "sha256": "9b9a60e31c47366749056f5297e14f716337e3c7f45fd36229ec01a100c0c081"
+    },
+    {
+      "family": "enemies",
+      "file": "thuy-quai-tam-ngu.png",
+      "width": 1152,
+      "height": 192,
+      "bytes": 10091,
+      "sha256": "21b033709887f1ef0252e2a2c505facf8b48754eca7c612d52fcff76246a2b60"
+    },
+    {
+      "family": "enemies",
+      "file": "u-linh-cung-thu.png",
+      "width": 1152,
+      "height": 192,
+      "bytes": 9445,
+      "sha256": "97365be2f2819a879a2f4f1b1f365cf9031bfd283ddf5781dee2f4e936fb72e7"
+    },
+    {
+      "family": "environments",
+      "file": "citadel-props.png",
+      "width": 1024,
+      "height": 128,
+      "bytes": 5414,
+      "sha256": "884ede448c2388a7fd9f83b7e017ecb1a65633c44bebd3aced3f7edc5b7e1dc3"
+    },
+    {
+      "family": "environments",
+      "file": "citadel-terrain.png",
+      "width": 256,
+      "height": 32,
+      "bytes": 1013,
+      "sha256": "84c5acdbce0ebc278a134446fd3c59bfa7d1781d63e892516279158ec4cfe2fe"
+    },
+    {
+      "family": "environments",
+      "file": "forest-props.png",
+      "width": 1024,
+      "height": 128,
+      "bytes": 4968,
+      "sha256": "c3c0008ef49b8e436e2b0bd724b04edf0ad077a8241e4dc3b1aa164a8f0eed94"
+    },
+    {
+      "family": "environments",
+      "file": "forest-terrain.png",
+      "width": 256,
+      "height": 32,
+      "bytes": 1055,
+      "sha256": "ba258383445130f3878d6e81764978cbe50cbc57d758bd582f9d7870bfbbd20a"
+    },
+    {
+      "family": "environments",
+      "file": "mountain-props.png",
+      "width": 1024,
+      "height": 128,
+      "bytes": 6026,
+      "sha256": "e7f4aea0ac8f76ec60ebe27d4e456b18180e5f64771fa86372deae0883abdd50"
+    },
+    {
+      "family": "environments",
+      "file": "mountain-terrain.png",
+      "width": 256,
+      "height": 32,
+      "bytes": 996,
+      "sha256": "857f66ab9f889991a1fbbfcb9f1286fd61d4550bd5adbe6625ed7d32a23f2a95"
+    },
+    {
+      "family": "environments",
+      "file": "swamp-props.png",
+      "width": 1024,
+      "height": 128,
+      "bytes": 4478,
+      "sha256": "ecc048e99352575f6e48d5234dc61d6faa57fe436c1eb960b09ded38b914d5d3"
+    },
+    {
+      "family": "environments",
+      "file": "swamp-terrain.png",
+      "width": 256,
+      "height": 32,
+      "bytes": 946,
+      "sha256": "4da509dc92be26d1c21bc99238642ed32c333d330381fac2abfd04d7b6fd0cab"
+    },
+    {
+      "family": "environments",
+      "file": "village-props.png",
+      "width": 1024,
+      "height": 128,
+      "bytes": 5324,
+      "sha256": "29deec550a1b30ce28d7a897d7fa51ac73087e779d93011f7b85db1cd4eedf40"
+    },
+    {
+      "family": "environments",
+      "file": "village-terrain.png",
+      "width": 256,
+      "height": 32,
+      "bytes": 988,
+      "sha256": "6ac1eefda1e59ea2fd525d2aa8c9b1be87dea1efb8dad12ab0f297c90ef44c4b"
+    }
+  ]
+}

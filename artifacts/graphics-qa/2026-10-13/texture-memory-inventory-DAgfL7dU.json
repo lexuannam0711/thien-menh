@@ -1,0 +1,606 @@
+{
+  "bundle": "dist/assets/index-DAgfL7dU.js",
+  "sha256": "125fab15da0089e67f2d97262488bfd8a9037625515296dab2edd81f02c5ee69",
+  "totals": {
+    "pngs": 74,
+    "compressedBytes": 796377,
+    "hypotheticalRGBA8Bytes": 69015552,
+    "allDistMatches": true,
+    "largestEdge": 2016
+  },
+  "limits": "Hypothetical base RGBA8 storage only; not actual GPU residency, device capability, mipmaps or leak proof.",
+  "inventory": [
+    {
+      "file": "assets/enemies/am-anh-quy-vuong.png",
+      "bytes": 17242,
+      "width": 1536,
+      "height": 256,
+      "sha256": "ff62d16ecb70f3852bb8ce19fbd72c95c7a02c0d63eab0923d81fdc4803bd9dc",
+      "distMatches": true
+    },
+    {
+      "file": "assets/enemies/bach-trao-ho-ma.png",
+      "bytes": 15871,
+      "width": 1536,
+      "height": 256,
+      "sha256": "6c86818134ab7a445c135e36fdf47d6450b42c17416ff14454c5d43c8dcb5b7a",
+      "distMatches": true
+    },
+    {
+      "file": "assets/enemies/bo-cap-dam-lay.png",
+      "bytes": 10214,
+      "width": 1152,
+      "height": 192,
+      "sha256": "ecce07e90d5518d807d574a3bbdf76ea8b3ff14d53e6d4ea0f10294602fb9f48",
+      "distMatches": true
+    },
+    {
+      "file": "assets/enemies/dia-dia-khong-lo.png",
+      "bytes": 9008,
+      "width": 1152,
+      "height": 192,
+      "sha256": "7d14ab99bb0a83e433d14f23e432bacb3058aebb6312397772bab9e0d97e9c29",
+      "distMatches": true
+    },
+    {
+      "file": "assets/enemies/dia-yeu-canh-truc.png",
+      "bytes": 8956,
+      "width": 1152,
+      "height": 192,
+      "sha256": "80ce62d3561e549455e5730abe90800b0d0c200a0630a9c7b2c46a83af81c6e1",
+      "distMatches": true
+    },
+    {
+      "file": "assets/enemies/dieu-sat-tan-vien.png",
+      "bytes": 11316,
+      "width": 1152,
+      "height": 192,
+      "sha256": "5e136d1a40a0aef79d35f6506a22868d01188f4fec709b0ad76a1f1f9ad37b98",
+      "distMatches": true
+    },
+    {
+      "file": "assets/enemies/giao-long-thuy-than.png",
+      "bytes": 17472,
+      "width": 1536,
+      "height": 256,
+      "sha256": "fd2aab4cd42d582a145be37d462f504f9ced380a8b00dff4302bf4c009c0d631",
+      "distMatches": true
+    },
+    {
+      "file": "assets/enemies/hac-an-ve-si.png",
+      "bytes": 10141,
+      "width": 1152,
+      "height": 192,
+      "sha256": "528a7d751ee0c7b789bc91bd3bf2c717e9bd873dbbdcea4c0349dd81eb12df18",
+      "distMatches": true
+    },
+    {
+      "file": "assets/enemies/ma-troi-u-am.png",
+      "bytes": 9764,
+      "width": 1152,
+      "height": 192,
+      "sha256": "edcc0507f20eb90880f6b3e303c2933e362faee156c933be73975d99b01a6e38",
+      "distMatches": true
+    },
+    {
+      "file": "assets/enemies/moc-tinh-con.png",
+      "bytes": 11381,
+      "width": 1152,
+      "height": 192,
+      "sha256": "45f9fc72cf94293b489b07f28bc8eaf53531cbe9e13f45f9bce5d59b6cdb627f",
+      "distMatches": true
+    },
+    {
+      "file": "assets/enemies/soi-rung-hac-am.png",
+      "bytes": 9446,
+      "width": 1152,
+      "height": 192,
+      "sha256": "e7fa3f17ff0bce35edb36edc5361523269506e46632c58196a1bfc389fad553b",
+      "distMatches": true
+    },
+    {
+      "file": "assets/enemies/thach-binh-co.png",
+      "bytes": 10422,
+      "width": 1152,
+      "height": 192,
+      "sha256": "ff7b913c776a9b83143d75ae14b038ad9162491537db8b8cc3bb942818edc0ed",
+      "distMatches": true
+    },
+    {
+      "file": "assets/enemies/thach-giap-nguu-ma.png",
+      "bytes": 17345,
+      "width": 1536,
+      "height": 256,
+      "sha256": "a8878c16148bd3674e5faa896013834734293ff5cc3e1031216041eb56320325",
+      "distMatches": true
+    },
+    {
+      "file": "assets/enemies/thach-hau-cuong-bao.png",
+      "bytes": 10356,
+      "width": 1152,
+      "height": 192,
+      "sha256": "9b9a60e31c47366749056f5297e14f716337e3c7f45fd36229ec01a100c0c081",
+      "distMatches": true
+    },
+    {
+      "file": "assets/enemies/thuy-quai-tam-ngu.png",
+      "bytes": 10091,
+      "width": 1152,
+      "height": 192,
+      "sha256": "21b033709887f1ef0252e2a2c505facf8b48754eca7c612d52fcff76246a2b60",
+      "distMatches": true
+    },
+    {
+      "file": "assets/enemies/u-linh-cung-thu.png",
+      "bytes": 9445,
+      "width": 1152,
+      "height": 192,
+      "sha256": "97365be2f2819a879a2f4f1b1f365cf9031bfd283ddf5781dee2f4e936fb72e7",
+      "distMatches": true
+    },
+    {
+      "file": "assets/environments/citadel-props.png",
+      "bytes": 5414,
+      "width": 1024,
+      "height": 128,
+      "sha256": "884ede448c2388a7fd9f83b7e017ecb1a65633c44bebd3aced3f7edc5b7e1dc3",
+      "distMatches": true
+    },
+    {
+      "file": "assets/environments/citadel-terrain.png",
+      "bytes": 1013,
+      "width": 256,
+      "height": 32,
+      "sha256": "84c5acdbce0ebc278a134446fd3c59bfa7d1781d63e892516279158ec4cfe2fe",
+      "distMatches": true
+    },
+    {
+      "file": "assets/environments/forest-props.png",
+      "bytes": 4968,
+      "width": 1024,
+      "height": 128,
+      "sha256": "c3c0008ef49b8e436e2b0bd724b04edf0ad077a8241e4dc3b1aa164a8f0eed94",
+      "distMatches": true
+    },
+    {
+      "file": "assets/environments/forest-terrain.png",
+      "bytes": 1055,
+      "width": 256,
+      "height": 32,
+      "sha256": "ba258383445130f3878d6e81764978cbe50cbc57d758bd582f9d7870bfbbd20a",
+      "distMatches": true
+    },
+    {
+      "file": "assets/environments/mountain-props.png",
+      "bytes": 6026,
+      "width": 1024,
+      "height": 128,
+      "sha256": "e7f4aea0ac8f76ec60ebe27d4e456b18180e5f64771fa86372deae0883abdd50",
+      "distMatches": true
+    },
+    {
+      "file": "assets/environments/mountain-terrain.png",
+      "bytes": 996,
+      "width": 256,
+      "height": 32,
+      "sha256": "857f66ab9f889991a1fbbfcb9f1286fd61d4550bd5adbe6625ed7d32a23f2a95",
+      "distMatches": true
+    },
+    {
+      "file": "assets/environments/swamp-props.png",
+      "bytes": 4478,
+      "width": 1024,
+      "height": 128,
+      "sha256": "ecc048e99352575f6e48d5234dc61d6faa57fe436c1eb960b09ded38b914d5d3",
+      "distMatches": true
+    },
+    {
+      "file": "assets/environments/swamp-terrain.png",
+      "bytes": 946,
+      "width": 256,
+      "height": 32,
+      "sha256": "4da509dc92be26d1c21bc99238642ed32c333d330381fac2abfd04d7b6fd0cab",
+      "distMatches": true
+    },
+    {
+      "file": "assets/environments/village-props.png",
+      "bytes": 5324,
+      "width": 1024,
+      "height": 128,
+      "sha256": "29deec550a1b30ce28d7a897d7fa51ac73087e779d93011f7b85db1cd4eedf40",
+      "distMatches": true
+    },
+    {
+      "file": "assets/environments/village-terrain.png",
+      "bytes": 988,
+      "width": 256,
+      "height": 32,
+      "sha256": "6ac1eefda1e59ea2fd525d2aa8c9b1be87dea1efb8dad12ab0f297c90ef44c4b",
+      "distMatches": true
+    },
+    {
+      "file": "assets/equipment/bamboo-armor_hero.png",
+      "bytes": 8427,
+      "width": 2016,
+      "height": 336,
+      "sha256": "e14b124f567b4a9bb1ba3a9f842af622001556e1182b1d57f2540054c974aa5d",
+      "distMatches": true
+    },
+    {
+      "file": "assets/equipment/bamboo-armor_hero_axe.png",
+      "bytes": 8048,
+      "width": 2016,
+      "height": 336,
+      "sha256": "7fdc47cf488487c1382099bb75fa03689bf37a5ec4709bbc78f7884fa32b5a4d",
+      "distMatches": true
+    },
+    {
+      "file": "assets/equipment/bamboo-armor_hero_sword.png",
+      "bytes": 8091,
+      "width": 2016,
+      "height": 336,
+      "sha256": "faedb9d141b40f7db39f176af5531ed6a0b89979395a53f89dbf7be73e1c0c0b",
+      "distMatches": true
+    },
+    {
+      "file": "assets/equipment/jade-charm_hero.png",
+      "bytes": 3951,
+      "width": 2016,
+      "height": 336,
+      "sha256": "3c5b1b22b24278383af71bf0962b29b2f723725664145cb0acd7314ef9dc53fd",
+      "distMatches": true
+    },
+    {
+      "file": "assets/equipment/jade-charm_hero_axe.png",
+      "bytes": 3910,
+      "width": 2016,
+      "height": 336,
+      "sha256": "83ee2e298a236a9e6dc990e1bab227c0f853cf2d441af5378e17c289a3e74ffa",
+      "distMatches": true
+    },
+    {
+      "file": "assets/equipment/jade-charm_hero_sword.png",
+      "bytes": 3887,
+      "width": 2016,
+      "height": 336,
+      "sha256": "23d97d62e7959b971e69f45b5ea95235f5781b76c986019b0ba957c9bf81c066",
+      "distMatches": true
+    },
+    {
+      "file": "assets/icons/rpg-icons.png",
+      "bytes": 3476,
+      "width": 160,
+      "height": 160,
+      "sha256": "aa276b2ae00035f65d5d752fc78dca22b0dcf591bb7418cc653fd338eb664031",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/chien-tuong-son-cuoc-portrait.png",
+      "bytes": 575,
+      "width": 96,
+      "height": 96,
+      "sha256": "9b421081f195881280f58efb53820d48b99d93ae5078b4da76b6584602123351",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/chien-tuong-son-cuoc.png",
+      "bytes": 930,
+      "width": 384,
+      "height": 48,
+      "sha256": "9ec225bef1f170b800781738dc29e15fb10e338e08aa6b1c42bfc9e552a424bb",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/dao-si-truc-lam-portrait.png",
+      "bytes": 623,
+      "width": 96,
+      "height": 96,
+      "sha256": "9a73569fb3cfad6c94169a3adefdfd31ac2ca5b61163e54255a07d7ceba06ad6",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/dao-si-truc-lam.png",
+      "bytes": 869,
+      "width": 384,
+      "height": 48,
+      "sha256": "5512b626ba6c4b0b9b0b1d7e7f1698becb26ef72d0efdc100bc89354d59ae880",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/ky-nhan-khong-lo-portrait.png",
+      "bytes": 642,
+      "width": 96,
+      "height": 96,
+      "sha256": "50885921df97fe2cd4696f0e79b4ae1b67c00e706973bed467974fddb83fa0db",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/ky-nhan-khong-lo.png",
+      "bytes": 1023,
+      "width": 384,
+      "height": 48,
+      "sha256": "04a0ebc5994baa0828ad088d2aed0057cff31d311ec662bae40ed6ef89dac5ab",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/linh-y-nui-cao-portrait.png",
+      "bytes": 781,
+      "width": 96,
+      "height": 96,
+      "sha256": "26397a69e229b8ec20dcb6292cedfbbb12bfb1cf7d1f3226448707d3cd202582",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/linh-y-nui-cao.png",
+      "bytes": 973,
+      "width": 384,
+      "height": 48,
+      "sha256": "f7d3e0ed41ea92e67a35cf67daa841aa61ea317f740d05c13e7e7444248873fe",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/ngu-ong-ba-vi-portrait.png",
+      "bytes": 786,
+      "width": 96,
+      "height": 96,
+      "sha256": "7798968bc985566e6898c83c7467abce0e347f353336a3500621954c34c96bfa",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/ngu-ong-ba-vi.png",
+      "bytes": 992,
+      "width": 384,
+      "height": 48,
+      "sha256": "c972547a1f38dadd41261c28e97799aef43f6cb0a43a056667e8fbdd978660aa",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/quan-thi-ve-phong-chau-portrait.png",
+      "bytes": 691,
+      "width": 96,
+      "height": 96,
+      "sha256": "4c7f67451ef43170397687c2965d99a58dba38bfccc2729d8b8e54f3ffaf2195",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/quan-thi-ve-phong-chau.png",
+      "bytes": 995,
+      "width": 384,
+      "height": 48,
+      "sha256": "68f9b3856bde8254870a25131b4615bf7ba2b0e22b87dfd164fdf22ff36dec0b",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/te-tu-hoang-cung-portrait.png",
+      "bytes": 658,
+      "width": 96,
+      "height": 96,
+      "sha256": "e11737d5649d1a698088d76e37d6a13d9f98021ea1c51dad0452b364cc0ec9c8",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/te-tu-hoang-cung.png",
+      "bytes": 985,
+      "width": 384,
+      "height": 48,
+      "sha256": "d69e0809bed88a0ed2369b5062a70fc545d0c60120a6d0d4f17c9004d3041e91",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/tho-san-tan-vien-portrait.png",
+      "bytes": 790,
+      "width": 96,
+      "height": 96,
+      "sha256": "2ea2571fe6df4601e6739266ea0e5ca225e4c5736ede683e4f6b913094b37f4e",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/tho-san-tan-vien.png",
+      "bytes": 975,
+      "width": 384,
+      "height": 48,
+      "sha256": "bfae5ca508861f6f8bcd875c9bc6a399fecb498362dbb9a6e470d0e3429c8a46",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/thuong-nhan-van-lang-portrait.png",
+      "bytes": 545,
+      "width": 96,
+      "height": 96,
+      "sha256": "edccb90dd0828362ed9f86a903a738e947c97294282631683925360c43be9bcf",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/thuong-nhan-van-lang.png",
+      "bytes": 876,
+      "width": 384,
+      "height": 48,
+      "sha256": "e028889aa93a1816f15f446d98d60cedd8edee259cf476f63481b0ca98c609ec",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/thuy-toc-lao-nhan-portrait.png",
+      "bytes": 764,
+      "width": 96,
+      "height": 96,
+      "sha256": "d52a6a215d4d851e9b64dbced8715e854e4d7093fdf30c922b419068d10c6e9e",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/thuy-toc-lao-nhan.png",
+      "bytes": 969,
+      "width": 384,
+      "height": 48,
+      "sha256": "2248c95ab12e7483b7ae6cff7657a659dab2563de4d248de8e16beb03caf282d",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/tien-nu-dam-sen-portrait.png",
+      "bytes": 795,
+      "width": 96,
+      "height": 96,
+      "sha256": "6198dd9681b6d463549b15fb8ed708ef06118350301bfd1650e681323a19de97",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/tien-nu-dam-sen.png",
+      "bytes": 1051,
+      "width": 384,
+      "height": 48,
+      "sha256": "c64fa921d7e9eeb87b6955467d700fa0f9f3eae70acebd53a426b7855eaef912",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/tu-si-tan-vien-portrait.png",
+      "bytes": 875,
+      "width": 96,
+      "height": 96,
+      "sha256": "79a653cbf24ad13f30b5f9b9239986fe395b43eb172e7b170b2a422a2d2ae5f8",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/tu-si-tan-vien.png",
+      "bytes": 972,
+      "width": 384,
+      "height": 48,
+      "sha256": "8596743f53c8150f0a0974e7518b164015d4aa237b26bf6af9928a8b1504f872",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/village-chief-portrait.png",
+      "bytes": 722,
+      "width": 96,
+      "height": 96,
+      "sha256": "5fd2322ba9496df8e831905b98fa207e5c142439d64260f4778363cec7985dc1",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/village-chief.png",
+      "bytes": 958,
+      "width": 384,
+      "height": 48,
+      "sha256": "f2ad309ffc2b4fd9dc238b2804cf3ff6a11374d72cabe358df224f933a423d26",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/village-healer-portrait.png",
+      "bytes": 635,
+      "width": 96,
+      "height": 96,
+      "sha256": "ca876ad6500e75f8b81fba8dc9ad2eafb6354bdd742dd892497f85d8211e32be",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/village-healer.png",
+      "bytes": 914,
+      "width": 384,
+      "height": 48,
+      "sha256": "e49086953e4e6e57ac8b8b73a9226c2bafc5e15bf0fc31d696475e1ecaeba896",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/village-smith-portrait.png",
+      "bytes": 592,
+      "width": 96,
+      "height": 96,
+      "sha256": "2622dcf34581927408a05bd7c33400641e688dbcbe59927e9f62e341882839fe",
+      "distMatches": true
+    },
+    {
+      "file": "assets/npcs/village-smith.png",
+      "bytes": 963,
+      "width": 384,
+      "height": 48,
+      "sha256": "ed24a1e81255282d27716765e19e674b352e3d14fa7449873bda51118fd6d3ed",
+      "distMatches": true
+    },
+    {
+      "file": "assets/sprites/hacan.png",
+      "bytes": 93798,
+      "width": 2016,
+      "height": 672,
+      "sha256": "7734791e6e03349c56cc90a01aadd3de3bd40abd78339ed5e7f26f31d894c92c",
+      "distMatches": true
+    },
+    {
+      "file": "assets/sprites/hero.png",
+      "bytes": 46680,
+      "width": 2016,
+      "height": 336,
+      "sha256": "1cdb516c4c3c48ccd723ff7ed5b876f3d8154c7a8986a59f6f32a5a7f22206dd",
+      "distMatches": true
+    },
+    {
+      "file": "assets/sprites/hero_axe.png",
+      "bytes": 49037,
+      "width": 2016,
+      "height": 336,
+      "sha256": "f07c05ee08b1b91bf93ccde52f38927e3acbe89247b216b5d3f5da8275801c32",
+      "distMatches": true
+    },
+    {
+      "file": "assets/sprites/hero_sword.png",
+      "bytes": 44718,
+      "width": 2016,
+      "height": 336,
+      "sha256": "0ae20e51c863507532d1ec2f472cea6feaa62b3434858eae82612552d2ae25fc",
+      "distMatches": true
+    },
+    {
+      "file": "assets/sprites/hoyer.png",
+      "bytes": 32606,
+      "width": 2016,
+      "height": 480,
+      "sha256": "f35d2cf5af6373409b41dd4bc6c2813c8ff22de4fdd7be77ce801e9593ce3308",
+      "distMatches": true
+    },
+    {
+      "file": "assets/sprites/matroi.png",
+      "bytes": 10947,
+      "width": 768,
+      "height": 128,
+      "sha256": "051217c089029b69f25649d5b719015c3d354dee7d2eeeafcaa5ff992d7f26c8",
+      "distMatches": true
+    },
+    {
+      "file": "assets/sprites/moctinh.png",
+      "bytes": 21863,
+      "width": 1152,
+      "height": 192,
+      "sha256": "4583e735afbd93ae2552fe768ed78a0b3d5f5d6f3cc7d2821c6e74fc32452f8d",
+      "distMatches": true
+    },
+    {
+      "file": "assets/sprites/spider.png",
+      "bytes": 21470,
+      "width": 1152,
+      "height": 192,
+      "sha256": "d3f8ab4bc5ff50318841c50c2b0f0e25ee4cc0efcb79de61264ceb212b40d937",
+      "distMatches": true
+    },
+    {
+      "file": "assets/sprites/thachtuong.png",
+      "bytes": 87577,
+      "width": 2016,
+      "height": 672,
+      "sha256": "1d65b26d042e0bb13e9777d3d5b7682056261c5fe608a87702866476c8b5a8c5",
+      "distMatches": true
+    },
+    {
+      "file": "assets/sprites/thuongluong.png",
+      "bytes": 90815,
+      "width": 2016,
+      "height": 672,
+      "sha256": "49881eea0897d84ba9c62e582dce8b64589a7963c2abcf086c3d1ff349ec6b40",
+      "distMatches": true
+    },
+    {
+      "file": "assets/sprites/wolf.png",
+      "bytes": 12479,
+      "width": 1152,
+      "height": 192,
+      "sha256": "6a7ee78da6ff56b013c035c3c3f06cf350746b6c354402b4462dd2658305861c",
+      "distMatches": true
+    }
+  ]
+}
