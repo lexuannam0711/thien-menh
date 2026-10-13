@@ -17,7 +17,7 @@ import {
 export class CombatSystem {
   constructor(private scene: Phaser.Scene, private enemies: () => Enemy[], private bossSystem?: BossSystem) {}
 
-  basic(player: Player, combo: number, dir: Phaser.Math.Vector2): void {
+  basic(player: Player, combo: number, dir?: Phaser.Math.Vector2): void {
     const s = gameState.data;
     const weaponId = s.rpg?.equipment?.slots?.weapon;
     const weapon = getEquippedWeaponOrDefault(weaponId, s.level);
@@ -27,7 +27,11 @@ export class CombatSystem {
     const reach = weapon.range;
     const knockback = calculateWeaponKnockback(weapon, comboIndex);
 
-    this.slashEffect(player.x, player.y, dir, combo, weapon);
+    const rawDir = dir && (dir.x !== 0 || dir.y !== 0) ? dir : (player.direction?.length() ? player.direction : new Phaser.Math.Vector2(1, 0));
+    const dirLen = Math.hypot(rawDir.x, rawDir.y);
+    const effectiveDir = dirLen > 0 ? new Phaser.Math.Vector2(rawDir.x / dirLen, rawDir.y / dirLen) : new Phaser.Math.Vector2(1, 0);
+
+    this.slashEffect(player.x, player.y, effectiveDir, combo, weapon);
     audioManager.playCue('sword_slash', { pitchMultiplier: 1 + combo * 0.04 });
     let hit = 0;
     for (const enemy of this.enemies()) {
@@ -35,9 +39,9 @@ export class CombatSystem {
       const dx = enemy.x - player.x;
       const dy = enemy.y - player.y;
       const distance = Math.hypot(dx, dy);
-      const dot = distance ? (dx * dir.x + dy * dir.y) / distance : 1;
+      const dot = distance ? (dx * effectiveDir.x + dy * effectiveDir.y) / distance : 1;
       if (distance <= reach + enemy.radius && dot >= (combo === 3 ? -0.12 : 0.19)) {
-        enemy.damage(base, dir.x * knockback, dir.y * knockback);
+        enemy.damage(base, effectiveDir.x * knockback, effectiveDir.y * knockback);
         hit++;
       }
     }
@@ -46,9 +50,9 @@ export class CombatSystem {
       const dx = boss.x - player.x;
       const dy = boss.y - player.y;
       const distance = Math.hypot(dx, dy);
-      const dot = distance ? (dx * dir.x + dy * dir.y) / distance : 1;
+      const dot = distance ? (dx * effectiveDir.x + dy * effectiveDir.y) / distance : 1;
       if (distance <= reach + boss.radius && dot >= (combo === 3 ? -0.12 : 0.19)) {
-        this.bossSystem?.damageBoss(base, dir.x * knockback, dir.y * knockback);
+        this.bossSystem?.damageBoss(base, effectiveDir.x * knockback, effectiveDir.y * knockback);
         hit++;
       }
     }
@@ -59,12 +63,16 @@ export class CombatSystem {
     }
   }
 
-  skill(player: Player, skill: SkillDefinition, damage: number, direction: Phaser.Math.Vector2): void {
-    this.skillEffect(player.x, player.y, skill, direction);
+  skill(player: Player, skill: SkillDefinition, damage: number, direction?: Phaser.Math.Vector2): void {
+    const rawDir = direction && (direction.x !== 0 || direction.y !== 0) ? direction : (player.direction?.length() ? player.direction : new Phaser.Math.Vector2(1, 0));
+    const dirLen = Math.hypot(rawDir.x, rawDir.y);
+    const effectiveDir = dirLen > 0 ? new Phaser.Math.Vector2(rawDir.x / dirLen, rawDir.y / dirLen) : new Phaser.Math.Vector2(1, 0);
+
+    this.skillEffect(player.x, player.y, skill, effectiveDir);
     audioManager.playCue(skill.element === 'flame' ? 'skill_flame' : 'skill_earth', { priority: 2 });
     if (damage <= 0) return;
     for (const enemy of this.enemies()) {
-      if (!enemy.isAlive || !skillHitsTarget(skill, player, direction, enemy)) continue;
+      if (!enemy.isAlive || !skillHitsTarget(skill, player, effectiveDir, enemy)) continue;
       const offsetX = enemy.x - player.x;
       const offsetY = enemy.y - player.y;
       const length = Math.max(1, Math.hypot(offsetX, offsetY));
@@ -72,8 +80,8 @@ export class CombatSystem {
       enemy.applyStatus(skill.effect.statusEffect, skill.effect.statusDurationMs ?? 0, damage);
     }
     const boss = this.bossSystem?.boss;
-    if (boss?.isAlive && skillHitsTarget(skill, player, direction, boss)) {
-      this.bossSystem?.damageBoss(damage, direction.x * (skill.effect.knockback ?? 0), direction.y * (skill.effect.knockback ?? 0));
+    if (boss?.isAlive && skillHitsTarget(skill, player, effectiveDir, boss)) {
+      this.bossSystem?.damageBoss(damage, effectiveDir.x * (skill.effect.knockback ?? 0), effectiveDir.y * (skill.effect.knockback ?? 0));
     }
     if (graphicsSettings.getBudget().cameraShake) this.scene.cameras.main.shake(100, 0.003);
   }

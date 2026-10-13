@@ -2,7 +2,9 @@ import Phaser from 'phaser';
 import { BALANCE, H, W } from '../../data/config';
 import { actor, floatText, label } from '../ui/art';
 import { gameState, getPlayerStats } from '../systems/GameState';
-import { TouchControls } from '../ui/TouchControls';
+import { InputManager } from '../input/InputManager';
+import { getItem } from '../../data/items';
+import { consumeItem } from '../rpg/InventorySystem';
 import { SPRITE_KEYS } from '../assets/assetLoader';
 import { animationFrames, canPlayLocomotion, facingDirection, SPRITE_MANIFEST } from '../assets/spriteManifest';
 import { equipmentTexture, EQUIPMENT_ARTWORK } from '../assets/equipmentArtwork';
@@ -124,7 +126,8 @@ interface PlayerActions {
 export class Player {
   readonly view: Phaser.GameObjects.Container;
   readonly direction = new Phaser.Math.Vector2(1, 0);
-  readonly controls: TouchControls;
+  readonly inputManager: InputManager;
+  readonly controls: { readonly direction: Phaser.Math.Vector2 };
   private sprite: Phaser.GameObjects.Sprite | null = null;
   private visualState = 'idle';
   private keys: Record<string, Phaser.Input.Keyboard.Key> | null = null;
@@ -144,7 +147,8 @@ export class Player {
 
   constructor(private scene: Phaser.Scene, x: number, y: number,
     private actions: PlayerActions, locked: () => boolean,
-    private readonly barriers: readonly Barrier[] = []) {
+    private readonly barriers: readonly Barrier[] = [],
+    inputManager?: InputManager) {
     this.locked = locked;
 
     if (scene.textures.exists(SPRITE_KEYS.hero)) {
@@ -162,29 +166,45 @@ export class Player {
     this.equipmentPresentation = new PlayerEquipmentPresentation(scene, this.view);
     this.syncEquipmentPresentation();
 
-    if (scene.input.keyboard) {
+    if (inputManager) {
+      this.inputManager = inputManager;
+    } else if (typeof InputManager === 'function') {
+      this.inputManager = new InputManager({ scene });
+    } else {
+      this.inputManager = {
+        update: () => ({ moveX: 0, moveY: 0, pressed: new Set(), held: new Set(), released: new Set() }),
+        getMovementVector: () => ({ x: 0, y: 0 }),
+        getAimPoint: () => null,
+        contextManager: { isGameplayAllowed: () => true, getCurrentContext: () => 'GAMEPLAY', peek: () => 'GAMEPLAY', onChange: () => () => {} },
+        settingsManager: { getSettings: () => ({ pc: { mouseAiming: true } }) },
+        cleanup: () => {},
+      } as unknown as InputManager;
+    }
+
+    this.controls = { direction: new Phaser.Math.Vector2(0, 0) };
+
+    if (typeof scene.input?.keyboard?.addKeys === 'function') {
       this.keys = scene.input.keyboard.addKeys({
-        up: 'W', down: 'S', left: 'A', right: 'D',
-        up2: 'UP', down2: 'DOWN', left2: 'LEFT', right2: 'RIGHT',
-        attack: 'J', dodge: 'SPACE', earth: 'Q', flame: 'E', water: 'R', fourth: 'T', interact: 'F',
+        attack: 'J', dodge: 'SPACE', interact: 'F',
       }) as Record<string, Phaser.Input.Keyboard.Key>;
     }
-    this.controls = new TouchControls(scene, (action) => {
-      if (action === 'attack') this.attack();
-      if (action === 'dodge') this.dodge();
-      if (action === 'earth') this.earth();
-      if (action === 'flame') this.flame();
-      if (action === 'water') this.useSkill('slot-3');
-      if (action === 'fourth') this.useSkill('slot-4');
-      if (action === 'interact') { this.playPose('interaction'); this.actions.interact(); }
-    }, () => !this.isLocked);
+
     const cancelLockedAttack = () => { if (this.isLocked) this.attackBufferedUntil = 0; };
     scene.events.on('preupdate', cancelLockedAttack);
+    let unsubContext: (() => void) | undefined;
+    if (this.inputManager?.contextManager?.onChange) {
+      unsubContext = this.inputManager.contextManager.onChange((curr) => {
+        if (curr !== 'GAMEPLAY') this.attackBufferedUntil = 0;
+      });
+    }
+
     const cleanup = this.removeControlListener = () => {
       this.attackBufferedUntil = 0;
       scene.events.off('preupdate', cancelLockedAttack);
       scene.events.off('shutdown', cleanup);
       this.view.off('destroy', cleanup);
+      unsubContext?.();
+      this.inputManager?.cleanup?.();
     };
     scene.events.once('shutdown', cleanup);
     this.view.once('destroy', cleanup);
@@ -195,39 +215,66 @@ export class Player {
   get isDodging(): boolean { return this.scene.time.now < this.dodgeEndAt; }
   get isDead(): boolean { return this.visualState === 'death'; }
   get canBeHit(): boolean { return this.visualState !== 'death' && this.skillInvulnerabilityMs <= 0 && this.scene.time.now >= this.invulnerableUntil; }
-  private get isLocked(): boolean { return this.isDead || this.locked(); }
+  private get isLocked(): boolean {
+    if (this.isDead || this.locked()) return true;
+    if (this.inputManager?.contextManager && !this.inputManager.contextManager.isGameplayAllowed()) {
+      return true;
+    }
+    return false;
+  }
 
   update(delta: number): void {
-    if (this.isLocked) { this.attackBufferedUntil = 0; this.syncStatusPresentation(); this.syncEquipmentPresentation(); return; }
+    if (this.isLocked) {
+      this.attackBufferedUntil = 0;
+      this.syncStatusPresentation();
+      this.syncEquipmentPresentation();
+      return;
+    }
     this.shieldRemainingMs = Math.max(0, this.shieldRemainingMs - delta);
     this.skillInvulnerabilityMs = Math.max(0, this.skillInvulnerabilityMs - delta);
     const time = this.scene.time.now;
-    const key = this.keys;
-    if (key) {
-      if (Phaser.Input.Keyboard.JustDown(key.attack)) this.attack();
-      if (Phaser.Input.Keyboard.JustDown(key.dodge)) this.dodge();
-      if (Phaser.Input.Keyboard.JustDown(key.earth)) this.earth();
-      if (Phaser.Input.Keyboard.JustDown(key.flame)) this.flame();
-      if (Phaser.Input.Keyboard.JustDown(key.water)) this.useSkill('slot-3');
-      if (Phaser.Input.Keyboard.JustDown(key.fourth)) this.useSkill('slot-4');
-      if (Phaser.Input.Keyboard.JustDown(key.interact)) { this.playPose('interaction'); this.actions.interact(); }
+
+    const input = this.inputManager?.update ? this.inputManager.update(delta) : null;
+    if (input) {
+      if (input.pressed.has('ATTACK')) this.attack();
+      if (input.pressed.has('DODGE')) this.dodge();
+      if (input.pressed.has('SKILL_1')) this.useSkill('slot-1');
+      if (input.pressed.has('SKILL_2')) this.useSkill('slot-2');
+      if (input.pressed.has('SKILL_3')) this.useSkill('slot-3');
+      if (input.pressed.has('SKILL_4')) this.useSkill('slot-4');
+      if (input.pressed.has('QUICK_ITEM_1')) this.useQuickItem(0);
+      if (input.pressed.has('QUICK_ITEM_2')) this.useQuickItem(1);
+      if (input.pressed.has('QUICK_ITEM_3')) this.useQuickItem(2);
+      if (input.pressed.has('QUICK_ITEM_4')) this.useQuickItem(3);
+      if (input.pressed.has('INTERACT')) { this.playPose('interaction'); this.actions.interact(); }
+    } else if (this.keys) {
+      const key = this.keys;
+      if (Phaser.Input?.Keyboard?.JustDown && key.attack && Phaser.Input.Keyboard.JustDown(key.attack)) this.attack();
+      if (Phaser.Input?.Keyboard?.JustDown && key.dodge && Phaser.Input.Keyboard.JustDown(key.dodge)) this.dodge();
+      if (Phaser.Input?.Keyboard?.JustDown && key.interact && Phaser.Input.Keyboard.JustDown(key.interact)) { this.playPose('interaction'); this.actions.interact(); }
     }
+
     if (this.attackBufferedUntil > 0) {
       if (time > this.attackBufferedUntil) this.attackBufferedUntil = 0;
       else if (time >= this.attackAt && !this.isDodging) this.attack();
     }
-    let vx = (Number(Boolean(key?.right.isDown || key?.right2.isDown)) -
-      Number(Boolean(key?.left.isDown || key?.left2.isDown)));
-    let vy = (Number(Boolean(key?.down.isDown || key?.down2.isDown)) -
-      Number(Boolean(key?.up.isDown || key?.up2.isDown)));
-    vx += this.controls.direction.x;
-    vy += this.controls.direction.y;
+
+    const move = this.inputManager?.getMovementVector ? this.inputManager.getMovementVector() : { x: 0, y: 0 };
+    let vx = move.x + this.controls.direction.x;
+    let vy = move.y + this.controls.direction.y;
     const length = Math.hypot(vx, vy);
-    if (length > 0.08 && !this.isDodging) this.direction.set(vx / length, vy / length);
-    const moving = length > 0.08 || this.isDodging;
+    if (length > 1) {
+      vx /= length;
+      vy /= length;
+    }
+    const moveLen = Math.hypot(vx, vy);
+    if (moveLen > 0.08 && !this.isDodging) {
+      this.direction.set(vx / moveLen, vy / moveLen);
+    }
+    const moving = moveLen > 0.08 || this.isDodging;
     const speed = this.isDodging ? 540 : getPlayerStats(gameState.data).speed;
-    const moveDirX = this.isDodging ? this.direction.x : length ? vx / length : 0;
-    const moveDirY = this.isDodging ? this.direction.y : length ? vy / length : 0;
+    const moveDirX = this.isDodging ? this.direction.x : vx;
+    const moveDirY = this.isDodging ? this.direction.y : vy;
     const next = moveInWorld({ x: this.view.x, y: this.view.y }, {
       x: this.view.x + moveDirX * speed * delta / 1000,
       y: this.view.y + moveDirY * speed * delta / 1000,
@@ -237,7 +284,7 @@ export class Player {
     this.syncStatusPresentation();
     if (this.sprite) {
       if (time > this.attackAt && canPlayLocomotion(this.visualState, this.sprite.anims.isPlaying)) {
-        this.playPose(this.isDodging || length > 0.75 ? 'run' : moving ? 'walk' : 'idle');
+        this.playPose(this.isDodging || moveLen > 0.75 ? 'run' : moving ? 'walk' : 'idle');
       }
     }
     if (!this.sprite) this.view.setScale(this.isDodging ? 0.89 : 1 + (moving ? Math.sin(time / 80) * 0.04 : 0));
@@ -281,6 +328,20 @@ export class Player {
     this.syncEquipmentPresentation();
   }
 
+  private getAimDirection(): Phaser.Math.Vector2 | null {
+    if (!this.inputManager) return null;
+    const settings = this.inputManager.settingsManager?.getSettings?.();
+    const mouseAiming = settings?.pc?.mouseAiming ?? true;
+    if (!mouseAiming) return null;
+    const aim = this.inputManager.getAimPoint?.();
+    if (!aim) return null;
+    const dx = aim.x - this.view.x;
+    const dy = aim.y - this.view.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist <= 1) return null;
+    return new Phaser.Math.Vector2(dx / dist, dy / dist);
+  }
+
   attack(): void {
     if (this.isLocked || this.isDodging) { this.attackBufferedUntil = 0; return; }
     const time = this.scene.time.now;
@@ -290,6 +351,12 @@ export class Player {
     this.lastAttack = time;
     const weapon = this.getEquippedWeapon();
     this.attackAt = time + calculateWeaponAttackTiming(weapon, this.combo);
+
+    const aimDir = this.getAimDirection();
+    if (aimDir) {
+      this.direction.set(aimDir.x, aimDir.y);
+    }
+
     if (this.sprite) {
       this.playPose('attack' + this.combo, this.attackAt - time);
     }
@@ -320,14 +387,27 @@ export class Player {
   useSkill(slot: SkillSlot): void {
     const s = gameState.data;
     if (this.isLocked || this.isDodging) return;
+    if (!s.rpg?.skills) return;
+
     const result = castEquippedSkill(s.rpg.skills, {
       level: s.level, hp: s.hp, mp: s.mp, maxHp: getPlayerStats(s).maxHp, maxMp: getPlayerStats(s).maxMp,
-      attack: s.attack, gold: s.gold, equippedWeaponId: s.rpg.equipment.slots.weapon,
+      attack: s.attack, gold: s.gold, equippedWeaponId: s.rpg?.equipment?.slots?.weapon,
     }, slot, Date.now());
-    if (!result.success || !result.skill) {
-      floatText(this.scene, this.x, this.y - 40, result.reason === 'on_cooldown' ? 'ĐANG HỒI CHIÊU' : 'CHƯA THỂ DÙNG', '#ffce91');
+
+    if (!result || !result.success || !result.skill) {
+      if (result?.reason === 'on_cooldown') {
+        floatText(this.scene, this.x, this.y - 40, 'ĐANG HỒI CHIÊU', '#ffce91');
+      } else if (result?.reason !== 'unknown_skill' && result?.reason !== 'not_unlocked') {
+        floatText(this.scene, this.x, this.y - 40, 'CHƯA THỂ DÙNG', '#ffce91');
+      }
       return;
     }
+
+    const aimDir = this.getAimDirection();
+    if (aimDir) {
+      this.direction.set(aimDir.x, aimDir.y);
+    }
+
     this.attackBufferedUntil = 0;
     gameState.data = { ...s, hp: result.caster.hp, mp: result.caster.mp, rpg: { ...s.rpg, skills: result.progress } };
     const effect = result.skill.effect;
@@ -338,6 +418,48 @@ export class Player {
     this.playPose(result.skill.element === 'flame' ? 'fire' : result.skill.element === 'water' ? 'water' : 'earth');
     floatText(this.scene, this.x, this.y - 40, result.skill.vietnameseName, '#a4e6e3');
     this.actions.skill(result.skill, result.damageDealt ?? 0, this.direction.clone());
+  }
+
+  useQuickItem(index: number): void {
+    if (this.isLocked || this.isDodging) return;
+    const s = gameState.data;
+    const inv = s.rpg?.inventory;
+    if (!inv?.slots || typeof consumeItem !== 'function' || typeof getItem !== 'function') return;
+
+    const consumables = inv.slots.filter(slot => {
+      const it = getItem(slot.itemId);
+      return it && it.kind === 'consumable' && slot.quantity > 0;
+    });
+
+    const target = consumables[index];
+    if (!target) return;
+
+    const item = getItem(target.itemId);
+    if (!item) return;
+
+    const change = consumeItem(inv, target.itemId);
+    if (change.changed !== 1) return;
+
+    const stats = getPlayerStats(s);
+    let healed = false;
+    let text = '';
+    if (item.restoreHp) {
+      s.hp = Math.min(stats.maxHp, s.hp + item.restoreHp);
+      text = `+${item.restoreHp} HP`;
+      healed = true;
+    }
+    if (item.restoreMp) {
+      s.mp = Math.min(stats.maxMp, s.mp + item.restoreMp);
+      text = (text ? text + ' ' : '') + `+${item.restoreMp} MP`;
+      healed = true;
+    }
+
+    s.rpg.inventory = change.state;
+    gameState.save();
+    if (healed) {
+      audioManager.playCue('heal', { priority: 2 });
+      floatText(this.scene, this.x, this.y - 40, `${item.name}: ${text}`, '#9df2c8');
+    }
   }
 
   hit(damage: number): void {
