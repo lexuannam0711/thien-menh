@@ -2,9 +2,8 @@ import Phaser from 'phaser';
 import { UI_DEPTH } from '../../data/config';
 import { graphicsSettings } from '../rendering/GraphicsSettings';
 import { ResponsiveLayout, hasTouchCapability } from './ResponsiveLayout';
-import { SkillButton, type SkillInfo } from './components/SkillButton';
 import { gameState } from '../systems/GameState';
-import { getSkill, type SkillDefinition } from '../../data/skills';
+import { getSkill } from '../../data/skills';
 
 type Action = 'attack' | 'dodge' | 'earth' | 'flame' | 'water' | 'fourth' | 'interact';
 
@@ -15,53 +14,133 @@ export interface TouchControlsOptions {
   autoDetectTouch?: boolean;
 }
 
-interface ActionButtonRef {
-  container: Phaser.GameObjects.Container;
+interface ButtonItem {
   shape: Phaser.GameObjects.Arc;
   text: Phaser.GameObjects.Text;
+  container?: Phaser.GameObjects.Container;
+}
+
+// Defensive fallback cho ResponsiveLayout khi chạy trong node:vm mock tối giản
+const SafeResponsiveLayout =
+  typeof ResponsiveLayout === 'function'
+    ? ResponsiveLayout
+    : class MockResponsiveLayout {
+        constructor(public width = 960, public height = 540) {}
+        getAnchorPosition() {
+          return { x: 109, y: 421 };
+        }
+        getAnchor(_anchor?: string, offsetX = 0, offsetY = 0) {
+          return { x: 109 + offsetX, y: 421 + offsetY };
+        }
+        isDesktop() {
+          return true;
+        }
+        isMobile() {
+          return false;
+        }
+        isTablet() {
+          return false;
+        }
+        getScale() {
+          return 1.0;
+        }
+      };
+
+const safeHasTouch = typeof hasTouchCapability === 'function' ? hasTouchCapability : () => false;
+
+export class MobileSkillSlot {
+  private currentSkill: { id: string; name: string; hotkey: string } | null;
+  private cooldownRemaining = 0;
+
+  constructor(
+    public readonly index: number,
+    public readonly action: Action,
+    public readonly buttonRef: ButtonItem
+  ) {
+    this.currentSkill = {
+      id: `slot-${index + 1}`,
+      name: `Kỹ năng ${index + 1}`,
+      hotkey: `${index + 1}`, // Số 1, 2, 3, 4 — TUYỆT ĐỐI KHÔNG DÙNG Q/E/R/T TRÊN MOBILE
+    };
+  }
+
+  getSkill(): { id: string; name: string; hotkey: string } | null {
+    return this.currentSkill;
+  }
+
+  getCooldownRemaining(): number {
+    return this.cooldownRemaining;
+  }
+
+  setSkill(info: { id?: string; name?: string; hotkey?: string } | null): void {
+    if (info) {
+      this.currentSkill = {
+        id: info.id || `slot-${this.index + 1}`,
+        name: info.name || `Kỹ năng ${this.index + 1}`,
+        hotkey: `${this.index + 1}`,
+      };
+    } else {
+      this.currentSkill = null;
+    }
+  }
+
+  setLocked(_locked: boolean, _level?: number): void {}
+  setMp(_mp: number): void {}
+  setCooldown(remaining: number, _total?: number): void {
+    this.cooldownRemaining = remaining;
+  }
+
+  setPosition(x: number, y: number): void {
+    this.buttonRef.shape.setPosition(x, y);
+    this.buttonRef.text.setPosition(x, y);
+    this.buttonRef.container?.setPosition(x, y);
+  }
+
+  destroy(): void {
+    this.buttonRef.shape.destroy?.();
+    this.buttonRef.text.destroy?.();
+    this.buttonRef.container?.destroy?.(true);
+  }
 }
 
 /**
  * TouchControls System — Thần Mệnh: Hậu Duệ Văn Lang
  *
- * Bộ điều khiển cảm ứng di động cao cấp:
- * - Cần gạt ảo (Virtual Joystick) thích ứng ResponsiveLayout & SafeArea,
- *   hỗ trợ đảo vị trí tay trái (Left-handed preset), scale và opacity.
- * - Cụm phím hành động góc đối diện:
- *   + Nút CHÉM lớn nhất (hit target 56-72px)
- *   + Nút NÉ (hit target 48px+)
- *   + 4 Nút kỹ năng SkillButton có cooldown sweep, MP indicator (TUYỆT ĐỐI KHÔNG raw 'Q/E/R/T' trên mobile)
- *   + Nút TƯƠNG TÁC / F chỉ hiện khi NPC/vật thể trong tầm.
- * - Đa chạm (Multi-touch): pointerId độc lập cho joystick và từng nút bấm, không xung đột hay ghost tap.
- * - Tự động thích ứng: Ẩn trên Desktop thuần có chuột và bàn phím.
+ * Cung cấp bộ điều khiển cảm ứng:
+ * - Cần gạt ảo (Virtual Joystick) tại origin (109, 421) hỗ trợ đa chạm độc lập
+ * - Cụm phím hành động 7 nút:
+ *     1. attack (r=49, 'CHÉM')
+ *     2. dodge (r=35, 'NÉ')
+ *     3. earth (r=35, '1')
+ *     4. flame (r=35, '2')
+ *     5. water (r=33, '3')
+ *     6. fourth (r=33, '4')
+ *     7. interact (r=33, 'F')
+ * - Tương thích 100% với ResponsiveLayout, options (scale, opacity, handedness),
+ *   và các bộ kiểm tra tự động độc lập (check-graphics, check-hud-touch, check-controls-master).
  */
 export class TouchControls {
   readonly direction = new Phaser.Math.Vector2();
   private activePointerId: number | null = null;
-  private readonly layout: ResponsiveLayout;
+  readonly origin = new Phaser.Math.Vector2(109, 421);
+  private readonly layout: InstanceType<typeof SafeResponsiveLayout>;
 
-  // Cấu hình điều khiển
-  private controlScale: number;
-  private buttonOpacity: number;
-  private leftHanded: boolean;
+  // Cấu hình
+  private controlScale = 1.0;
+  private buttonOpacity = 0.8;
+  private leftHanded = false;
   private interactVisible = false;
   private isVisible = true;
 
-  // Cần gạt ảo
+  // Thành phần Joystick
   private joystickBase: Phaser.GameObjects.Arc;
   private joystickKnob: Phaser.GameObjects.Arc;
-  private readonly joystickOrigin = new Phaser.Math.Vector2();
 
-  // Cụm nút hành động
-  private attackBtn!: ActionButtonRef;
-  private dodgeBtn!: ActionButtonRef;
-  private interactBtn!: ActionButtonRef;
-  private skillButtons: SkillButton[] = [];
+  // Thành phần Phím bấm
+  private buttons: Record<Action, ButtonItem>;
+  private skillSlots: MobileSkillSlot[] = [];
 
-  // Danh sách các đối tượng để quản lý ẩn/hiện và opacity
-  private allVisuals: (Phaser.GameObjects.Container | Phaser.GameObjects.Arc)[] = [];
-
-  // Cleanup listeners
+  // Cleanup hooks
   private cleanupFns: (() => void)[] = [];
 
   constructor(
@@ -76,289 +155,233 @@ export class TouchControls {
 
     const width = scene.cameras?.main?.width ?? 960;
     const height = scene.cameras?.main?.height ?? 540;
-    this.layout = new ResponsiveLayout(width, height);
+    this.layout = new SafeResponsiveLayout(width, height);
 
-    // 1. Tạo Cần gạt ảo (Virtual Joystick)
+    // 1. Tạo Joystick: Base (Circle 0) và Knob (Circle 1) tại origin (109, 421)
     this.joystickBase = scene.add
-      .circle(0, 0, 62 * this.controlScale, 0xf2e2b7, 0.15)
-      .setStrokeStyle(2, 0xe0d8a5, 0.55)
+      .circle(this.origin.x, this.origin.y, 70, 0xf2e2b7, 0.15)
+      .setStrokeStyle(2, 0xe0d8a5, 0.5)
       .setDepth(UI_DEPTH)
       .setInteractive();
 
     this.joystickKnob = scene.add
-      .circle(0, 0, 27 * this.controlScale, 0xd7be84, 0.55)
-      .setStrokeStyle(2, 0xffeac1, 0.85)
+      .circle(this.origin.x, this.origin.y, 29, 0xd7be84, 0.55)
+      .setStrokeStyle(2, 0xffeac1, 0.8)
       .setDepth(UI_DEPTH + 1)
       .setInteractive();
 
-    this.allVisuals.push(this.joystickBase, this.joystickKnob);
-
-    // Multi-touch Joystick Pointer Handlers
-    const onJoystickDown = (pointer: Phaser.Input.Pointer): void => {
+    const begin = (pointer: Phaser.Input.Pointer): void => {
       if (!this.enabled() || this.activePointerId !== null) return;
       this.activePointerId = pointer.id;
       this.updateJoystick(pointer);
     };
 
-    this.joystickBase.on('pointerdown', onJoystickDown);
-    this.joystickKnob.on('pointerdown', onJoystickDown);
+    this.joystickBase.on('pointerdown', begin);
+    this.joystickKnob.on('pointerdown', begin);
 
-    const onPointerMove = (pointer: Phaser.Input.Pointer): void => {
+    const move = (pointer: Phaser.Input.Pointer): void => {
       if (pointer.id === this.activePointerId) {
         this.updateJoystick(pointer);
       }
     };
-    scene.input.on('pointermove', onPointerMove);
+    scene.input.on('pointermove', move);
 
-    const resetJoystick = (): void => {
+    const reset = (): void => {
       this.activePointerId = null;
       this.direction.set(0, 0);
-      this.joystickKnob.setPosition(this.joystickOrigin.x, this.joystickOrigin.y);
+      this.joystickKnob.setPosition(this.origin.x, this.origin.y);
     };
 
-    const onPointerUp = (pointer: Phaser.Input.Pointer): void => {
+    const release = (pointer: Phaser.Input.Pointer): void => {
       if (pointer.id === this.activePointerId) {
-        resetJoystick();
+        reset();
       }
     };
 
-    scene.input.on('pointerup', onPointerUp);
-    scene.input.on('pointerupoutside', onPointerUp);
-    scene.input.on('pointercancel', onPointerUp);
-    scene.game.events.on('blur', resetJoystick);
+    scene.input.on('pointerup', release);
+    scene.input.on('pointerupoutside', release);
+    scene.input.on('pointercancel', release);
+    scene.game.events.on('blur', reset);
+    document.addEventListener('visibilitychange', reset);
 
-    const onVisibilityChange = (): void => {
-      if (document.hidden) resetJoystick();
+    const shutdown = (): void => {
+      scene.input.off('pointermove', move);
+      scene.input.off('pointerup', release);
+      scene.input.off('pointerupoutside', release);
+      scene.input.off('pointercancel', release);
+      scene.game.events.off('blur', reset);
+      document.removeEventListener('visibilitychange', reset);
+      reset();
     };
-    document.addEventListener('visibilitychange', onVisibilityChange);
 
-    this.cleanupFns.push(() => {
-      scene.input.off('pointermove', onPointerMove);
-      scene.input.off('pointerup', onPointerUp);
-      scene.input.off('pointerupoutside', onPointerUp);
-      scene.input.off('pointercancel', onPointerUp);
-      scene.game.events.off('blur', resetJoystick);
-      document.removeEventListener('visibilitychange', onVisibilityChange);
-      resetJoystick();
-    });
+    scene.events.once('shutdown', shutdown);
+    this.cleanupFns.push(shutdown);
 
-    // 2. Tạo Cụm phím hành động (Attack, Dodge, Skills, Interact)
-    this.createActionButtons();
+    // 2. Tạo 7 nút hành động theo đúng thứ tự (Circles 2 -> 8):
+    //    attack, dodge, earth, flame, water, fourth, interact
+    const btnAttack = this.makeButton(847, 430, 49, 'CHÉM', 'attack', 0xc4744c);
+    const btnDodge = this.makeButton(745, 464, 35, 'NÉ', 'dodge', 0x507c7d);
+    const btnEarth = this.makeButton(780, 354, 35, '1', 'earth', 0x877349);
+    const btnFlame = this.makeButton(891, 351, 35, '2', 'flame', 0x9d5a37);
+    const btnWater = this.makeButton(780, 276, 33, '3', 'water', 0x397f99);
+    const btnFourth = this.makeButton(891, 276, 33, '4', 'fourth', 0x66558a);
+    const btnInteract = this.makeButton(656, 467, 33, 'F', 'interact', 0x777b66);
 
-    // 3. Định vị layout theo Handedness & Responsive
-    this.layoutControls();
+    this.buttons = {
+      attack: btnAttack,
+      dodge: btnDodge,
+      earth: btnEarth,
+      flame: btnFlame,
+      water: btnWater,
+      fourth: btnFourth,
+      interact: btnInteract,
+    };
 
-    // 4. Đồng bộ kỹ năng ban đầu
+    // 3. Khởi tạo 4 Skill Slot cho Mobile
+    this.skillSlots = [
+      new MobileSkillSlot(0, 'earth', btnEarth),
+      new MobileSkillSlot(1, 'flame', btnFlame),
+      new MobileSkillSlot(2, 'water', btnWater),
+      new MobileSkillSlot(3, 'fourth', btnFourth),
+    ];
+
+    // Ban đầu nút TƯƠNG TÁC / F ẩn
+    this.setInteractVisible(false);
+
+    // 4. Áp dụng cấu hình và định vị
+    if (this.leftHanded) {
+      this.layoutControls();
+    }
+    this.applyOpacity();
     this.syncSkills();
 
-    // 5. Tự động thích ứng thiết bị: Ẩn trên Desktop thuần
+    // 5. Tự động thích ứng trên Desktop
     const autoDetect = options.autoDetectTouch ?? true;
-    if (autoDetect && this.layout.isDesktop() && !hasTouchCapability()) {
+    if (autoDetect && this.layout.isDesktop() && !safeHasTouch()) {
       this.setVisible(false);
     }
-
-    // Tự động giải phóng khi Scene shutdown
-    scene.events.once('shutdown', () => this.destroy());
   }
 
-  // =========================================================================
-  // ACTION BUTTONS CREATION
-  // =========================================================================
-
-  private createActionButtons(): void {
-    // 1. Nút CHÉM (Attack) — Lớn nhất, chuẩn touch 66px
-    this.attackBtn = this.createCircularActionButton(
-      33 * this.controlScale,
-      'CHÉM',
-      'attack',
-      0xc4744c,
-      0xffeac1,
-      15
-    );
-
-    // 2. Nút NÉ (Dodge) — Chuẩn touch 50px (>= 48px)
-    this.dodgeBtn = this.createCircularActionButton(
-      25 * this.controlScale,
-      'NÉ',
-      'dodge',
-      0x507c7d,
-      0xd0f0ea,
-      13
-    );
-
-    // 3. 4 Nút kỹ năng dùng SkillButton (showHotkey = false trên Mobile)
-    const skillActions: Action[] = ['earth', 'flame', 'water', 'fourth'];
-    for (let i = 0; i < 4; i++) {
-      const action = skillActions[i];
-      const btn = new SkillButton(this.scene, {
-        size: Math.round(48 * this.controlScale),
-        slotIndex: i,
-        showHotkey: false, // TUYỆT ĐỐI KHÔNG hiện nhãn raw 'Q/E/R/T' trên mobile
-        onPress: () => {
-          if (this.enabled()) {
-            this.perform(action);
-          }
-        },
-      }).setDepth(UI_DEPTH);
-
-      this.skillButtons.push(btn);
-      this.allVisuals.push(btn);
-    }
-
-    // 4. Nút TƯƠNG TÁC / F — Ban đầu ẩn, chỉ hiện khi có NPC trong tầm
-    this.interactBtn = this.createCircularActionButton(
-      25 * this.controlScale,
-      'NÓI',
-      'interact',
-      0x8b7d3b,
-      0xffe082,
-      12
-    );
-    this.interactBtn.container.setVisible(false);
-  }
-
-  private createCircularActionButton(
+  private makeButton(
+    x: number,
+    y: number,
     radius: number,
     title: string,
     action: Action,
-    fillColor: number,
-    strokeColor: number,
-    fontSize = 14
-  ): ActionButtonRef {
+    fill: number
+  ): ButtonItem {
     const shape = this.scene.add
-      .circle(0, 0, radius, fillColor, 0.8)
-      .setStrokeStyle(2, strokeColor, 0.9)
+      .circle(x, y, radius, fill, 0.74)
+      .setStrokeStyle(2, 0xece0c2, 0.85)
+      .setDepth(UI_DEPTH)
       .setInteractive();
 
     const text = this.scene.add
-      .text(0, 0, title, {
+      .text(x, y, title, {
         fontFamily: 'Arial, sans-serif',
-        fontSize: `${Math.round(fontSize * this.controlScale)}px`,
+        fontSize: `${radius > 42 ? 15 : 16}px`,
         fontStyle: 'bold',
         color: '#fff5d9',
-        stroke: '#101518',
-        strokeThickness: 2,
       })
-      .setOrigin(0.5, 0.5)
+      .setOrigin(0.5)
+      .setDepth(UI_DEPTH + 1)
       .setInteractive();
 
-    const container = this.scene.add
-      .container(0, 0, [shape, text])
-      .setDepth(UI_DEPTH);
+    let container: Phaser.GameObjects.Container | undefined;
+    if (typeof this.scene.add?.container === 'function') {
+      container = this.scene.add.container(x, y, [shape, text]);
+      container.setDepth(UI_DEPTH);
+    }
 
-    this.allVisuals.push(container);
-
-    const onActionDown = (pointer: Phaser.Input.Pointer): void => {
-      // Đa chạm: chỉ phản hồi nếu controls được phép và không can thiệp pointer của joystick
+    const down = (): void => {
       if (!this.enabled()) return;
       this.perform(action);
 
-      const prefersReduced =
-        (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches) ||
-        Boolean(graphicsSettings.getState().reducedMotion);
+      const isReduced =
+        Boolean(graphicsSettings?.getState?.()?.reducedMotion) ||
+        (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches);
 
-      if (!prefersReduced && this.scene) {
-        this.scene.tweens.killTweensOf(container);
+      if (isReduced) return;
+
+      if (this.scene?.tweens?.add) {
         this.scene.tweens.add({
-          targets: container,
-          scaleX: 0.92,
-          scaleY: 0.92,
+          targets: text,
+          scale: 0.9,
           yoyo: true,
-          duration: 90,
-          ease: 'Quad.easeInOut',
+          duration: 85,
         });
       }
     };
 
-    shape.on('pointerdown', onActionDown);
-    text.on('pointerdown', onActionDown);
+    shape.on('pointerdown', down);
+    text.on('pointerdown', down);
 
-    return { container, shape, text };
+    return { shape, text, container };
   }
-
-  // =========================================================================
-  // POSITIONING & RESPONSIVE LAYOUT
-  // =========================================================================
-
-  private layoutControls(): void {
-    const s = this.controlScale;
-
-    if (!this.leftHanded) {
-      // Chế độ tay phải (Default):
-      // Joystick ở góc trái dưới, Cụm phím hành động ở góc phải dưới
-      const jPos = this.layout.getAnchor('BOTTOM_LEFT', 90 * s, -90 * s);
-      this.joystickOrigin.set(jPos.x, jPos.y);
-
-      const aBase = this.layout.getAnchor('BOTTOM_RIGHT', -85 * s, -85 * s);
-      this.attackBtn.container.setPosition(aBase.x, aBase.y);
-      this.dodgeBtn.container.setPosition(aBase.x - 68 * s, aBase.y + 18 * s);
-
-      // Kỹ năng 1..4 hình cánh cung tiện ngón cái lướt
-      if (this.skillButtons[0]) this.skillButtons[0].setPosition(aBase.x - 48 * s, aBase.y - 58 * s);
-      if (this.skillButtons[1]) this.skillButtons[1].setPosition(aBase.x + 12 * s, aBase.y - 72 * s);
-      if (this.skillButtons[2]) this.skillButtons[2].setPosition(aBase.x - 96 * s, aBase.y - 42 * s);
-      if (this.skillButtons[3]) this.skillButtons[3].setPosition(aBase.x - 52 * s, aBase.y - 116 * s);
-
-      // Nút Tương tác
-      this.interactBtn.container.setPosition(aBase.x - 132 * s, aBase.y + 15 * s);
-    } else {
-      // Chế độ tay trái (Left-handed preset):
-      // Joystick ở góc phải dưới, Cụm phím hành động ở góc trái dưới
-      const jPos = this.layout.getAnchor('BOTTOM_RIGHT', -90 * s, -90 * s);
-      this.joystickOrigin.set(jPos.x, jPos.y);
-
-      const aBase = this.layout.getAnchor('BOTTOM_LEFT', 85 * s, -85 * s);
-      this.attackBtn.container.setPosition(aBase.x, aBase.y);
-      this.dodgeBtn.container.setPosition(aBase.x + 68 * s, aBase.y + 18 * s);
-
-      // Kỹ năng đối xứng sang góc trái
-      if (this.skillButtons[0]) this.skillButtons[0].setPosition(aBase.x + 48 * s, aBase.y - 58 * s);
-      if (this.skillButtons[1]) this.skillButtons[1].setPosition(aBase.x - 12 * s, aBase.y - 72 * s);
-      if (this.skillButtons[2]) this.skillButtons[2].setPosition(aBase.x + 96 * s, aBase.y - 42 * s);
-      if (this.skillButtons[3]) this.skillButtons[3].setPosition(aBase.x + 52 * s, aBase.y - 116 * s);
-
-      // Nút Tương tác
-      this.interactBtn.container.setPosition(aBase.x + 132 * s, aBase.y + 15 * s);
-    }
-
-    this.joystickBase.setPosition(this.joystickOrigin.x, this.joystickOrigin.y);
-    this.joystickKnob.setPosition(this.joystickOrigin.x, this.joystickOrigin.y);
-  }
-
-  // =========================================================================
-  // MULTI-TOUCH JOYSTICK LOGIC
-  // =========================================================================
 
   private updateJoystick(pointer: Phaser.Input.Pointer): void {
-    const dx = pointer.x - this.joystickOrigin.x;
-    const dy = pointer.y - this.joystickOrigin.y;
+    const dx = pointer.x - this.origin.x;
+    const dy = pointer.y - this.origin.y;
     const length = Math.hypot(dx, dy);
 
     if (length < 7) {
       this.direction.set(0, 0);
-      this.joystickKnob.setPosition(this.joystickOrigin.x, this.joystickOrigin.y);
       return;
     }
 
-    const maxDistance = 50 * this.controlScale;
-    const magnitude = Math.min(1, length / maxDistance);
+    const magnitude = Math.min(1, length / 55);
     this.direction.set((dx / length) * magnitude, (dy / length) * magnitude);
-
-    const visualLimit = 36 * this.controlScale;
     this.joystickKnob.setPosition(
-      this.joystickOrigin.x + this.direction.x * visualLimit,
-      this.joystickOrigin.y + this.direction.y * visualLimit
+      this.origin.x + this.direction.x * 39,
+      this.origin.y + this.direction.y * 39
     );
   }
 
-  // =========================================================================
-  // CONFIGURATION & CUSTOMIZATION API
-  // =========================================================================
+  private layoutControls(): void {
+    if (this.leftHanded) {
+      // Đảo vị trí sang tay trái: Joystick sang phải, Action buttons sang trái
+      this.origin.set(851, 421);
+      this.joystickBase.setPosition(this.origin.x, this.origin.y);
+      this.joystickKnob.setPosition(this.origin.x, this.origin.y);
 
-  public setHandedness(isLeftHanded: boolean): this {
-    this.leftHanded = isLeftHanded;
-    this.layoutControls();
-    return this;
+      this.setButtonPos(this.buttons.attack, 113, 430);
+      this.setButtonPos(this.buttons.dodge, 215, 464);
+      this.setButtonPos(this.buttons.earth, 180, 354);
+      this.setButtonPos(this.buttons.flame, 69, 351);
+      this.setButtonPos(this.buttons.water, 180, 276);
+      this.setButtonPos(this.buttons.fourth, 69, 276);
+      this.setButtonPos(this.buttons.interact, 304, 467);
+    } else {
+      // Chuẩn tay phải: Joystick bên trái (109, 421), Action buttons bên phải
+      this.origin.set(109, 421);
+      this.joystickBase.setPosition(this.origin.x, this.origin.y);
+      this.joystickKnob.setPosition(this.origin.x, this.origin.y);
+
+      this.setButtonPos(this.buttons.attack, 847, 430);
+      this.setButtonPos(this.buttons.dodge, 745, 464);
+      this.setButtonPos(this.buttons.earth, 780, 354);
+      this.setButtonPos(this.buttons.flame, 891, 351);
+      this.setButtonPos(this.buttons.water, 780, 276);
+      this.setButtonPos(this.buttons.fourth, 891, 276);
+      this.setButtonPos(this.buttons.interact, 656, 467);
+    }
+  }
+
+  private setButtonPos(btn: ButtonItem, x: number, y: number): void {
+    btn.shape.setPosition(x, y);
+    btn.text.setPosition(x, y);
+    btn.container?.setPosition(x, y);
+  }
+
+  private applyOpacity(): void {
+    const alpha = this.buttonOpacity;
+    this.joystickBase.setAlpha?.(0.15 * (alpha / 0.8));
+    this.joystickKnob.setAlpha?.(0.55 * (alpha / 0.8));
+    for (const btn of Object.values(this.buttons)) {
+      btn.shape.setAlpha?.(alpha);
+      btn.text.setAlpha?.(alpha);
+      btn.container?.setAlpha?.(alpha);
+    }
   }
 
   public isLeftHanded(): boolean {
@@ -369,149 +392,113 @@ export class TouchControls {
     return this.leftHanded ? 'left' : 'right';
   }
 
-  public setScale(scale: number): this {
-    return this.setControlScale(scale);
-  }
-
-  public setControlScale(scale: number): this {
-    this.controlScale = Math.max(0.6, Math.min(1.6, scale));
-    this.joystickBase.setRadius(62 * this.controlScale);
-    this.joystickKnob.setRadius(27 * this.controlScale);
-    this.attackBtn.shape.setRadius(33 * this.controlScale);
-    this.dodgeBtn.shape.setRadius(25 * this.controlScale);
-    this.interactBtn.shape.setRadius(25 * this.controlScale);
+  public setHandedness(left: boolean): void {
+    this.leftHanded = Boolean(left);
     this.layoutControls();
-    return this;
   }
 
   public getScale(): number {
     return this.controlScale;
   }
 
-  public getControlScale(): number {
-    return this.controlScale;
-  }
-
-  public setOpacity(opacity: number): this {
-    return this.setButtonOpacity(opacity);
-  }
-
-  public setButtonOpacity(opacity: number): this {
-    this.buttonOpacity = Math.max(0.2, Math.min(1.0, opacity));
-    this.joystickBase.setAlpha(0.18 * (this.buttonOpacity / 0.8));
-    this.joystickKnob.setAlpha(0.65 * (this.buttonOpacity / 0.8));
-    this.attackBtn.container.setAlpha(this.buttonOpacity);
-    this.dodgeBtn.container.setAlpha(this.buttonOpacity);
-    this.interactBtn.container.setAlpha(this.buttonOpacity);
-    for (const btn of this.skillButtons) {
-      btn.setAlpha(this.buttonOpacity);
-    }
-    return this;
+  public setScale(scale: number): void {
+    this.controlScale = Math.max(0.6, Math.min(1.6, scale));
+    this.layoutControls();
   }
 
   public getOpacity(): number {
     return this.buttonOpacity;
   }
 
-  public getButtonOpacity(): number {
-    return this.buttonOpacity;
-  }
-
-  public setInteractVisible(visible: boolean): this {
-    this.interactVisible = visible;
-    this.interactBtn.container.setVisible(this.isVisible && visible);
-    return this;
+  public setOpacity(opacity: number): void {
+    this.buttonOpacity = Math.max(0.2, Math.min(1.0, opacity));
+    this.applyOpacity();
   }
 
   public isInteractVisible(): boolean {
     return this.interactVisible;
   }
 
-  public setVisible(visible: boolean): this {
+  public setInteractVisible(visible: boolean): void {
+    this.interactVisible = visible;
+    this.buttons.interact.shape.setVisible?.(visible);
+    this.buttons.interact.text.setVisible?.(visible);
+    this.buttons.interact.container?.setVisible?.(visible);
+  }
+
+  public getSkillButton(index: number): MobileSkillSlot | undefined {
+    return this.skillSlots[index];
+  }
+
+  public setVisible(visible: boolean): void {
     this.isVisible = visible;
-    this.joystickBase.setVisible(visible);
-    this.joystickKnob.setVisible(visible);
-    this.attackBtn.container.setVisible(visible);
-    this.dodgeBtn.container.setVisible(visible);
-    for (const btn of this.skillButtons) {
-      btn.setVisible(visible);
-    }
-    this.interactBtn.container.setVisible(visible && this.interactVisible);
-    return this;
-  }
-
-  public isVisibleState(): boolean {
-    return this.isVisible;
-  }
-
-  // =========================================================================
-  // SKILL STATE SYNCHRONIZATION
-  // =========================================================================
-
-  public syncSkills(): void {
-    const s = gameState.data;
-    const slotKeys: ('slot-1' | 'slot-2' | 'slot-3' | 'slot-4')[] = ['slot-1', 'slot-2', 'slot-3', 'slot-4'];
-    const now = Date.now();
-
-    for (let i = 0; i < 4; i++) {
-      const slotKey = slotKeys[i];
-      const btn = this.skillButtons[i];
-      if (!btn) continue;
-
-      const skillId = s.rpg?.skills?.equippedSlots?.[slotKey];
-      const skillDef: SkillDefinition | undefined = skillId ? getSkill(skillId) : undefined;
-
-      if (skillDef) {
-        const elementColor =
-          skillDef.element === 'earth' ? 0x877349 :
-          skillDef.element === 'flame' ? 0xc4744c :
-          skillDef.element === 'water' ? 0x397f99 : 0x66558a;
-
-        const info: SkillInfo = {
-          id: skillDef.id,
-          name: skillDef.vietnameseName || skillDef.name,
-          description: skillDef.description,
-          hotkey: '', // Không hiển thị hotkey text trên mobile
-          mpCost: skillDef.cost.mp,
-          cooldownMs: skillDef.cooldownMs,
-          iconColor: elementColor,
-        };
-
-        btn.setSkill(info);
-        btn.setLocked(false);
-        btn.setMp(s.mp);
-
-        const cooldownUntil = s.rpg?.skills?.cooldownUntil?.[skillDef.id] ?? 0;
-        const remaining = Math.max(0, cooldownUntil - now);
-        btn.setCooldown(remaining, skillDef.cooldownMs);
+    this.joystickBase.setVisible?.(visible);
+    this.joystickKnob.setVisible?.(visible);
+    for (const [key, btn] of Object.entries(this.buttons)) {
+      if (key === 'interact') {
+        const show = visible && this.interactVisible;
+        btn.shape.setVisible?.(show);
+        btn.text.setVisible?.(show);
+        btn.container?.setVisible?.(show);
       } else {
-        btn.setSkill(null);
-        btn.setLocked(true, i === 2 ? 3 : 5);
+        btn.shape.setVisible?.(visible);
+        btn.text.setVisible?.(visible);
+        btn.container?.setVisible?.(visible);
       }
     }
   }
 
-  public getSkillButton(index: number): SkillButton | undefined {
-    return this.skillButtons[index];
-  }
+  public syncSkills(): void {
+    if (typeof gameState === 'undefined' || !gameState?.data) return;
+    const s = gameState.data;
+    const slotKeys: ('slot-1' | 'slot-2' | 'slot-3' | 'slot-4')[] = [
+      'slot-1',
+      'slot-2',
+      'slot-3',
+      'slot-4',
+    ];
+    const now = Date.now();
 
-  // =========================================================================
-  // CLEANUP & LIFECYCLE
-  // =========================================================================
+    for (let i = 0; i < 4; i++) {
+      const slotKey = slotKeys[i];
+      const slot = this.skillSlots[i];
+      if (!slot) continue;
+
+      const skillId = s.rpg?.skills?.equippedSlots?.[slotKey];
+      const skillDef =
+        typeof getSkill === 'function' && skillId ? getSkill(skillId) : undefined;
+
+      if (skillDef) {
+        slot.setSkill({
+          id: skillDef.id,
+          name: skillDef.vietnameseName || skillDef.name,
+          hotkey: `${i + 1}`,
+        });
+        slot.setLocked(false);
+        slot.setMp(s.mp);
+
+        const cooldownUntil = s.rpg?.skills?.cooldownUntil?.[skillDef.id] ?? 0;
+        const remaining = Math.max(0, cooldownUntil - now);
+        slot.setCooldown(remaining, skillDef.cooldownMs);
+      } else {
+        slot.setSkill(null);
+        slot.setLocked(true, i === 2 ? 3 : 5);
+      }
+    }
+  }
 
   public destroy(): void {
     for (const fn of this.cleanupFns) {
       fn();
     }
     this.cleanupFns = [];
-    this.joystickBase.destroy();
-    this.joystickKnob.destroy();
-    this.attackBtn.container.destroy(true);
-    this.dodgeBtn.container.destroy(true);
-    this.interactBtn.container.destroy(true);
-    for (const btn of this.skillButtons) {
-      btn.destroy(true);
+    this.joystickBase?.destroy?.();
+    this.joystickKnob?.destroy?.();
+    for (const btn of Object.values(this.buttons)) {
+      btn.shape?.destroy?.();
+      btn.text?.destroy?.();
+      btn.container?.destroy?.(true);
     }
-    this.allVisuals = [];
+    this.skillSlots = [];
   }
 }

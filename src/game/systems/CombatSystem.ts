@@ -14,6 +14,13 @@ import {
   type WeaponDefinition,
 } from '../../data/weapons';
 
+function makeVec2(x = 0, y = 0): Phaser.Math.Vector2 {
+  if (typeof Phaser !== 'undefined' && Phaser.Math?.Vector2) {
+    return new Phaser.Math.Vector2(x, y);
+  }
+  return { x, y } as unknown as Phaser.Math.Vector2;
+}
+
 export class CombatSystem {
   constructor(private scene: Phaser.Scene, private enemies: () => Enemy[], private bossSystem?: BossSystem) {}
 
@@ -27,9 +34,10 @@ export class CombatSystem {
     const reach = weapon.range;
     const knockback = calculateWeaponKnockback(weapon, comboIndex);
 
-    const rawDir = dir && (dir.x !== 0 || dir.y !== 0) ? dir : (player.direction?.length() ? player.direction : new Phaser.Math.Vector2(1, 0));
+    const playerDirLen = typeof player.direction?.length === 'function' ? player.direction.length() : Math.hypot(player.direction?.x ?? 0, player.direction?.y ?? 0);
+    const rawDir = dir && (dir.x !== 0 || dir.y !== 0) ? dir : (playerDirLen ? player.direction : makeVec2(1, 0));
     const dirLen = Math.hypot(rawDir.x, rawDir.y);
-    const effectiveDir = dirLen > 0 ? new Phaser.Math.Vector2(rawDir.x / dirLen, rawDir.y / dirLen) : new Phaser.Math.Vector2(1, 0);
+    const effectiveDir = dirLen > 0 ? makeVec2(rawDir.x / dirLen, rawDir.y / dirLen) : makeVec2(1, 0);
 
     this.slashEffect(player.x, player.y, effectiveDir, combo, weapon);
     audioManager.playCue('sword_slash', { pitchMultiplier: 1 + combo * 0.04 });
@@ -64,9 +72,10 @@ export class CombatSystem {
   }
 
   skill(player: Player, skill: SkillDefinition, damage: number, direction?: Phaser.Math.Vector2): void {
-    const rawDir = direction && (direction.x !== 0 || direction.y !== 0) ? direction : (player.direction?.length() ? player.direction : new Phaser.Math.Vector2(1, 0));
+    const playerDirLen = typeof player.direction?.length === 'function' ? player.direction.length() : Math.hypot(player.direction?.x ?? 0, player.direction?.y ?? 0);
+    const rawDir = direction && (direction.x !== 0 || direction.y !== 0) ? direction : (playerDirLen ? player.direction : makeVec2(1, 0));
     const dirLen = Math.hypot(rawDir.x, rawDir.y);
-    const effectiveDir = dirLen > 0 ? new Phaser.Math.Vector2(rawDir.x / dirLen, rawDir.y / dirLen) : new Phaser.Math.Vector2(1, 0);
+    const effectiveDir = dirLen > 0 ? makeVec2(rawDir.x / dirLen, rawDir.y / dirLen) : makeVec2(1, 0);
 
     this.skillEffect(player.x, player.y, skill, effectiveDir);
     audioManager.playCue(skill.element === 'flame' ? 'skill_flame' : 'skill_earth', { priority: 2 });

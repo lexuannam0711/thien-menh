@@ -5,6 +5,7 @@ import { gameState } from '../systems/GameState';
 import { settingsModel, CONTROLS_GUIDE } from '../ui/SettingsModel';
 import { audioManager } from '../audio/AudioManager';
 import { graphicsSettings } from '../rendering/GraphicsSettings';
+import { ControlsSettings } from '../ui/screens/ControlsSettings';
 
 export class MenuScene extends Phaser.Scene {
   private muteButtonText?: Phaser.GameObjects.Text;
@@ -14,6 +15,7 @@ export class MenuScene extends Phaser.Scene {
   private lastFocusedElement: HTMLElement | null = null;
   private isModalOpen = false;
   private keydownHandler?: (event: KeyboardEvent) => void;
+  private controlsSettings?: ControlsSettings;
 
   constructor() {
     super('Menu');
@@ -83,7 +85,7 @@ export class MenuScene extends Phaser.Scene {
       this,
       480,
       483,
-      'WASD / Cần gạt: di chuyển  ·  J / Chém: đánh  ·  Space / Né: lướt  ·  Q/E: thần lực  ·  F: tương tác',
+      'WASD / Cần gạt: di chuyển  ·  Chuột trái / J: đánh  ·  Space: né  ·  Phím 1-4: kỹ năng  ·  F: tương tác',
       13,
       '#c8d6c5',
       'center'
@@ -289,6 +291,13 @@ export class MenuScene extends Phaser.Scene {
     srHelp.addEventListener('click', () => this.openControlsModal());
     srNav.appendChild(srHelp);
 
+    const srControls = document.createElement('button');
+    srControls.className = 'sr-only-focusable';
+    srControls.type = 'button';
+    srControls.textContent = 'Mở cài đặt điều khiển và gán phím';
+    srControls.addEventListener('click', () => this.openControlsSettings());
+    srNav.appendChild(srControls);
+
     container.appendChild(srNav);
 
     // 3. Thanh công cụ cài đặt nhanh góc trên màn hình (Menu Accessible Dock)
@@ -306,6 +315,15 @@ export class MenuScene extends Phaser.Scene {
     dockMute.textContent = isMuted ? '🔇 ÂM THANH: TẮT' : '🔊 ÂM THANH: BẬT';
     dockMute.addEventListener('click', () => this.toggleMute());
     dock.appendChild(dockMute);
+
+    const dockControls = document.createElement('button');
+    dockControls.id = 'dock-controls-btn';
+    dockControls.type = 'button';
+    dockControls.className = 'menu-dock-btn';
+    dockControls.setAttribute('aria-label', 'Mở bảng Cài đặt Điều khiển và gán phím');
+    dockControls.textContent = '🎮 CÀI ĐẶT ĐIỀU KHIỂN';
+    dockControls.addEventListener('click', () => this.openControlsSettings());
+    dock.appendChild(dockControls);
 
     const dockHelp = document.createElement('button');
     dockHelp.id = 'dock-help-btn';
@@ -551,9 +569,19 @@ export class MenuScene extends Phaser.Scene {
     shortcutCard.appendChild(tipsUl);
     dialog.appendChild(shortcutCard);
 
-    // Chân trang modal với nút Đã hiểu
+    // Chân trang modal với nút Đã hiểu và Tùy chỉnh điều khiển
     const footer = document.createElement('div');
     footer.className = 'modal-footer';
+
+    const openSettingsBtn = document.createElement('button');
+    openSettingsBtn.type = 'button';
+    openSettingsBtn.className = 'modal-btn-secondary';
+    openSettingsBtn.textContent = '🎮 TÙY CHỈNH PHÍM & CẢM ỨNG';
+    openSettingsBtn.addEventListener('click', () => {
+      this.closeControlsModal();
+      this.openControlsSettings();
+    });
+    footer.appendChild(openSettingsBtn);
 
     const confirmBtn = document.createElement('button');
     confirmBtn.type = 'button';
@@ -568,6 +596,14 @@ export class MenuScene extends Phaser.Scene {
 
     appContainer.appendChild(container);
     this.domLayer = container;
+  }
+
+  public openControlsSettings(): void {
+    if (!this.controlsSettings && typeof ControlsSettings === 'function') {
+      this.controlsSettings = new ControlsSettings(this);
+    }
+    this.controlsSettings?.open();
+    this.announceLive('Đã mở bảng Cài đặt Điều khiển.');
   }
 
   private setupKeyboardShortcuts(): void {
@@ -597,6 +633,15 @@ export class MenuScene extends Phaser.Scene {
     };
 
     this.keydownHandler = (event: KeyboardEvent): void => {
+      // Phím Escape ưu tiên đóng ControlsSettings nếu đang mở
+      if (this.controlsSettings && this.controlsSettings.isOpen()) {
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          this.controlsSettings.close();
+        }
+        return;
+      }
+
       // Phím Escape đóng hộp thoại nếu đang mở
       if (event.key === 'Escape') {
         if (this.isModalOpen) {
@@ -672,6 +717,10 @@ export class MenuScene extends Phaser.Scene {
     if (this.keydownHandler) {
       window.removeEventListener('keydown', this.keydownHandler);
       this.keydownHandler = undefined;
+    }
+    if (this.controlsSettings) {
+      this.controlsSettings.destroy(true);
+      this.controlsSettings = undefined;
     }
     if (this.domLayer) {
       this.domLayer.remove();

@@ -32,7 +32,8 @@
     "check:player-status": "node scripts/check-player-status.cjs",
     "check:campaign": "node scripts/check-campaign.cjs",
     "check:campaign-control": "node scripts/check-campaign-control.cjs && node scripts/campaign-navigation.cjs && node scripts/campaign-dungeon.cjs && node scripts/campaign-rewards.cjs && node scripts/map-v8-coverage.cjs --selfcheck",
-    "check:all": "npm run build && npm run check:save && npm run check:rpg && npm run check:content-audio && npm run check:rpg-menu && npm run check:graphics && npm run check:sprites && npm run check:equipment && npm run check:npcs && npm run check:enemies && npm run check:environments && npm run check:combat-vfx && npm run check:icons && npm run check:environment-atmosphere && npm run check:rpg-visual && npm run check:scene-presentation && npm run check:player-status && npm run check:campaign-control && npm run check:graphics-stress-control && npm run check:equipment-browser-control"
+    "check:controls": "node scripts/check-controls-master.cjs",
+    "check:all": "npm run build && npm run check:save && npm run check:rpg && npm run check:content-audio && npm run check:rpg-menu && npm run check:graphics && npm run check:sprites && npm run check:equipment && npm run check:npcs && npm run check:enemies && npm run check:environments && npm run check:combat-vfx && npm run check:icons && npm run check:environment-atmosphere && npm run check:rpg-visual && npm run check:scene-presentation && npm run check:player-status && npm run check:campaign-control && npm run check:graphics-stress-control && npm run check:equipment-browser-control && npm run check:controls"
   },
   "dependencies": {
     "phaser": "4.2.1"

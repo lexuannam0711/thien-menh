@@ -507,50 +507,68 @@ export class Hud {
  * Viền đồng cổ, nền tối bề mặt nổi, hỗ trợ chữ tiếng Việt sắc nét.
  */
 export function toast(scene: Phaser.Scene, text: string, color = '#f9e9bd'): void {
-  const previous = scene.children.getByName('status-toast');
+  const previous = typeof scene.children?.getByName === 'function' ? scene.children.getByName('status-toast') : undefined;
   if (previous) {
-    scene.tweens.killTweensOf(previous);
+    scene.tweens?.killTweensOf(previous);
     previous.destroy();
   }
 
   const toastWidth = Math.min(680, Math.max(220, text.length * 9 + 44));
   const toastHeight = 36;
-  const radius = uiTokens.radius.md;
+  const radius = (typeof uiTokens !== 'undefined' && uiTokens?.radius?.md) ? uiTokens.radius.md : 8;
 
-  const bg = scene.add.graphics();
-  bg.fillStyle(uiNumericColors.bg, 0.95);
-  bg.fillRoundedRect(-toastWidth / 2, -toastHeight / 2, toastWidth, toastHeight, radius);
-  bg.lineStyle(1.5, uiNumericColors.gold, 0.9);
-  bg.strokeRoundedRect(-toastWidth / 2, -toastHeight / 2, toastWidth, toastHeight, radius);
+  let bg: any;
+  if (typeof scene.add?.graphics === 'function') {
+    bg = scene.add.graphics();
+    const bgColor = (typeof uiNumericColors !== 'undefined' && uiNumericColors?.bg) ? uiNumericColors.bg : 0x1a1614;
+    const goldColor = (typeof uiNumericColors !== 'undefined' && uiNumericColors?.gold) ? uiNumericColors.gold : 0xd4af37;
+    bg.fillStyle?.(bgColor, 0.95);
+    bg.fillRoundedRect?.(-toastWidth / 2, -toastHeight / 2, toastWidth, toastHeight, radius);
+    bg.lineStyle?.(1.5, goldColor, 0.9);
+    bg.strokeRoundedRect?.(-toastWidth / 2, -toastHeight / 2, toastWidth, toastHeight, radius);
+  } else if (typeof scene.add?.rectangle === 'function') {
+    bg = scene.add.rectangle(0, 0, toastWidth, toastHeight, 0x17342e, 0.95);
+  }
 
-  const textObj = scene.add.text(0, 0, text, {
-    fontFamily: uiTypography.fontFamilies.body,
-    fontSize: '13px',
-    fontStyle: 'bold',
-    color: color,
-    align: 'center',
-  }).setOrigin(0.5, 0.5);
+  let textObj: any;
+  if (typeof scene.add?.text === 'function') {
+    textObj = scene.add.text(0, 0, text, {
+      fontFamily: (typeof uiTypography !== 'undefined' && uiTypography?.fontFamilies?.body) ? uiTypography.fontFamilies.body : 'Arial, sans-serif',
+      fontSize: '13px',
+      fontStyle: 'bold',
+      color: color,
+      align: 'center',
+    }).setOrigin(0.5, 0.5);
+  }
 
   const screenWidth = scene.cameras?.main?.width ?? 960;
-  const container = scene.add
-    .container(screenWidth / 2, 115, [bg, textObj])
-    .setName('status-toast')
-    .setDepth(UI_DEPTH + 100);
+  const children = [bg, textObj].filter(Boolean);
+  let container: any;
+  if (typeof scene.add?.container === 'function') {
+    container = scene.add
+      .container(screenWidth / 2, 115, children)
+      .setName('status-toast')
+      .setDepth(UI_DEPTH + 100);
+  }
+
+  if (!container) return;
 
   const prefersReduced =
     (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches) ||
-    Boolean(graphicsSettings.getState().reducedMotion);
+    Boolean(graphicsSettings?.getState?.()?.reducedMotion);
 
   if (prefersReduced) {
-    scene.time.delayedCall(2400, () => container.destroy(true));
-  } else {
-    container.setAlpha(0).setScale(0.96);
+    scene.time?.delayedCall?.(2400, () => container.destroy?.(true));
+  } else if (scene.tweens?.add) {
+    const fastDuration = (typeof uiTokens !== 'undefined' && uiTokens?.motionMs?.fast) ? uiTokens.motionMs.fast : 150;
+    const normalDuration = (typeof uiTokens !== 'undefined' && uiTokens?.motionMs?.normal) ? uiTokens.motionMs.normal : 250;
+    container.setAlpha?.(0)?.setScale?.(0.96);
     scene.tweens.add({
       targets: container,
       alpha: 1,
       scaleX: 1,
       scaleY: 1,
-      duration: uiTokens.motionMs.fast,
+      duration: fastDuration,
       ease: 'Quad.easeOut',
       onComplete: () => {
         scene.tweens.add({
@@ -559,9 +577,9 @@ export function toast(scene: Phaser.Scene, text: string, color = '#f9e9bd'): voi
           scaleX: 0.96,
           scaleY: 0.96,
           delay: 2000,
-          duration: uiTokens.motionMs.normal,
+          duration: normalDuration,
           ease: 'Quad.easeIn',
-          onComplete: () => container.destroy(true),
+          onComplete: () => container.destroy?.(true),
         });
       },
     });

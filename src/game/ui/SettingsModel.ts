@@ -53,8 +53,8 @@ export const CONTROLS_GUIDE: ControlsGuide = Object.freeze({
     },
     {
       id: 'attack',
-      label: 'Chém kiếm',
-      binding: 'J',
+      label: 'Tấn công',
+      binding: 'Chuột trái (LMB) / J',
       description: 'Tấn công cận chiến; bấm liên tục để tạo chuỗi liên kích 3 đòn.',
     },
     {
@@ -64,22 +64,34 @@ export const CONTROLS_GUIDE: ControlsGuide = Object.freeze({
       description: 'Lướt nhanh né đòn tấn công của quái thú và tạm thời miễn nhiễm sát thương.',
     },
     {
-      id: 'earth-skill',
-      label: 'Kỹ năng đã trang bị',
-      binding: 'Q / E / R / T',
-      description: 'Dùng bốn ô kỹ năng. Mở khóa, trang bị trong thẻ Kỹ Năng tại làng; tiêu hao và hồi chiêu tùy chiêu.',
+      id: 'skills',
+      label: '4 Ô Kỹ năng',
+      binding: '1 / 2 / 3 / 4 (Digit1..Digit4)',
+      description: 'Kích hoạt 4 ô kỹ năng võ học (Phím 1..4 mặc định; không dùng Q/E/R/T).',
     },
     {
-      id: 'flame-skill',
-      label: 'Thần lực Hỏa',
-      binding: 'E',
-      description: 'Phóng luồng lửa thiêu đốt kẻ địch diện rộng (tiêu hao 20 Thần lực / MP, hồi chiêu 3s).',
+      id: 'quick-items',
+      label: '4 Ô Vật phẩm',
+      binding: '5 / 6 / 7 / 8 (Digit5..Digit8)',
+      description: 'Sử dụng nhanh dược thảo, linh đan và vật phẩm hồi phục trong túi đồ.',
     },
     {
       id: 'interact',
       label: 'Tương tác',
       binding: 'F',
       description: 'Nói chuyện với Trưởng làng, Thợ rèn hoặc Thầy mo khi đứng gần.',
+    },
+    {
+      id: 'inventory',
+      label: 'Túi đồ / Trang bị',
+      binding: 'B / I / Tab',
+      description: 'Mở hòm đồ và bảng quản lý trang bị nhân vật.',
+    },
+    {
+      id: 'map',
+      label: 'Bản đồ',
+      binding: 'M',
+      description: 'Mở bản đồ khu vực Làng Văn Lang và các phụ bản.',
     },
   ]),
   mobile: Object.freeze([
@@ -102,16 +114,16 @@ export const CONTROLS_GUIDE: ControlsGuide = Object.freeze({
       description: 'Nhấn để lướt né đòn tức thời.',
     },
     {
-      id: 'touch-earth',
-      label: 'Nút Thần lực Q',
-      binding: 'Nút Thổ màu đồng thau',
-      description: 'Dùng kỹ năng trang bị ô Q; R/T là ô thứ ba, thứ tư.',
+      id: 'touch-skills',
+      label: '4 Nút Kỹ năng',
+      binding: 'Nút kỹ năng 1..4 (vòng cung)',
+      description: 'Kích hoạt kỹ năng tương ứng với thời gian hồi chiêu và hiển thị năng lượng MP.',
     },
     {
-      id: 'touch-flame',
-      label: 'Nút Thần lực E',
-      binding: 'Nút Hỏa màu đỏ gạch',
-      description: 'Phóng sóng lửa thiêu quái vật.',
+      id: 'touch-items',
+      label: 'Vật phẩm nhanh',
+      binding: 'Hàng ô vật phẩm 5..8',
+      description: 'Chạm để dùng nhanh thảo dược hoặc thần đan hồi phục.',
     },
     {
       id: 'touch-interact',
@@ -141,7 +153,7 @@ export const CONTROLS_GUIDE: ControlsGuide = Object.freeze({
     },
     {
       id: 'quick-help',
-      label: 'Phím tắt Hướng dẫn',
+      label: 'Phím tắt Cài đặt & Hướng dẫn',
       binding: 'H / C',
       description: 'Mở hoặc đóng bảng Cài đặt & Hướng dẫn điều khiển.',
     },
@@ -154,8 +166,9 @@ export const CONTROLS_GUIDE: ControlsGuide = Object.freeze({
   ]),
   tips: Object.freeze([
     'Trên điện thoại, hãy xoay ngang màn hình (Landscape) để hiển thị đầy đủ cần điều khiển và tầm nhìn.',
-    'Trạng thái bật/tắt âm thanh được tự động lưu lại vào trình duyệt cho những lần chơi sau.',
+    'Trạng thái cài đặt bàn phím và cảm ứng được tự động lưu lại vào trình duyệt cho những lần chơi sau.',
     'Giao diện hỗ trợ đầy đủ bộ đọc màn hình và phím Tab theo tiêu chuẩn trợ năng web.',
+    'Có thể tùy chỉnh lại phím trong mục Cài đặt Điều khiển theo thói quen của bạn.',
   ]),
 });
 

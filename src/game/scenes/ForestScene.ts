@@ -67,7 +67,7 @@ export class ForestScene extends Phaser.Scene {
       onPlayerDamaged: (damage) => this.player.hit(damage),
     });
     this.combat = new CombatSystem(this, () => this.enemies, this.bossSystem);
-    this.hud = new Hud(this, chapterConfig.name + ' · Đánh J / Né Space / Q / E');
+    this.hud = new Hud(this, chapterConfig.name + ' · Chuột trái đánh · Phím 1-4 kỹ năng · Space né · F tương tác');
     if (this.hasCombatTasks()) {
       for (const spawn of chapterConfig.enemySpawnPool.initialSpawns) {
         this.spawn(spawn.kind, spawn.x, spawn.y);

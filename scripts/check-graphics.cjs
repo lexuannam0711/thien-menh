@@ -240,6 +240,7 @@ try {
     '../world/WorldBounds': {}, '../systems/SkillCombat': {},
     '../audio/AudioManager': { audioManager: { playCue() {} } },
     '../../data/weapons': { getEquippedWeaponOrDefault: () => ({ weaponType }) },
+    '../input/InputManager': {}, '../../data/items': {}, '../rpg/InventorySystem': {},
   });
   const player = Object.assign(Object.create(Player.prototype), {
     scene: actorScene, sprite: actorSprite, visualState: 'idle', view: { x: 100, y: 200 },
