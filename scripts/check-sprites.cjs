@@ -188,6 +188,7 @@ const { Player } = loadActor('src/game/entities/Player.ts', {
   ...shared, '../systems/GameState': { gameState: state, getPlayerStats: () => ({ speed: 100, maxMp: 20 }) },
   '../ui/TouchControls': {}, '../world/WorldBounds': { moveInWorld: (_, next) => next },
   '../systems/SkillCombat': {}, '../audio/AudioManager': { audioManager: { playCue() {} } },
+  '../input/InputManager': {}, '../../data/items': {}, '../rpg/InventorySystem': {},
 });
 const player = Object.assign(Object.create(Player.prototype), {
   scene, view: view(), sprite: sprite(), locked: () => false, keys: null,
