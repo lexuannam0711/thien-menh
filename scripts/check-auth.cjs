@@ -1,0 +1,20 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const root = process.cwd();
+const source = fs.readFileSync(path.join(root, 'src/game/online/auth.ts'), 'utf8');
+const menu = fs.readFileSync(path.join(root, 'src/game/scenes/MenuScene.ts'), 'utf8');
+const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+assert.ok(pkg.dependencies['@supabase/supabase-js']);
+assert.match(source, /VITE_SUPABASE_URL/);
+assert.match(source, /VITE_SUPABASE_ANON_KEY/);
+assert.doesNotMatch(source, /service[_-]?role/i);
+assert.match(source, /signUp\(/);
+assert.match(source, /signInWithPassword\(/);
+assert.match(source, /signOut\(/);
+assert.match(source, /onAuthStateChange/);
+assert.match(source, /Object\.freeze/);
+assert.match(menu, /menu-auth-panel/);
+assert.match(menu, /validateCredentials/);
+console.log('Auth self-check: PASS (config guard, immutable state hooks, menu validation)');

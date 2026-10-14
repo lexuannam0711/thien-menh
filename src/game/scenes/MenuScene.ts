@@ -6,6 +6,8 @@ import { settingsModel, CONTROLS_GUIDE } from '../ui/SettingsModel';
 import { audioManager } from '../audio/AudioManager';
 import { graphicsSettings } from '../rendering/GraphicsSettings';
 import { ControlsSettings } from '../ui/screens/ControlsSettings';
+import { AuthStore, authStore, validateCredentials, type AuthState } from '../online/auth';
+import { MultiplayerAdapter, type MultiplayerConnectionState } from '../online/multiplayer';
 
 export class MenuScene extends Phaser.Scene {
   private muteButtonText?: Phaser.GameObjects.Text;
@@ -16,6 +18,10 @@ export class MenuScene extends Phaser.Scene {
   private isModalOpen = false;
   private keydownHandler?: (event: KeyboardEvent) => void;
   private controlsSettings?: ControlsSettings;
+  private authStoreInstance: AuthStore = authStore;
+  private authUnsubscribe?: () => void;
+  private networkUnsubscribe?: () => void;
+  private multiplayerAdapter?: MultiplayerAdapter;
 
   constructor() {
     super('Menu');
@@ -337,6 +343,164 @@ export class MenuScene extends Phaser.Scene {
     dock.appendChild(dockHelp);
 
     container.appendChild(dock);
+
+    const authPanel = document.createElement('section');
+    authPanel.className = 'menu-auth-panel';
+    authPanel.setAttribute('aria-labelledby', 'menu-auth-title');
+    const authTitle = document.createElement('h2');
+    authTitle.id = 'menu-auth-title';
+    authTitle.textContent = 'TÀI KHOẢN (TÙY CHỌN)';
+    authPanel.appendChild(authTitle);
+    const email = document.createElement('input');
+    email.type = 'email'; email.autocomplete = 'email'; email.placeholder = 'Email'; email.setAttribute('aria-label', 'Email');
+    const password = document.createElement('input');
+    password.type = 'password'; password.autocomplete = 'current-password'; password.placeholder = 'Mật khẩu (tối thiểu 6 ký tự)'; password.setAttribute('aria-label', 'Mật khẩu');
+    const authStatus = document.createElement('p');
+    authStatus.setAttribute('role', 'status');
+    const signIn = document.createElement('button');
+    signIn.type = 'button'; signIn.textContent = 'ĐĂNG NHẬP';
+    const signUp = document.createElement('button');
+    signUp.type = 'button'; signUp.textContent = 'TẠO TÀI KHOẢN';
+    const signOut = document.createElement('button');
+    signOut.type = 'button'; signOut.textContent = 'ĐĂNG XUẤT'; signOut.hidden = true;
+    const submit = (action: 'signIn' | 'signUp'): void => {
+      const message = validateCredentials(email.value, password.value);
+      if (message) { authStatus.textContent = message; return; }
+      void (action === 'signIn' ? this.authStoreInstance.signInWithPassword(email.value, password.value) : this.authStoreInstance.signUp(email.value, password.value));
+    };
+    signIn.addEventListener('click', () => submit('signIn'));
+    signUp.addEventListener('click', () => submit('signUp'));
+    signOut.addEventListener('click', () => {
+      this.multiplayerAdapter?.disconnect();
+      void this.authStoreInstance.signOut();
+    });
+    authPanel.append(email, password, signIn, signUp, signOut, authStatus);
+    container.appendChild(authPanel);
+
+    // Bảng trạng thái & điều khiển mạng trực tuyến (chỉ hiển thị khi đã xác thực tài khoản)
+    const networkPanel = document.createElement('section');
+    networkPanel.className = 'menu-network-panel';
+    networkPanel.setAttribute('aria-labelledby', 'menu-network-title');
+    networkPanel.hidden = true;
+
+    const networkTitle = document.createElement('h2');
+    networkTitle.id = 'menu-network-title';
+    networkTitle.textContent = 'MẠNG TRỰC TUYẾN (PHÒNG CHƠI)';
+    networkPanel.appendChild(networkTitle);
+
+    const networkStatus = document.createElement('p');
+    networkStatus.id = 'menu-network-status';
+    networkStatus.setAttribute('role', 'status');
+    networkPanel.appendChild(networkStatus);
+
+    const networkControls = document.createElement('div');
+    networkControls.className = 'menu-network-controls';
+
+    const connectBtn = document.createElement('button');
+    connectBtn.id = 'menu-network-connect-btn';
+    connectBtn.type = 'button';
+    connectBtn.textContent = 'KẾT NỐI LẠI MÁY CHỦ';
+
+    const disconnectBtn = document.createElement('button');
+    disconnectBtn.id = 'menu-network-disconnect-btn';
+    disconnectBtn.type = 'button';
+    disconnectBtn.textContent = 'NGẮT KẾT NỐI MẠNG';
+    disconnectBtn.hidden = true;
+
+    networkControls.append(connectBtn, disconnectBtn);
+    networkPanel.appendChild(networkControls);
+    container.appendChild(networkPanel);
+
+    const connectMultiplayer = async (userState?: AuthState): Promise<void> => {
+      if (!this.multiplayerAdapter) return;
+      const currentAuth = userState ?? this.authStoreInstance.snapshot;
+      if (currentAuth.status !== 'authenticated') return;
+
+      // Token chỉ tồn tại trong bộ nhớ (in-memory variable), tuyệt đối không hiển thị hay ghi log
+      let token: string | undefined;
+      try {
+        if (this.authStoreInstance.client) {
+          const { data } = await this.authStoreInstance.client.auth.getSession();
+          token = data.session?.access_token ?? undefined;
+        }
+      } catch {
+        // Giữ nguyên undefined và hoạt động fail-closed nếu lỗi phiên
+      }
+
+      const roomId = 'village-hub';
+      const characterId = currentAuth.user?.id ? `char-${currentAuth.user.id}` : 'char-hero-1';
+      await this.multiplayerAdapter.connect({
+        roomId,
+        characterId,
+        token,
+      });
+    };
+
+    connectBtn.addEventListener('click', () => {
+      void connectMultiplayer();
+    });
+
+    disconnectBtn.addEventListener('click', () => {
+      this.multiplayerAdapter?.disconnect();
+    });
+
+    const renderNetwork = (netState: MultiplayerConnectionState): void => {
+      let statusText: string;
+      if (!netState.configured) {
+        statusText = 'Chưa cấu hình máy chủ (VITE_GAME_SERVER_URL). Đang chạy chế độ Offline an toàn.';
+      } else {
+        switch (netState.status) {
+          case 'offline':
+            statusText = 'Chế độ ngoại tuyến (Offline). Tiếp tục chơi offline an toàn.';
+            break;
+          case 'connecting':
+            statusText = `Đang kết nối tới phòng chơi (${netState.roomId ?? 'village-hub'})...`;
+            break;
+          case 'connected':
+            statusText = `Đã kết nối phòng trực tuyến: ${netState.roomId ?? 'village-hub'} · Độ trễ: ${netState.latencyMs}ms`;
+            break;
+          case 'reconnecting':
+            statusText = 'Đang thử kết nối lại máy chủ...';
+            break;
+          case 'error':
+            statusText = netState.message || 'Lỗi kết nối máy chủ. Bạn vẫn có thể chơi offline.';
+            break;
+          case 'disconnected':
+          default:
+            statusText = 'Đã ngắt kết nối máy chủ phòng chơi.';
+            break;
+        }
+      }
+      networkStatus.textContent = statusText;
+
+      const isConnected = netState.status === 'connected';
+      const isConnecting = netState.status === 'connecting' || netState.status === 'reconnecting';
+      connectBtn.disabled = !netState.configured || isConnected || isConnecting;
+      connectBtn.hidden = isConnected;
+      disconnectBtn.hidden = !isConnected;
+      disconnectBtn.disabled = !isConnected;
+    };
+
+    if (typeof MultiplayerAdapter === 'function') {
+      this.multiplayerAdapter = new MultiplayerAdapter();
+      this.networkUnsubscribe = this.multiplayerAdapter.onStateChange(renderNetwork);
+    }
+
+    const renderAuth = (state: AuthState): void => {
+      authStatus.textContent = state.message || (state.status === 'authenticated' ? `Đã đăng nhập: ${state.user?.email ?? 'tài khoản'}` : state.configured ? 'Chưa đăng nhập. Tiến trình vẫn lưu cục bộ khi chơi offline.' : state.message);
+      const disabled = !state.configured || state.status === 'loading';
+      email.disabled = disabled || state.status === 'authenticated'; password.disabled = disabled || state.status === 'authenticated';
+      signIn.disabled = disabled || state.status === 'authenticated'; signUp.disabled = disabled || state.status === 'authenticated'; signOut.hidden = state.status !== 'authenticated';
+
+      if (state.status === 'authenticated') {
+        networkPanel.hidden = false;
+        void connectMultiplayer(state);
+      } else {
+        networkPanel.hidden = true;
+        this.multiplayerAdapter?.disconnect();
+      }
+    };
+    this.authUnsubscribe = this.authStoreInstance.subscribe(renderAuth);
 
     // 4. Hộp thoại Cài đặt & Hướng dẫn điều khiển (Accessible Modal Dialog)
     const modal = document.createElement('div');
@@ -722,6 +886,15 @@ export class MenuScene extends Phaser.Scene {
       this.controlsSettings.destroy(true);
       this.controlsSettings = undefined;
     }
+    if (this.multiplayerAdapter) {
+      this.multiplayerAdapter.disconnect();
+      this.multiplayerAdapter.destroy();
+      this.multiplayerAdapter = undefined;
+    }
+    this.networkUnsubscribe?.();
+    this.networkUnsubscribe = undefined;
+    this.authUnsubscribe?.();
+    this.authUnsubscribe = undefined;
     if (this.domLayer) {
       this.domLayer.remove();
       this.domLayer = null;

@@ -1,0 +1,28 @@
+﻿const { execFileSync } = require("node:child_process");
+const assert = require("node:assert/strict");
+execFileSync(process.execPath, [require.resolve("typescript/bin/tsc"), "-p", "apps/game-server/tsconfig.json"], { stdio: "inherit" });
+(async () => {
+  const mod = await import("../dist/game-server/server.js");
+  process.env.SUPABASE_JWT_JWKS_URL = "https://example.invalid/auth/v1/.well-known/jwks.json";
+  process.env.SUPABASE_JWT_AUDIENCE = "authenticated";
+  const verifier = mod.createJwtVerifier();
+  await assert.rejects(() => verifier(undefined), /missing bearer token/);
+  await assert.rejects(() => verifier("Bearer malformed"));
+  assert.equal(mod.extractBearer(undefined), null);
+  assert.equal(mod.extractBearer("Basic abc"), null);
+  assert.equal(mod.extractBearer("Bearer abc"), "abc");
+  assert.equal(mod.validateMoveIntent({ type: "teleport", x: 0, y: 0 }), null);
+  assert.equal(mod.validateMoveIntent({ type: "move", x: 2, y: 0 }), null);
+  assert.equal(mod.validateMoveIntent({ type: "move", x: Number.NaN, y: 0 }), null);
+  assert.deepEqual(mod.validateMoveIntent({ type: "move", x: 1, y: -1 }), { type: "move", x: 1, y: -1 });
+  assert.equal(mod.validateCombatIntent({ type: "attack", seq: 1, comboIndex: 1, damage: 9999 }), null, "forged damage rejected");
+  assert.equal(mod.validateCombatIntent({ type: "attack", seq: 1, comboIndex: 9 }), null, "combo bounds enforced");
+  assert.equal(mod.validateCombatIntent({ type: "dodge", seq: 2, directionX: 2, directionY: 0 }), null, "dodge bounds enforced");
+  assert.deepEqual(mod.validateCombatIntent({ type: "dodge", seq: 2, directionX: 1, directionY: 0 }), { type: "dodge", seq: 2, directionX: 1, directionY: 0 });
+  assert.equal(mod.calculateDamage({ type: "attack", seq: 1, comboIndex: 2 }), 14, "damage is deterministic");
+  assert.equal(mod.calculateDamage({ type: "attack", seq: 1, comboIndex: 2 }), mod.calculateDamage({ type: "attack", seq: 1, comboIndex: 2 }));
+  const reject = mod.createReject("attack", "MALFORMED", "invalid", 7);
+  const rejectAgain = mod.createReject("attack", "MALFORMED", "invalid", 7);
+  assert.deepEqual({ ...reject, serverTimestamp: 0 }, { ...rejectAgain, serverTimestamp: 0 }, "reject is idempotent");
+  console.log("game-server self-check passed");
+})();
