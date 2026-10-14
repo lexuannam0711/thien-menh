@@ -4,6 +4,8 @@ import express, { type Request, type Response } from "express";
 import { createMinigameRouter } from "./minigames/routes.js";
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "jose";
 import { createHash, randomUUID } from "node:crypto";
+import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import { CharacterRepository, type CharacterProgressWrite } from "./characterRepository.js";
 
@@ -401,7 +403,8 @@ export function createGameServer() {
   return server;
 }
 
-if (import.meta.url === `file://${process.argv[1]?.replaceAll("\\", "/")}`) {
+const isMainModule = Boolean(process.argv[1] && resolve(fileURLToPath(import.meta.url)) === resolve(process.argv[1]));
+if (isMainModule) {
   const port = Number(process.env.PORT ?? 2567);
   createGameServer().listen(port).then(() => console.log(`game-server listening on ${port}`));
 }
