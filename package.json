@@ -38,7 +38,8 @@
     "server:typecheck": "tsc -p apps/game-server/tsconfig.json --noEmit",
     "server:start": "tsc -p apps/game-server/tsconfig.json && node --enable-source-maps dist/game-server/server.js",
     "check:game-server": "node scripts/check-game-server.cjs",
-    "check:minigames": "node scripts/check-minigames-engine.cjs"
+    "check:minigames": "node scripts/check-minigames-engine.cjs",
+    "check:minigames-client": "node scripts/check-minigames-client.cjs"
   },
   "dependencies": {
     "@colyseus/colyseus": "npm:colyseus@^0.18.9",
