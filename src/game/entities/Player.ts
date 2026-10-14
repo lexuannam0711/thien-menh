@@ -352,9 +352,12 @@ export class Player {
     const weapon = this.getEquippedWeapon();
     this.attackAt = time + calculateWeaponAttackTiming(weapon, this.combo);
 
-    const aimDir = this.getAimDirection();
-    if (aimDir) {
-      this.direction.set(aimDir.x, aimDir.y);
+    const move = this.inputManager?.getMovementVector ? this.inputManager.getMovementVector() : { x: 0, y: 0 };
+    const vx = move.x + this.controls.direction.x;
+    const vy = move.y + this.controls.direction.y;
+    const moveLen = Math.hypot(vx, vy);
+    if (moveLen > 0.08) {
+      this.direction.set(vx / moveLen, vy / moveLen);
     }
 
     if (this.sprite) {

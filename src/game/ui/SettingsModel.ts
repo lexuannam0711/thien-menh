@@ -55,7 +55,7 @@ export const CONTROLS_GUIDE: ControlsGuide = Object.freeze({
       id: 'attack',
       label: 'Tấn công',
       binding: 'Chuột trái (LMB) / J',
-      description: 'Tấn công cận chiến; bấm liên tục để tạo chuỗi liên kích 3 đòn.',
+      description: 'Tấn công cận chiến theo hướng di chuyển/mặt nhân vật; bấm liên tục để tạo chuỗi liên kích 3 đòn.',
     },
     {
       id: 'dodge',

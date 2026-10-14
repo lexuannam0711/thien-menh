@@ -113,12 +113,12 @@ export class KeyboardMouseAdapter {
             const gameObj = obj as { visible?: boolean; depth?: number; getData?: (k: string) => unknown };
             // Bỏ qua object đang ẩn hoặc là touch control
             if (gameObj.visible === false) continue;
-            if (typeof gameObj.getData === 'function' && gameObj.getData('isTouchControl')) continue;
+            const isTouch = typeof gameObj.getData === 'function' && Boolean(gameObj.getData('isTouchControl'));
+            const isUI = typeof gameObj.getData === 'function' && Boolean(gameObj.getData('isUI') || gameObj.getData('ui') || gameObj.getData('dialogue'));
+            if (isTouch && !isUI) continue;
             // Độ sâu UI trong game thường >= 1000 (UI_DEPTH = 2000)
             if (typeof gameObj.depth === 'number' && gameObj.depth >= 1000) return true;
-            if (typeof gameObj.getData === 'function') {
-              if (gameObj.getData('isUI') || gameObj.getData('ui') || gameObj.getData('dialogue')) return true;
-            }
+            if (isUI) return true;
           }
         }
       }
