@@ -1,6 +1,7 @@
-﻿import { MapSchema, Schema, type } from "@colyseus/schema";
+import { MapSchema, Schema, type } from "@colyseus/schema";
 import { Room, Server, WebSocketTransport, type Client } from "@colyseus/colyseus";
-import type { Request, Response } from "express";
+import express, { type Request, type Response } from "express";
+import { createMinigameRouter } from "./minigames/routes.js";
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "jose";
 
 export const ROOM_NAME = "than-menh.v1";
@@ -216,7 +217,19 @@ export class PlayerRoom extends Room<{ state: WorldState }> {
 export function createGameServer() {
   const server = new Server({
     transport: new WebSocketTransport(),
-    express: (app) => { app.get("/health", (_req: Request, res: Response) => { res.status(200).json({ ok: true, room: ROOM_NAME }); }); },
+    express: (app) => {
+      app.use(express.json());
+      app.get("/health", (_req: Request, res: Response) => { res.status(200).json({ ok: true, room: ROOM_NAME }); });
+      let verifier: ReturnType<typeof createJwtVerifier> | undefined;
+      try {
+        if (process.env.SUPABASE_JWT_AUDIENCE) {
+          verifier = createJwtVerifier();
+        }
+      } catch {
+        // Verifier unavailable
+      }
+      app.use("/api/minigames", createMinigameRouter(verifier));
+    },
     greet: false,
   });
   server.define(ROOM_NAME, PlayerRoom);
