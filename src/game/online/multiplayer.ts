@@ -1,15 +1,16 @@
-﻿/**
- * TrÃ² chÆ¡i: Tháº§n Má»‡nh â€” Háº­u Duá»‡ VÄƒn Lang
- * Multiplayer Client Adapter (M2 Client Online Boundary)
+/**
+ * Trò chơi: Thần Mệnh — Hậu Duệ Văn Lang
+ * Multiplayer Client Adapter (M2 & M3 Client Online Boundary)
  *
- * Adapter phÃ²ng chÆ¡i qua WebSocket vá»›i nguyÃªn táº¯c Fail-Closed:
- * - KhÃ´ng cÃ³ dependency báº¯t buá»™c lÃªn server tháº­t khi cháº¡y offline (hoáº¡t Ä‘á»™ng an toÃ n khi thiáº¿u VITE_GAME_SERVER_URL).
- * - Validate toÃ n bá»™ gÃ³i tin xuáº¥t (outgoing intents) trÆ°á»›c khi gá»­i qua máº¡ng.
- * - Bounded payload (giá»›i háº¡n kÃ­ch thÆ°á»›c gÃ³i tin).
- * - Theo dÃµi tráº¡ng thÃ¡i káº¿t ná»‘i cháº·t cháº½ (ConnectionState).
- * - Xá»­ lÃ½ snapshots, rejects, server events tá»« server cÃ³ tháº©m quyá»n (authoritative).
- * - Tuyá»‡t Ä‘á»‘i khÃ´ng coi client state lÃ  tháº©m quyá»n; chá»‰ lÆ°u trá»¯ báº£n sao Ä‘á»c tá»« snapshot server.
- * - KhÃ´ng log token, secret hay thÃ´ng tin nháº¡y cáº£m.
+ * Adapter phòng chơi qua WebSocket với nguyên tắc Fail-Closed:
+ * - Không có dependency bắt buộc lên server thật khi chạy offline (hoạt động an toàn khi thiếu VITE_GAME_SERVER_URL).
+ * - Validate toàn bộ gói tin xuất (outgoing intents) trước khi gửi qua mạng.
+ * - Bounded payload (giới hạn kích thước gói tin).
+ * - Theo dõi trạng thái kết nối chặt chẽ (ConnectionState).
+ * - Xử lý snapshots, rejects, server events từ server có thẩm quyền (authoritative).
+ * - Tuyệt đối không coi client state là thẩm quyền; chỉ lưu trữ bản sao đọc từ snapshot server.
+ * - Không log token, secret hay thông tin nhạy cảm.
+ * - Tích hợp Authoritative Snapshot Adapter (M3) với interpolation buffer và remote-player/enemy subscriptions.
  */
 
 import { Client, type Room } from 'colyseus.js';
@@ -35,6 +36,24 @@ import {
   createInteractIntent,
   deepFreeze,
 } from './protocol';
+
+import {
+  SnapshotAdapter,
+  AuthoritativeSnapshotAdapter,
+  type InterpolationSnapshot,
+  type InterpolationPair,
+  type InterpolatedEntityPosition,
+  type SnapshotAdapterOptions,
+} from './snapshotAdapter';
+
+export {
+  SnapshotAdapter,
+  AuthoritativeSnapshotAdapter,
+  type InterpolationSnapshot,
+  type InterpolationPair,
+  type InterpolatedEntityPosition,
+  type SnapshotAdapterOptions,
+};
 
 export type ConnectionStatus =
   | 'offline'
@@ -94,10 +113,8 @@ export class MultiplayerAdapter {
   private seqCounter = 0;
   private sentTimestamps = new Map<number, number>();
 
-  // Authoritative server state (Read-only on client)
-  private currentSnapshot: Readonly<ServerSnapshotMessage> | null = null;
-  private playerMap = new Map<string, Readonly<ServerPlayerState>>();
-  private monsterMap = new Map<string, Readonly<ServerMonsterState>>();
+  // Authoritative server state adapter (M3 vertical slice)
+  private readonly snapshotAdapterInstance: SnapshotAdapter;
 
   // Metrics
   private rejectedCount = 0;
@@ -105,16 +122,17 @@ export class MultiplayerAdapter {
 
   // Listeners
   private stateListeners = new Set<(state: MultiplayerConnectionState) => void>();
-  private snapshotListeners = new Set<(snapshot: ServerSnapshotMessage) => void>();
   private rejectListeners = new Set<(reject: ServerRejectMessage) => void>();
   private eventListeners = new Set<(event: ServerGameplayEvent) => void>();
   private errorListeners = new Set<(error: string) => void>();
 
   constructor(
     config: GameServerConfig | null = readGameServerConfig(),
-    _socketFactory?: WebSocketFactory
+    _socketFactory?: WebSocketFactory,
+    snapshotOptions?: SnapshotAdapterOptions
   ) {
     this.config = config;
+    this.snapshotAdapterInstance = new SnapshotAdapter(snapshotOptions);
     this.connState = Object.freeze({
       status: config ? 'disconnected' : 'offline',
       roomId: null,
@@ -123,8 +141,8 @@ export class MultiplayerAdapter {
       serverTick: 0,
       lastSnapshotTime: 0,
       message: config
-        ? 'Cháº¿ Ä‘á»™ máº¡ng sáºµn sÃ ng káº¿t ná»‘i.'
-        : 'Cháº¿ Ä‘á»™ máº¡ng táº¡m táº¯t: chÆ°a cáº¥u hÃ¬nh VITE_GAME_SERVER_URL. Äang cháº¡y cháº¿ Ä‘á»™ Offline an toÃ n.',
+        ? 'Chế độ mạng sẵn sàng kết nối.'
+        : 'Chế độ mạng tạm tắt: chưa cấu hình VITE_GAME_SERVER_URL. Đang chạy chế độ Offline an toàn.',
       configured: !!config,
     });
   }
@@ -150,8 +168,12 @@ export class MultiplayerAdapter {
     return false;
   }
 
-  get latestSnapshot(): Readonly<ServerSnapshotMessage> | null {
-    return this.currentSnapshot;
+  get latestSnapshot(): Readonly<InterpolationSnapshot> | null {
+    return this.snapshotAdapterInstance.latestSnapshot;
+  }
+
+  get previousSnapshot(): Readonly<InterpolationSnapshot> | null {
+    return this.snapshotAdapterInstance.previousSnapshot;
   }
 
   get serverTick(): number {
@@ -166,16 +188,40 @@ export class MultiplayerAdapter {
     return this.lastServerReject;
   }
 
+  get snapshotAdapter(): SnapshotAdapter {
+    return this.snapshotAdapterInstance;
+  }
+
+  get snapshots(): SnapshotAdapter {
+    return this.snapshotAdapterInstance;
+  }
+
   getRemotePlayer(id: string): Readonly<ServerPlayerState> | null {
-    return this.playerMap.get(id) ?? null;
+    return this.snapshotAdapterInstance.getRemotePlayer(id);
   }
 
   getAllRemotePlayers(): readonly Readonly<ServerPlayerState>[] {
-    return Object.freeze(Array.from(this.playerMap.values()));
+    return this.snapshotAdapterInstance.getAllRemotePlayers();
   }
 
   getAllMonsters(): readonly Readonly<ServerMonsterState>[] {
-    return Object.freeze(Array.from(this.monsterMap.values()));
+    return this.snapshotAdapterInstance.getAllMonsters();
+  }
+
+  getSnapshotBuffer(): readonly Readonly<InterpolationSnapshot>[] {
+    return this.snapshotAdapterInstance.getSnapshotBuffer();
+  }
+
+  getInterpolationPair(renderTime?: number): InterpolationPair {
+    return this.snapshotAdapterInstance.getInterpolationPair(renderTime);
+  }
+
+  interpolatePlayer(id: string, alphaOrRenderTime?: number): InterpolatedEntityPosition | null {
+    return this.snapshotAdapterInstance.interpolatePlayer(id, alphaOrRenderTime);
+  }
+
+  interpolateMonster(id: string, alphaOrRenderTime?: number): InterpolatedEntityPosition | null {
+    return this.snapshotAdapterInstance.interpolateMonster(id, alphaOrRenderTime);
   }
 
   // ============================================================================
@@ -188,42 +234,75 @@ export class MultiplayerAdapter {
    */
   async connect(options: RoomConnectOptions): Promise<boolean> {
     const targetUrl = options.serverUrl || this.config?.serverUrl;
-    if (!targetUrl) { this.setConnectionState({ status: 'offline', message: 'Kh?ng th? k?t n?i: thi?u URL m?y ch? (VITE_GAME_SERVER_URL). Ti?p t?c ch?i offline.' }); return false; }
+    if (!targetUrl) {
+      this.setConnectionState({
+        status: 'offline',
+        message: 'Missing game server URL (VITE_GAME_SERVER_URL). Offline mode continues.',
+      });
+      return false;
+    }
     this.closeRoom();
-    this.setConnectionState({ status: 'connecting', roomId: options.roomId, characterId: options.characterId, message: `?ang k?t n?i t?i ph?ng ${options.roomId}...` });
+    this.setConnectionState({
+      status: 'connecting',
+      roomId: options.roomId,
+      characterId: options.characterId,
+      message: `Connecting to room ${options.roomId}...`,
+    });
     try {
       const client = new Client(targetUrl.replace(/\/+$/, ''));
-      const room = await client.joinOrCreate('than-menh.v1', { authorization: options.token ? `Bearer ${options.token}` : undefined, roomId: options.roomId, characterId: options.characterId });
+      const room = await client.joinOrCreate('than-menh.v1', {
+        authorization: options.token ? `Bearer ${options.token}` : undefined,
+        roomId: options.roomId,
+        characterId: options.characterId,
+      });
       this.room = room;
       room.onMessage('snapshot', (message: unknown) => this.handleIncomingMessage(message));
       room.onMessage('reject', (message: unknown) => this.handleIncomingMessage(message));
       room.onMessage('event', (message: unknown) => this.handleIncomingMessage(message));
-      room.onError((code: number, message?: string) => this.notifyError(`L?i k?t n?i m?y ch? (${code}): ${message}`));
-      room.onLeave((code: number, _reason?: string) => { this.room = null; this.setConnectionState({ status: 'disconnected', message: `?? ng?t k?t n?i m?y ch? (${code}).` }); if (code !== 1000) this.notifyError(`M?t k?t n?i m?y ch?: m? ${code}`); });
-      this.setConnectionState({ status: 'connected', message: `?? k?t n?i ph?ng ${options.roomId}.` }); return true;
-    } catch { this.room = null; this.setConnectionState({ status: 'error', message: 'Kh?ng th? thi?t l?p k?t n?i t?i m?y ch?.' }); return false; }
+      room.onError((code: number, message?: string) =>
+        this.notifyError(`Game server connection error (${code}): ${message}`)
+      );
+      room.onLeave((code: number, _reason?: string) => {
+        this.room = null;
+        this.snapshotAdapterInstance.clear();
+        this.setConnectionState({
+          status: 'disconnected',
+          serverTick: 0,
+          lastSnapshotTime: 0,
+          message: `Disconnected from game server (${code}).`,
+        });
+        if (code !== 1000) this.notifyError(`Lost game server connection: code ${code}`);
+      });
+      this.setConnectionState({ status: 'connected', message: `Connected to room ${options.roomId}.` });
+      return true;
+    } catch {
+      this.room = null;
+      this.snapshotAdapterInstance.clear();
+      this.setConnectionState({ status: 'error', message: 'Unable to establish game server connection.' });
+      return false;
+    }
   }
 
   disconnect(code = 1000, reason = 'Client disconnect'): void {
     this.closeRoom(code, reason);
+    this.snapshotAdapterInstance.clear();
     this.setConnectionState({
       status: 'disconnected',
       roomId: null,
       characterId: null,
-      message: 'ÄÃ£ chá»§ Ä‘á»™ng ngáº¯t káº¿t ná»‘i.',
+      serverTick: 0,
+      lastSnapshotTime: 0,
+      message: 'Disconnected from game server.',
     });
   }
 
   destroy(): void {
     this.disconnect();
     this.stateListeners.clear();
-    this.snapshotListeners.clear();
     this.rejectListeners.clear();
     this.eventListeners.clear();
     this.errorListeners.clear();
-    this.playerMap.clear();
-    this.monsterMap.clear();
-    this.currentSnapshot = null;
+    this.snapshotAdapterInstance.destroy();
   }
 
   // ============================================================================
@@ -282,10 +361,24 @@ export class MultiplayerAdapter {
     return () => this.stateListeners.delete(listener);
   }
 
-  onSnapshot(listener: (snapshot: ServerSnapshotMessage) => void): () => void {
-    this.snapshotListeners.add(listener);
-    if (this.currentSnapshot) listener(this.currentSnapshot);
-    return () => this.snapshotListeners.delete(listener);
+  onSnapshot(listener: (snapshot: Readonly<ServerSnapshotMessage> | null) => void): () => void {
+    return this.snapshotAdapterInstance.onSnapshot(listener as any);
+  }
+
+  onRemotePlayers(listener: (players: readonly Readonly<ServerPlayerState>[]) => void): () => void {
+    return this.snapshotAdapterInstance.onRemotePlayers(listener);
+  }
+
+  onRemotePlayer(id: string, listener: (player: Readonly<ServerPlayerState> | null) => void): () => void {
+    return this.snapshotAdapterInstance.onRemotePlayer(id, listener);
+  }
+
+  onEnemies(listener: (enemies: readonly Readonly<ServerMonsterState>[]) => void): () => void {
+    return this.snapshotAdapterInstance.onEnemies(listener);
+  }
+
+  onEnemy(id: string, listener: (enemy: Readonly<ServerMonsterState> | null) => void): () => void {
+    return this.snapshotAdapterInstance.onEnemy(id, listener);
   }
 
   onReject(listener: (reject: ServerRejectMessage) => void): () => void {
@@ -304,19 +397,10 @@ export class MultiplayerAdapter {
   }
 
   // ============================================================================
-  // INTERNAL HANDLERS
+  // INTERNAL / MESSAGE HANDLERS
   // ============================================================================
 
-  private dispatchRawIntent(intent: ClientIntent): boolean {
-    const validation = validateClientIntent(intent);
-    if (!validation.ok || !validation.value || !this.room) { if (this.room) this.notifyError(`Client intent validation failed: ${validation.error}`); return false; }
-    const value = validation.value;
-    let serverIntent: Record<string, unknown>;
-    switch (value.type) { case 'move_input': serverIntent = { type: 'move', x: value.moveX, y: value.moveY }; break; case 'attack': case 'cast_skill': case 'dodge': serverIntent = { ...value }; break; default: this.notifyError('Intent type is not supported by the game server.'); return false; }
-    try { this.room.send('intent', serverIntent); return true; } catch { this.notifyError('Failed to send intent.'); return false; }
-  }
-
-  private handleIncomingMessage(rawData: unknown): void {
+  handleIncomingMessage(rawData: unknown): void {
     const serialized = typeof rawData === 'string' ? rawData : JSON.stringify(rawData);
     if (!serialized) return;
     const result = deserializeServerMessage(serialized);
@@ -339,49 +423,60 @@ export class MultiplayerAdapter {
     }
   }
 
-  private applySnapshot(snapshot: ServerSnapshotMessage): void {
-    this.currentSnapshot = snapshot;
+  private dispatchRawIntent(intent: ClientIntent): boolean {
+    const validation = validateClientIntent(intent);
+    if (!validation.ok || !validation.value || !this.room) {
+      if (this.room) this.notifyError(`Client intent validation failed: ${validation.error}`);
+      return false;
+    }
+    const value = validation.value;
+    let serverIntent: Record<string, unknown>;
+    switch (value.type) {
+      case 'move_input':
+        serverIntent = { type: 'move', x: value.moveX, y: value.moveY };
+        break;
+      case 'attack':
+      case 'cast_skill':
+      case 'dodge':
+        serverIntent = { ...value };
+        break;
+      default:
+        this.notifyError('Intent type is not supported by the game server.');
+        return false;
+    }
+    try {
+      this.room.send('intent', serverIntent);
+      return true;
+    } catch {
+      this.notifyError('Failed to send intent.');
+      return false;
+    }
+  }
 
+  private applySnapshot(snapshot: ServerSnapshotMessage): void {
     // Measure RTT latency if ackSeq matches an outstanding input
     const sentTime = this.sentTimestamps.get(snapshot.ackSeq);
     let latency = this.connState.latencyMs;
     if (sentTime) {
       latency = Math.max(0, Date.now() - sentTime);
-      // Clean up old tracked sequences
       for (const k of this.sentTimestamps.keys()) {
         if (k <= snapshot.ackSeq) this.sentTimestamps.delete(k);
       }
     }
 
-    // Update authoritative caches
-    this.playerMap.clear();
-    for (const player of snapshot.players) {
-      this.playerMap.set(player.id, player);
-    }
-
-    this.monsterMap.clear();
-    for (const monster of snapshot.monsters) {
-      this.monsterMap.set(monster.id, monster);
-    }
+    this.snapshotAdapterInstance.applySnapshot(snapshot);
 
     this.setConnectionState({
       serverTick: snapshot.serverTick,
       latencyMs: latency,
       lastSnapshotTime: snapshot.serverTimestamp,
     });
-
-    for (const listener of this.snapshotListeners) {
-      try {
-        listener(snapshot);
-      } catch {
-        // Listener isolation
-      }
-    }
   }
 
   private applyReject(reject: ServerRejectMessage): void {
     this.rejectedCount++;
     this.lastServerReject = reject;
+    this.snapshotAdapterInstance.applyReject(reject);
 
     for (const listener of this.rejectListeners) {
       try {
@@ -393,6 +488,8 @@ export class MultiplayerAdapter {
   }
 
   private applyEvent(eventMsg: ServerEventMessage): void {
+    this.snapshotAdapterInstance.applyEvent(eventMsg);
+
     for (const listener of this.eventListeners) {
       try {
         listener(eventMsg.event);
@@ -404,8 +501,13 @@ export class MultiplayerAdapter {
 
   private closeRoom(_code = 1000, _reason = 'Client disconnect'): void {
     if (!this.room) return;
-    const room = this.room; this.room = null;
-    try { void room.leave(true); } catch { /* ignore room close failure */ }
+    const room = this.room;
+    this.room = null;
+    try {
+      void room.leave(true);
+    } catch {
+      /* ignore room close failure */
+    }
   }
 
   private setConnectionState(next: Partial<MultiplayerConnectionState>): void {
@@ -421,7 +523,10 @@ export class MultiplayerAdapter {
 
   private notifyError(message: string): void {
     // Redact sensitive patterns if any
-    const safeMessage = message.replace(/(token|Bearer)\s*[:=]\s*['"]?[a-zA-Z0-9._-]+['"]?/gi, '$1=[REDACTED]');
+    const safeMessage = message.replace(
+      /(token|Bearer|authorization)\s*[:=]\s*['"]?[a-zA-Z0-9._-]+['"]?/gi,
+      '$1=[REDACTED]'
+    );
     for (const listener of this.errorListeners) {
       try {
         listener(safeMessage);
@@ -434,4 +539,3 @@ export class MultiplayerAdapter {
 
 export const MultiplayerClient = MultiplayerAdapter;
 export const multiplayer = new MultiplayerAdapter();
-

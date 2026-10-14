@@ -44,7 +44,7 @@
     "@colyseus/colyseus": "npm:colyseus@^0.18.9",
     "@colyseus/schema": "^5.0.39",
     "@supabase/supabase-js": "^2.117.3",
-    "colyseus.js": "^0.16.22",
+    "colyseus.js": "^0.15.28",
     "jose": "^6.2.12",
     "phaser": "4.2.1"
   },

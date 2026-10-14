@@ -2,8 +2,9 @@
 /**
  * scripts/check-network-contract.cjs
  *
- * Deterministic static analysis and runtime verification for M2 Online Boundary:
+ * Deterministic static analysis and runtime verification for M2 & M3 Online Boundary:
  * - src/game/online/protocol.ts
+ * - src/game/online/snapshotAdapter.ts
  * - src/game/online/multiplayer.ts
  *
  * Verifies:
@@ -13,6 +14,9 @@
  * 4. Validation of authoritative snapshots, rejects, and server gameplay events.
  * 5. Fail-closed adapter behavior when offline / VITE_GAME_SERVER_URL is absent.
  * 6. WebSocket mock dispatch, sequence tracking, listener isolation, and clean teardown.
+ * 7. M3 Authoritative snapshot consumption, deep immutability, and listener notifications.
+ * 8. Interpolation-friendly snapshot buffering and entity lerp calculations.
+ * 9. Clean disconnect clearing of all remote state and listeners.
  */
 
 const assert = require('node:assert/strict');
@@ -22,22 +26,25 @@ const ts = require('typescript');
 
 const root = process.cwd();
 const protocolPath = path.join(root, 'src', 'game', 'online', 'protocol.ts');
+const snapshotAdapterPath = path.join(root, 'src', 'game', 'online', 'snapshotAdapter.ts');
 const multiplayerPath = path.join(root, 'src', 'game', 'online', 'multiplayer.ts');
 const scriptPath = path.join(root, 'scripts', 'check-network-contract.cjs');
 
-console.log('[M2-NETWORK-CHECK] Starting deterministic network contract verification...');
+console.log('[M2/M3-NETWORK-CHECK] Starting deterministic network contract verification...');
 
 // ============================================================================
 // PART 1: STATIC FILE & CONTRACT CHECKS
 // ============================================================================
 
-console.log('[M2-NETWORK-CHECK] 1. Checking file existence and source contracts...');
+console.log('[M2/M3-NETWORK-CHECK] 1. Checking file existence and source contracts...');
 
 assert.ok(fs.existsSync(protocolPath), `Missing protocol file at ${protocolPath}`);
+assert.ok(fs.existsSync(snapshotAdapterPath), `Missing snapshotAdapter file at ${snapshotAdapterPath}`);
 assert.ok(fs.existsSync(multiplayerPath), `Missing multiplayer file at ${multiplayerPath}`);
 assert.ok(fs.existsSync(scriptPath), `Missing self-check file at ${scriptPath}`);
 
 const protocolSrc = fs.readFileSync(protocolPath, 'utf8');
+const snapshotAdapterSrc = fs.readFileSync(snapshotAdapterPath, 'utf8');
 const multiplayerSrc = fs.readFileSync(multiplayerPath, 'utf8');
 
 // 1.1 Protocol versioning and identifier
@@ -63,10 +70,14 @@ for (const msgType of requiredServerMessages) {
 assert.match(protocolSrc, /FORBIDDEN_CLIENT_AUTHORITY_FIELDS/, 'protocol.ts must declare forbidden client authority fields');
 assert.match(protocolSrc, /Object\.freeze/, 'protocol.ts must use Object.freeze for contract tables');
 assert.match(protocolSrc, /deepFreeze/, 'protocol.ts must provide deepFreeze utility');
+assert.match(snapshotAdapterSrc, /export\s+class\s+SnapshotAdapter/, 'snapshotAdapter.ts must export SnapshotAdapter');
+assert.match(snapshotAdapterSrc, /isAuthoritative[\s\S]*?return\s+false/, 'SnapshotAdapter must explicitly declare client is never authoritative');
+assert.match(snapshotAdapterSrc, /deepFreeze/, 'snapshotAdapter.ts must use deepFreeze for immutability');
 assert.match(multiplayerSrc, /isAuthoritative[\s\S]*?return\s+false/, 'Client adapter must explicitly declare client is never authoritative');
 
 // 1.5 Secrets protection in logging
 assert.doesNotMatch(protocolSrc, /console\.log\([^)]*token[^)]*\)/i, 'protocol.ts must not log plain tokens');
+assert.doesNotMatch(snapshotAdapterSrc, /console\.log\([^)]*token[^)]*\)/i, 'snapshotAdapter.ts must not log plain tokens');
 assert.doesNotMatch(multiplayerSrc, /console\.log\([^)]*token[^)]*\)/i, 'multiplayer.ts must not log plain tokens');
 assert.match(multiplayerSrc, /REDACTED/, 'multiplayer.ts must redact sensitive tokens in error messages');
 
@@ -79,7 +90,7 @@ console.log('  -> [PASS] Static contract and security checks passed.');
 // PART 2: COMPILATION & RUNTIME MODULE LOADING
 // ============================================================================
 
-console.log('[M2-NETWORK-CHECK] 2. Transpiling and loading modules into test sandbox...');
+console.log('[M2/M3-NETWORK-CHECK] 2. Transpiling and loading modules into test sandbox...');
 
 function compileAndLoad(tsCode, filename, customRequires = {}) {
   const transpiled = ts.transpileModule(tsCode, {
@@ -107,9 +118,27 @@ function compileAndLoad(tsCode, filename, customRequires = {}) {
   return moduleObj.exports;
 }
 
+let colyseusModule;
+try {
+  colyseusModule = require('colyseus.js');
+} catch {
+  colyseusModule = {
+    Client: class MockClient {
+      async joinOrCreate() {
+        throw new Error('Offline mock Client: no live server');
+      }
+    },
+  };
+}
+
 const protocolModule = compileAndLoad(protocolSrc, 'protocol.ts');
+const snapshotAdapterModule = compileAndLoad(snapshotAdapterSrc, 'snapshotAdapter.ts', {
+  './protocol': protocolModule,
+});
 const multiplayerModule = compileAndLoad(multiplayerSrc, 'multiplayer.ts', {
   './protocol': protocolModule,
+  './snapshotAdapter': snapshotAdapterModule,
+  'colyseus.js': colyseusModule,
 });
 
 console.log('  -> [PASS] Modules successfully transpiled and loaded in memory.');
@@ -118,7 +147,7 @@ console.log('  -> [PASS] Modules successfully transpiled and loaded in memory.')
 // PART 3: VALID CLIENT INTENT GENERATION & IMMUTABILITY
 // ============================================================================
 
-console.log('[M2-NETWORK-CHECK] 3. Testing valid client intent creators and immutability...');
+console.log('[M2/M3-NETWORK-CHECK] 3. Testing valid client intent creators and immutability...');
 
 const {
   PROTOCOL_VERSION,
@@ -203,16 +232,14 @@ console.log('  -> [PASS] Valid intents construct and pass validation with immuta
 // PART 4: REJECTION OF MALFORMED, OVERSIZED, AND UNKNOWN INTENTS
 // ============================================================================
 
-console.log('[M2-NETWORK-CHECK] 4. Testing rejection of malformed, oversized, and unknown intents...');
+console.log('[M2/M3-NETWORK-CHECK] 4. Testing rejection of malformed, oversized, and unknown intents...');
 
-// 4.1 Non-object / nil / array payloads
 for (const malformed of [null, undefined, 123, 'hello', [], [{}], true]) {
   const res = validateClientIntent(malformed);
   assert.equal(res.ok, false, `Expected non-object payload to be rejected: ${String(malformed)}`);
   assert.equal(res.code, 'MALFORMED');
 }
 
-// 4.2 Unknown intent type
 for (const unknown of [
   { type: 'teleport' },
   { type: 'god_mode' },
@@ -225,7 +252,6 @@ for (const unknown of [
   assert.equal(res.code, 'UNKNOWN_INTENT');
 }
 
-// 4.3 Malformed room_join
 assert.equal(validateClientIntent({ type: 'room_join', protocolVersion: '1.0.0', roomId: '', characterId: 'c1', clientTimestamp: 100 }).ok, false);
 assert.equal(validateClientIntent({ type: 'room_join', protocolVersion: '1.0.0', roomId: 'room with spaces!', characterId: 'c1', clientTimestamp: 100 }).ok, false);
 assert.equal(validateClientIntent({ type: 'room_join', protocolVersion: '1.0.0', roomId: 'x'.repeat(65), characterId: 'c1', clientTimestamp: 100 }).ok, false);
@@ -233,7 +259,6 @@ assert.equal(validateClientIntent({ type: 'room_join', protocolVersion: '1.0.0',
 assert.equal(validateClientIntent({ type: 'room_join', protocolVersion: '1.0.0', roomId: 'r1', characterId: 'c1', clientTimestamp: NaN }).ok, false);
 assert.equal(validateClientIntent({ type: 'room_join', protocolVersion: '1.0.0', roomId: 'r1', characterId: 'c1', clientTimestamp: 100, unexpectedField: 'bad' }).ok, false);
 
-// 4.4 Malformed move_input
 assert.equal(validateClientIntent({ type: 'move_input', seq: -1, moveX: 0, moveY: 0, clientTimestamp: 100 }).ok, false);
 assert.equal(validateClientIntent({ type: 'move_input', seq: 1.5, moveX: 0, moveY: 0, clientTimestamp: 100 }).ok, false);
 assert.equal(validateClientIntent({ type: 'move_input', seq: 1, moveX: 1.05, moveY: 0, clientTimestamp: 100 }).ok, false);
@@ -242,25 +267,20 @@ assert.equal(validateClientIntent({ type: 'move_input', seq: 1, moveX: NaN, move
 assert.equal(validateClientIntent({ type: 'move_input', seq: 1, moveX: 0, moveY: Infinity, clientTimestamp: 100 }).ok, false);
 assert.equal(validateClientIntent({ type: 'move_input', seq: 1, moveX: 0, moveY: 0, aimWorldX: 200000, clientTimestamp: 100 }).ok, false);
 
-// 4.5 Malformed attack
 assert.equal(validateClientIntent({ type: 'attack', seq: 1, comboIndex: -1, clientTimestamp: 100 }).ok, false);
 assert.equal(validateClientIntent({ type: 'attack', seq: 1, comboIndex: 4, clientTimestamp: 100 }).ok, false);
 assert.equal(validateClientIntent({ type: 'attack', seq: 1, comboIndex: 1, targetEntityId: 'a'.repeat(65), clientTimestamp: 100 }).ok, false);
 
-// 4.6 Malformed cast_skill
 assert.equal(validateClientIntent({ type: 'cast_skill', seq: 1, skillId: '', clientTimestamp: 100 }).ok, false);
 assert.equal(validateClientIntent({ type: 'cast_skill', seq: 1, skillId: 's'.repeat(33), clientTimestamp: 100 }).ok, false);
 assert.equal(validateClientIntent({ type: 'cast_skill', seq: 1, skillId: 'skill;drop', clientTimestamp: 100 }).ok, false);
 
-// 4.7 Malformed dodge
 assert.equal(validateClientIntent({ type: 'dodge', seq: 1, directionX: 1.5, directionY: 0, clientTimestamp: 100 }).ok, false);
 assert.equal(validateClientIntent({ type: 'dodge', seq: 1, directionX: 0, directionY: -1.5, clientTimestamp: 100 }).ok, false);
 
-// 4.8 Malformed interact
 assert.equal(validateClientIntent({ type: 'interact', seq: 1, targetId: '', clientTimestamp: 100 }).ok, false);
 assert.equal(validateClientIntent({ type: 'interact', seq: 1, targetId: 't'.repeat(65), clientTimestamp: 100 }).ok, false);
 
-// 4.9 Oversized payload (> 4096 bytes)
 const oversizedIntent = {
   type: 'interact',
   seq: 1,
@@ -278,7 +298,7 @@ console.log('  -> [PASS] Malformed, oversized, and unknown intents strictly reje
 // PART 5: STRICT REJECTION OF CLIENT AUTHORITY CLAIMS
 // ============================================================================
 
-console.log('[M2-NETWORK-CHECK] 5. Testing rejection of client authority claims (anti-cheat)...');
+console.log('[M2/M3-NETWORK-CHECK] 5. Testing rejection of client authority claims (anti-cheat)...');
 
 const forbiddenAuthorityClaims = [
   { intent: { type: 'attack', seq: 1, comboIndex: 0, damage: 99999, clientTimestamp: 100 }, field: 'damage' },
@@ -306,9 +326,8 @@ console.log('  -> [PASS] All 10/10 client authority claim attempts rejected with
 // PART 6: SERVER SNAPSHOT, REJECT, AND EVENT CONTRACT VALIDATION
 // ============================================================================
 
-console.log('[M2-NETWORK-CHECK] 6. Testing authoritative server message validation...');
+console.log('[M2/M3-NETWORK-CHECK] 6. Testing authoritative server message validation...');
 
-// 6.1 Server Snapshot
 const sampleSnapshot = {
   type: 'snapshot',
   serverTick: 120,
@@ -369,11 +388,9 @@ assert.equal(snapshotResult.value.monsters.length, 1);
 assert.equal(snapshotResult.value.projectiles.length, 1);
 assert.ok(Object.isFrozen(snapshotResult.value));
 
-// Invalid snapshot
 assert.equal(validateServerMessage({ type: 'snapshot', serverTick: -1 }).ok, false);
 assert.equal(validateServerMessage({ type: 'snapshot', serverTick: 1, players: 'not-array' }).ok, false);
 
-// 6.2 Server Reject
 const sampleReject = {
   type: 'reject',
   seq: 4,
@@ -387,10 +404,8 @@ assert.equal(rejectResult.ok, true);
 assert.equal(rejectResult.value.code, 'ON_COOLDOWN');
 assert.ok(Object.isFrozen(rejectResult.value));
 
-// Invalid reject
 assert.equal(validateServerMessage({ type: 'reject', intentType: 'cast_skill', code: 'INVALID_CODE', reason: 'bad', serverTimestamp: 100 }).ok, false);
 
-// 6.3 Server Event
 const sampleEvent = {
   type: 'event',
   serverTick: 121,
@@ -409,7 +424,6 @@ assert.equal(eventResult.ok, true);
 assert.equal(eventResult.value.event.kind, 'damage_dealt');
 assert.ok(Object.isFrozen(eventResult.value));
 
-// Serialization & Deserialization
 const serializedSnapshot = JSON.stringify(sampleSnapshot);
 const deserialized = deserializeServerMessage(serializedSnapshot);
 assert.equal(deserialized.ok, true);
@@ -421,11 +435,10 @@ console.log('  -> [PASS] Authoritative snapshots, rejects, and events validated.
 // PART 7: MULTIPLAYER ADAPTER FAIL-CLOSED & OFFLINE SAFETY
 // ============================================================================
 
-console.log('[M2-NETWORK-CHECK] 7. Testing MultiplayerAdapter fail-closed & offline safety...');
+console.log('[M2/M3-NETWORK-CHECK] 7. Testing MultiplayerAdapter fail-closed & offline safety...');
 
 const { MultiplayerAdapter, readGameServerConfig } = multiplayerModule;
 
-// 7.1 Config reading with absent URL
 assert.equal(readGameServerConfig({}), null, 'Absent env must return null config');
 assert.equal(readGameServerConfig({ VITE_GAME_SERVER_URL: '   ' }), null, 'Empty env must return null config');
 assert.equal(readGameServerConfig({ VITE_GAME_SERVER_URL: 'http://not-ws.com' }), null, 'Non-ws URL must return null config');
@@ -433,7 +446,6 @@ const validConfig = readGameServerConfig({ VITE_GAME_SERVER_URL: 'wss://game.tha
 assert.ok(validConfig);
 assert.equal(validConfig.serverUrl, 'wss://game.thanmenh.vn');
 
-// 7.2 Instantiation without config (default offline mode)
 const offlineAdapter = new MultiplayerAdapter(null);
 assert.equal(offlineAdapter.isConfigured, false);
 assert.equal(offlineAdapter.isConnected, false);
@@ -444,7 +456,6 @@ assert.equal(offlineAdapter.serverTick, 0);
 assert.deepEqual(offlineAdapter.getAllRemotePlayers(), []);
 assert.deepEqual(offlineAdapter.getAllMonsters(), []);
 
-// 7.3 Fail-closed sending when offline
 assert.equal(offlineAdapter.sendIntent(createMoveInputIntent(1, 0.5, 0.5)), false, 'sendIntent must fail closed when offline');
 assert.equal(offlineAdapter.sendMove(0.5, 0.5), false, 'sendMove must fail closed when offline');
 assert.equal(offlineAdapter.sendAttack(0), false, 'sendAttack must fail closed when offline');
@@ -452,7 +463,6 @@ assert.equal(offlineAdapter.sendCastSkill('slot-1'), false, 'sendCastSkill must 
 assert.equal(offlineAdapter.sendDodge(1, 0), false, 'sendDodge must fail closed when offline');
 assert.equal(offlineAdapter.sendInteract('target-1'), false, 'sendInteract must fail closed when offline');
 
-// 7.4 Connect without configured server URL
 offlineAdapter.connect({ roomId: 'hub', characterId: 'c1' }).then((connected) => {
   assert.equal(connected, false, 'connect() without server URL must return false');
   assert.equal(offlineAdapter.state.status, 'offline');
@@ -462,7 +472,9 @@ console.log('  -> [PASS] Fail-closed offline safety confirmed.');
 
 // ============================================================================
 // PART 8: COLYSEUS ADAPTER BOUNDARY (no live server)
-console.log('[M2-NETWORK-CHECK] 8. Testing official Colyseus adapter boundary...');
+// ============================================================================
+
+console.log('[M2/M3-NETWORK-CHECK] 8. Testing official Colyseus adapter boundary...');
 assert.match(multiplayerSrc, /from ['"]colyseus\.js['"]/, 'client must use official Colyseus SDK');
 assert.match(multiplayerSrc, /joinOrCreate\(['"]than-menh\.v1['"]/, 'client room name must match versioned server room');
 assert.match(multiplayerSrc, /authorization: options\.token \? `Bearer \${options\.token}`/, 'join options must carry Bearer authorization');
@@ -474,5 +486,230 @@ assert.match(multiplayerSrc, /onMessage\(['"]reject['"]/, 'reject adapter must b
 assert.match(multiplayerSrc, /onMessage\(['"]event['"]/, 'event adapter must bind room messages');
 assert.doesNotMatch(multiplayerSrc, /console\.log\([^)]*token/i, 'tokens must never be logged');
 console.log('  -> [PASS] Colyseus join options, room name, and validated message adapters verified statically.');
+
+// ============================================================================
+// PART 9: M3 AUTHORITATIVE SNAPSHOT ADAPTER & INTERPOLATION VERIFICATION
+// ============================================================================
+
+console.log('[M3-NETWORK-CHECK] 9. Testing M3 authoritative snapshot adapter vertical slice...');
+
+const { SnapshotAdapter, interpolatePosition } = snapshotAdapterModule;
+
+// 9.1 Adapter instantiation & strictly non-authoritative status
+const testAdapter = new MultiplayerAdapter(null);
+const standaloneSnapshotAdapter = new SnapshotAdapter();
+
+assert.equal(testAdapter.isAuthoritative, false, 'MultiplayerAdapter must report isAuthoritative = false');
+assert.equal(standaloneSnapshotAdapter.isAuthoritative, false, 'SnapshotAdapter must report isAuthoritative = false');
+assert.equal(testAdapter.latestSnapshot, null, 'Initial latestSnapshot must be null');
+assert.deepEqual(testAdapter.getAllRemotePlayers(), [], 'Initial remote players must be empty');
+assert.deepEqual(testAdapter.getAllMonsters(), [], 'Initial monsters must be empty');
+assert.deepEqual(testAdapter.getSnapshotBuffer(), [], 'Initial snapshot buffer must be empty');
+
+// 9.2 Subscription wiring: snapshot, remote players, monsters, single entities
+let receivedSnapshot = null;
+let receivedPlayers = null;
+let receivedMonsters = null;
+let specificPlayer = null;
+let specificMonster = null;
+let snapshotNotifyCount = 0;
+
+const unsubSnapshot = testAdapter.onSnapshot((s) => {
+  receivedSnapshot = s;
+  snapshotNotifyCount++;
+});
+const unsubPlayers = testAdapter.onRemotePlayers((p) => { receivedPlayers = p; });
+const unsubMonsters = testAdapter.onEnemies((m) => { receivedMonsters = m; });
+const unsubSinglePlayer = testAdapter.onRemotePlayer('p-1', (p) => { specificPlayer = p; });
+const unsubSingleMonster = testAdapter.onEnemy('m-1', (m) => { specificMonster = m; });
+
+assert.equal(receivedSnapshot, null);
+assert.deepEqual(receivedPlayers, []);
+assert.deepEqual(receivedMonsters, []);
+assert.equal(specificPlayer, null);
+assert.equal(specificMonster, null);
+
+// 9.3 Ingest authoritative snapshot T1
+const t1 = 1700000000000;
+const snap1 = {
+  type: 'snapshot',
+  serverTick: 100,
+  serverTimestamp: t1,
+  ackSeq: 1,
+  players: [
+    {
+      id: 'p-1',
+      characterId: 'c-1',
+      name: 'Thạch Sanh',
+      x: 100,
+      y: 200,
+      vx: 5,
+      vy: 0,
+      facing: 'right',
+      state: 'walk',
+      hp: 100,
+      maxHp: 100,
+      mp: 50,
+      maxMp: 50,
+      level: 1,
+    },
+  ],
+  monsters: [
+    {
+      id: 'm-1',
+      monsterType: 'wild-boar',
+      x: 200,
+      y: 200,
+      vx: -2,
+      vy: 0,
+      facing: 'left',
+      state: 'chase',
+      hp: 50,
+      maxHp: 50,
+      targetPlayerId: 'p-1',
+    },
+  ],
+};
+
+testAdapter.handleIncomingMessage(snap1);
+
+// 9.4 Verification that snapshot listener receives immutable remote state
+assert.ok(receivedSnapshot, 'Snapshot listener must receive validated snapshot');
+assert.equal(receivedSnapshot.serverTick, 100);
+assert.equal(receivedSnapshot.players.length, 1);
+assert.equal(receivedSnapshot.monsters.length, 1);
+assert.ok(Object.isFrozen(receivedSnapshot), 'Received snapshot must be frozen');
+assert.ok(Object.isFrozen(receivedSnapshot.players), 'Snapshot players array must be frozen');
+assert.ok(Object.isFrozen(receivedSnapshot.players[0]), 'Snapshot player state must be frozen');
+assert.ok(Object.isFrozen(receivedSnapshot.monsters), 'Snapshot monsters array must be frozen');
+assert.ok(Object.isFrozen(receivedSnapshot.monsters[0]), 'Snapshot monster state must be frozen');
+
+assert.equal(testAdapter.latestSnapshot.serverTick, 100);
+assert.equal(testAdapter.getAllRemotePlayers().length, 1);
+assert.equal(testAdapter.getAllMonsters().length, 1);
+assert.equal(specificPlayer?.id, 'p-1');
+assert.equal(specificMonster?.id, 'm-1');
+
+// Verify immutability: attempts to forge or mutate client state are rejected
+assert.throws(() => {
+  'use strict';
+  receivedSnapshot.players[0].hp = 99999;
+}, /Cannot assign to read only property|read-only/i, 'Forging player HP on client copy must throw');
+
+assert.throws(() => {
+  'use strict';
+  receivedSnapshot.monsters[0].hp = 0;
+}, /Cannot assign to read only property|read-only/i, 'Forging monster HP on client copy must throw');
+
+// 9.5 Interpolation buffer & interpolation-friendly snapshot queries
+const t2 = t1 + 100;
+const snap2 = {
+  type: 'snapshot',
+  serverTick: 101,
+  serverTimestamp: t2,
+  ackSeq: 2,
+  players: [
+    {
+      id: 'p-1',
+      characterId: 'c-1',
+      name: 'Thạch Sanh',
+      x: 120,
+      y: 200,
+      vx: 5,
+      vy: 0,
+      facing: 'right',
+      state: 'walk',
+      hp: 90,
+      maxHp: 100,
+      mp: 45,
+      maxMp: 50,
+      level: 1,
+    },
+  ],
+  monsters: [
+    {
+      id: 'm-1',
+      monsterType: 'wild-boar',
+      x: 180,
+      y: 200,
+      vx: -2,
+      vy: 0,
+      facing: 'left',
+      state: 'attack',
+      hp: 40,
+      maxHp: 50,
+      targetPlayerId: 'p-1',
+    },
+  ],
+};
+
+testAdapter.handleIncomingMessage(snap2);
+assert.equal(testAdapter.getSnapshotBuffer().length, 2, 'Buffer must store consecutive snapshots');
+assert.equal(testAdapter.previousSnapshot.serverTick, 100);
+assert.equal(testAdapter.latestSnapshot.serverTick, 101);
+
+// Midpoint interpolation test (alpha = 0.5)
+const interpPairMid = testAdapter.getInterpolationPair(t1 + 50);
+assert.equal(interpPairMid.from.serverTick, 100);
+assert.equal(interpPairMid.to.serverTick, 101);
+assert.equal(interpPairMid.alpha, 0.5);
+
+const interpPlayer = testAdapter.interpolatePlayer('p-1', 0.5);
+assert.ok(interpPlayer);
+assert.equal(interpPlayer.x, 110, 'Player X must be linearly interpolated to 110');
+assert.equal(interpPlayer.y, 200);
+
+const interpMonster = testAdapter.interpolateMonster('m-1', 0.5);
+assert.ok(interpMonster);
+assert.equal(interpMonster.x, 190, 'Monster X must be linearly interpolated to 190');
+assert.equal(interpMonster.y, 200);
+
+// 9.6 Listener isolation test: throwing listener does not disrupt others or crash adapter
+const throwingUnsub = testAdapter.onSnapshot(() => {
+  throw new Error('Expected test error inside buggy subscriber');
+});
+testAdapter.handleIncomingMessage({ ...snap2, serverTick: 102, serverTimestamp: t2 + 100 });
+throwingUnsub();
+
+// 9.7 Authoritative event handling
+let eventReceived = null;
+const unsubEvent = testAdapter.onEvent((ev) => { eventReceived = ev; });
+testAdapter.handleIncomingMessage({
+  type: 'event',
+  serverTick: 103,
+  serverTimestamp: t2 + 150,
+  event: {
+    kind: 'damage_dealt',
+    sourceId: 'p-1',
+    targetId: 'm-1',
+    amount: 15,
+    isCritical: false,
+    newHp: 25,
+  },
+});
+assert.ok(eventReceived);
+assert.equal(eventReceived.kind, 'damage_dealt');
+assert.equal(eventReceived.newHp, 25);
+unsubEvent();
+
+// 9.8 Disconnect clears remote state and clears snapshot listeners
+testAdapter.disconnect();
+assert.equal(testAdapter.latestSnapshot, null, 'disconnect must clear latestSnapshot to null');
+assert.deepEqual(testAdapter.getAllRemotePlayers(), [], 'disconnect must clear all remote players');
+assert.deepEqual(testAdapter.getAllMonsters(), [], 'disconnect must clear all monsters');
+assert.deepEqual(testAdapter.getSnapshotBuffer(), [], 'disconnect must clear snapshot buffer');
+assert.equal(receivedSnapshot, null, 'snapshot listener must receive null on disconnect');
+assert.deepEqual(receivedPlayers, [], 'remote players listener must receive empty array on disconnect');
+assert.deepEqual(receivedMonsters, [], 'monsters listener must receive empty array on disconnect');
+assert.equal(specificPlayer, null, 'single player listener must receive null on disconnect');
+assert.equal(specificMonster, null, 'single monster listener must receive null on disconnect');
+
+unsubSnapshot();
+unsubPlayers();
+unsubMonsters();
+unsubSinglePlayer();
+unsubSingleMonster();
+
+console.log('  -> [PASS] Authoritative snapshot listener receives immutable state and disconnect clears it.');
 console.log('----------------------------------------------------------------------');
-console.log('[SUCCESS] All M2 network protocol and multiplayer adapter checks passed!');
+console.log('[SUCCESS] All M2 and M3 network protocol and snapshot adapter checks passed!');
