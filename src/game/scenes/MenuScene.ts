@@ -466,13 +466,22 @@ export class MenuScene extends Phaser.Scene {
     connectBtn.type = 'button';
     connectBtn.textContent = 'KẾT NỐI LẠI MÁY CHỦ';
 
+    const offlinePlayBtn = document.createElement('button');
+    offlinePlayBtn.id = 'menu-network-offline-btn';
+    offlinePlayBtn.type = 'button';
+    offlinePlayBtn.className = 'menu-network-btn-offline';
+    offlinePlayBtn.textContent = '🎮 CHƠI OFFLINE NGAY';
+    offlinePlayBtn.addEventListener('click', () => {
+      this.startGame();
+    });
+
     const disconnectBtn = document.createElement('button');
     disconnectBtn.id = 'menu-network-disconnect-btn';
     disconnectBtn.type = 'button';
     disconnectBtn.textContent = 'NGẮT KẾT NỐI MẠNG';
     disconnectBtn.hidden = true;
 
-    networkControls.append(connectBtn, disconnectBtn);
+    networkControls.append(connectBtn, offlinePlayBtn, disconnectBtn);
     networkPanel.appendChild(networkControls);
     container.appendChild(networkPanel);
 
@@ -496,7 +505,9 @@ export class MenuScene extends Phaser.Scene {
           if (this.isSceneDestroyed || this.authGeneration !== currentGeneration) return;
           const msg = err instanceof CharacterLifecycleError ? err.message : 'Không thể tải nhân vật. Bạn vẫn có thể chơi offline.';
           authStatus.textContent = msg;
-          networkStatus.textContent = 'Chưa thể kết nối phòng trực tuyến: ' + msg + ' (Bạn vẫn có thể nhấn BẮT ĐẦU HÀNH TRÌNH để chơi offline bình thường, hoặc chạy migrations trên Supabase).';
+          networkStatus.textContent = 'Chưa thể kết nối phòng trực tuyến: ' + msg + ' (CSDL Supabase chưa chạy migrations tạo bảng "characters". Bạn có thể nhấn CHƠI OFFLINE NGAY bên dưới, hoặc chạy supabase/full_setup.sql trên Supabase SQL Editor).';
+          connectBtn.disabled = false;
+          connectBtn.hidden = false;
           return;
         }
       }
