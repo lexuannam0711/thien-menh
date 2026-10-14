@@ -29,6 +29,8 @@ import { DIVINE_POWERS, getSkillsByDivinePower, type DivinePowerId, type SkillDe
 import { ensureMinigameTextures } from '../minigames/MinigameArtwork';
 import { getFestivalNpcs, type FestivalNpc } from '../minigames/MinigameNpcRegistry';
 import { MinigameOverlay, type MinigameOverlayTab } from '../minigames/MinigameOverlay';
+import { multiplayer } from '../online/multiplayer';
+import { RemotePlayerRenderer } from '../online/remotePlayerRenderer';
 
 type NpcInfo = ReturnType<typeof getVillageNpcs>[number];
 interface Choice { title: string; select: () => void; }
@@ -58,6 +60,8 @@ export class VillageScene extends Phaser.Scene {
   private npcs: NpcInfo[] = [];
   private festivalNpcs: readonly FestivalNpc[] = [];
   private npcSprites = new Map<string, Phaser.GameObjects.Sprite>();
+  private remotePlayers: RemotePlayerRenderer | null = null;
+  private lastMoveSentTime = 0;
 
   constructor() { super('Village'); }
 
@@ -73,10 +77,13 @@ export class VillageScene extends Phaser.Scene {
     createNpcAnimations(this);
     this.npcSprites = new Map();
     this.minigameOverlay = null;
+    this.remotePlayers = typeof RemotePlayerRenderer === 'function' ? new RemotePlayerRenderer(this) : null;
     this.events.once('shutdown', () => {
       this.npcSprites = new Map();
       this.minigameOverlay?.destroy();
       this.minigameOverlay = null;
+      this.remotePlayers?.destroy();
+      this.remotePlayers = null;
     });
     this.pause = new PauseOverlay(this, () => !this.overlay && !this.minigameOverlay);
     audioManager.startMusic('village');
@@ -176,6 +183,8 @@ export class VillageScene extends Phaser.Scene {
       window.removeEventListener('keydown', onKeyDown);
       this.minigameOverlay?.destroy();
       this.minigameOverlay = null;
+      this.remotePlayers?.destroy();
+      this.remotePlayers = null;
       gameState.save();
     });
   }
@@ -185,6 +194,23 @@ export class VillageScene extends Phaser.Scene {
     gameState.tickPlaytime(delta);
     this.player.update(delta);
     this.hud.refresh();
+
+    if (multiplayer?.isConnected) {
+      const now = this.time ? this.time.now : Date.now();
+      if (now - this.lastMoveSentTime >= 50) {
+        this.lastMoveSentTime = now;
+        const move = this.player?.inputManager?.getMovementVector?.() ?? { x: 0, y: 0 };
+        let vx = move.x + (this.player?.controls?.direction?.x ?? 0);
+        let vy = move.y + (this.player?.controls?.direction?.y ?? 0);
+        const len = Math.hypot(vx, vy);
+        if (len > 1) {
+          vx /= len;
+          vy /= len;
+        }
+        multiplayer.sendMove(vx, vy, this.player?.x, this.player?.y);
+      }
+      this.remotePlayers?.update(delta);
+    }
 
     // Cổng sang Rừng Trúc phía Đông
     if (this.player.x > 912 && this.player.y > 193 && this.player.y < 344) {
