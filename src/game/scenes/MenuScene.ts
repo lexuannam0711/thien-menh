@@ -24,6 +24,7 @@ export class MenuScene extends Phaser.Scene {
   private networkUnsubscribe?: () => void;
   private authGeneration = 0;
   private isSceneDestroyed = false;
+  private isGuestOffline = false;
   private activeCharacter: CharacterRow | null = null;
 
   constructor() {
@@ -344,44 +345,102 @@ export class MenuScene extends Phaser.Scene {
     dockHelp.setAttribute('aria-label', 'Xem hướng dẫn điều khiển bàn phím và cảm ứng di động');
     dockHelp.textContent = '⚙ HƯỚNG DẪN';
     dockHelp.addEventListener('click', () => this.openControlsModal());
-    dock.appendChild(dockHelp);
+    const dockAccount = document.createElement('button');
+    dockAccount.id = 'dock-account-btn';
+    dockAccount.type = 'button';
+    dockAccount.className = 'menu-dock-btn';
+    dockAccount.setAttribute('aria-label', 'Trạng thái tài khoản người chơi');
+    dockAccount.textContent = '👤 ĐĂNG NHẬP';
+    dock.appendChild(dockAccount);
 
     container.appendChild(dock);
+
+    // Màn hình Đăng Nhập / Tài Khoản khởi đầu (Auth Screen Overlay)
+    const authBackdrop = document.createElement('div');
+    authBackdrop.id = 'menu-auth-backdrop';
+    authBackdrop.className = 'menu-auth-backdrop';
+    const isAuthedInitial = this.authStoreInstance.snapshot.status === 'authenticated';
+    authBackdrop.style.display = isAuthedInitial || this.isGuestOffline ? 'none' : 'flex';
 
     const authPanel = document.createElement('section');
     authPanel.className = 'menu-auth-panel';
     authPanel.setAttribute('aria-labelledby', 'menu-auth-title');
     const authTitle = document.createElement('h2');
     authTitle.id = 'menu-auth-title';
-    authTitle.textContent = 'TÀI KHOẢN (TÙY CHỌN)';
+    authTitle.className = 'menu-auth-title';
+    authTitle.textContent = '⚔️ THẦN MỆNH ONLINE ⚔️';
     authPanel.appendChild(authTitle);
+
+    const authSubtitle = document.createElement('p');
+    authSubtitle.className = 'menu-auth-subtitle';
+    authSubtitle.textContent = 'Đăng nhập tài khoản Supabase để lưu tiến trình trực tuyến và phiêu lưu cùng đồng đội.';
+    authPanel.appendChild(authSubtitle);
+
     const email = document.createElement('input');
-    email.type = 'email'; email.autocomplete = 'email'; email.placeholder = 'Email'; email.setAttribute('aria-label', 'Email');
+    email.type = 'email'; email.autocomplete = 'email'; email.placeholder = 'Email đăng nhập'; email.setAttribute('aria-label', 'Email');
     const password = document.createElement('input');
     password.type = 'password'; password.autocomplete = 'current-password'; password.placeholder = 'Mật khẩu (tối thiểu 6 ký tự)'; password.setAttribute('aria-label', 'Mật khẩu');
-    const authStatus = document.createElement('p');
-    authStatus.setAttribute('role', 'status');
+
+    const authBtnRow = document.createElement('div');
+    authBtnRow.className = 'menu-auth-buttons';
+
     const signIn = document.createElement('button');
-    signIn.type = 'button'; signIn.textContent = 'ĐĂNG NHẬP';
+    signIn.type = 'button'; signIn.className = 'menu-auth-btn-primary'; signIn.textContent = 'ĐĂNG NHẬP';
     const signUp = document.createElement('button');
-    signUp.type = 'button'; signUp.textContent = 'TẠO TÀI KHOẢN';
+    signUp.type = 'button'; signUp.className = 'menu-auth-btn-secondary'; signUp.textContent = 'TẠO TÀI KHOẢN';
+    authBtnRow.append(signIn, signUp);
+
+    const guestBtn = document.createElement('button');
+    guestBtn.type = 'button';
+    guestBtn.className = 'menu-auth-btn-guest';
+    guestBtn.textContent = '🎮 BỎ QUA & CHƠI CHẾ ĐỘ OFFLINE';
+
+    const authStatus = document.createElement('p');
+    authStatus.className = 'menu-auth-status';
+    authStatus.setAttribute('role', 'status');
+
     const signOut = document.createElement('button');
     signOut.type = 'button'; signOut.textContent = 'ĐĂNG XUẤT'; signOut.hidden = true;
+
     const submit = (action: 'signIn' | 'signUp'): void => {
       const message = validateCredentials(email.value, password.value);
       if (message) { authStatus.textContent = message; return; }
+      authStatus.textContent = action === 'signIn' ? 'Đang xác thực đăng nhập...' : 'Đang tạo tài khoản...';
       void (action === 'signIn' ? this.authStoreInstance.signInWithPassword(email.value, password.value) : this.authStoreInstance.signUp(email.value, password.value));
     };
     signIn.addEventListener('click', () => submit('signIn'));
     signUp.addEventListener('click', () => submit('signUp'));
+
+    guestBtn.addEventListener('click', () => {
+      this.isGuestOffline = true;
+      authBackdrop.style.display = 'none';
+      dockAccount.textContent = '👤 KHÁCH (ĐĂNG NHẬP)';
+      this.announceLive('Đã vào chế độ chơi Offline.');
+    });
+
+    dockAccount.addEventListener('click', () => {
+      if (this.authStoreInstance.snapshot.status === 'authenticated') {
+        if (window.confirm('Bạn có muốn đăng xuất tài khoản?')) {
+          signOut.click();
+        }
+      } else {
+        this.isGuestOffline = false;
+        authBackdrop.style.display = 'flex';
+      }
+    });
+
     signOut.addEventListener('click', () => {
       this.authGeneration++;
       this.activeCharacter = null;
+      this.isGuestOffline = false;
       multiplayer.disconnect();
       void this.authStoreInstance.signOut();
+      authBackdrop.style.display = 'flex';
     });
-    authPanel.append(email, password, signIn, signUp, signOut, authStatus);
-    container.appendChild(authPanel);
+
+    authPanel.append(email, password, authBtnRow, guestBtn, authStatus, signOut);
+    authBackdrop.appendChild(authPanel);
+    container.appendChild(authBackdrop);
 
     // Bảng trạng thái & điều khiển mạng trực tuyến (chỉ hiển thị khi đã xác thực tài khoản)
     const networkPanel = document.createElement('section');
@@ -437,7 +496,7 @@ export class MenuScene extends Phaser.Scene {
           if (this.isSceneDestroyed || this.authGeneration !== currentGeneration) return;
           const msg = err instanceof CharacterLifecycleError ? err.message : 'Không thể tải nhân vật. Bạn vẫn có thể chơi offline.';
           authStatus.textContent = msg;
-          networkStatus.textContent = 'Chưa thể kết nối phòng trực tuyến: ' + msg;
+          networkStatus.textContent = 'Chưa thể kết nối phòng trực tuyến: ' + msg + ' (Bạn vẫn có thể nhấn BẮT ĐẦU HÀNH TRÌNH để chơi offline bình thường, hoặc chạy migrations trên Supabase).';
           return;
         }
       }
@@ -527,6 +586,8 @@ export class MenuScene extends Phaser.Scene {
       signIn.disabled = disabled || state.status === 'authenticated'; signUp.disabled = disabled || state.status === 'authenticated'; signOut.hidden = state.status !== 'authenticated';
 
       if (state.status === 'authenticated') {
+        authBackdrop.style.display = 'none';
+        dockAccount.textContent = `👤 ${state.user?.email ?? 'Tài khoản'} (ĐĂNG XUẤT)`;
         networkPanel.hidden = false;
         void connectMultiplayer(state);
       } else {
@@ -534,6 +595,10 @@ export class MenuScene extends Phaser.Scene {
         this.activeCharacter = null;
         networkPanel.hidden = true;
         multiplayer.disconnect();
+        dockAccount.textContent = '👤 KHÁCH (ĐĂNG NHẬP)';
+        if (!this.isGuestOffline) {
+          authBackdrop.style.display = 'flex';
+        }
       }
     };
     this.authUnsubscribe = this.authStoreInstance.subscribe(renderAuth);
