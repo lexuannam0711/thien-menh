@@ -19,7 +19,7 @@ import {
   type StorageLike,
 } from './InputSettings';
 import { KeyboardMouseAdapter } from './KeyboardMouseAdapter';
-import { TouchAdapter } from './TouchAdapter';
+import { TouchAdapter, isTouchPointer } from './TouchAdapter';
 import { InputManager } from './InputManager';
 
 function assert(condition: unknown, message: string): asserts condition {
@@ -342,6 +342,152 @@ function testMultiTouchIsolation(): void {
 }
 
 /**
+ * 9. Kiểm tra cách ly pointer type giữa chuột và cảm ứng (Pointer Type Isolation):
+ * - isTouchPointer phân biệt chính xác chuột và cảm ứng.
+ * - TouchAdapter gắn listeners vào scene nhưng bỏ qua con trỏ chuột (LMB),
+ *   ngăn ngừa click chuột vào vùng phím ảo bị nhận nhầm thành SKILL hoặc DODGE.
+ * - KeyboardMouseAdapter bỏ qua các game object đang ẩn hoặc có isTouchControl.
+ */
+function testPointerTypeIsolation(): void {
+  // Test isTouchPointer helper
+  assert(isTouchPointer({ wasTouch: false, pointerType: 'mouse' }) === false, 'Mouse pointer must not be touch');
+  assert(isTouchPointer({ wasTouch: false, pointerType: 'pen' }) === false, 'Pen pointer must not be touch');
+  assert(isTouchPointer({ event: { pointerType: 'mouse' } }) === false, 'Event pointerType mouse must not be touch');
+  assert(isTouchPointer({ event: { type: 'mousedown' } }) === false, 'Event type mousedown must not be touch');
+
+  assert(isTouchPointer({ wasTouch: true, pointerType: 'touch' }) === true, 'Touch pointer must be touch');
+  assert(isTouchPointer({ event: { pointerType: 'touch' } }) === true, 'Event pointerType touch must be touch');
+  assert(isTouchPointer({ event: { type: 'touchstart' } }) === true, 'Event type touchstart must be touch');
+  assert(isTouchPointer(undefined) === true, 'Undefined pointer (synthetic/headless) defaults to true');
+  assert(isTouchPointer({}) === true, 'Empty pointer object defaults to true');
+
+  // Giả lập scene có input event emitter
+  const listeners: Record<string, ((...args: unknown[]) => void)[]> = {};
+  const mockScene = {
+    events: {
+      once: () => {},
+      on: () => {},
+      off: () => {},
+    },
+    input: {
+      on: (event: string, fn: (...args: unknown[]) => void) => {
+        listeners[event] = listeners[event] || [];
+        listeners[event].push(fn);
+      },
+      off: (event: string, fn: (...args: unknown[]) => void) => {
+        if (listeners[event]) {
+          listeners[event] = listeners[event].filter(cb => cb !== fn);
+        }
+      },
+    },
+  } as unknown as Phaser.Scene;
+
+  const touch = new TouchAdapter(mockScene, {
+    handedness: 'right',
+    controlScale: 1.0,
+    buttonOpacity: 0.8,
+    floatingJoystick: false,
+    buttonSpacing: 1.0,
+  });
+
+  const emitScene = (event: string, ...args: unknown[]) => {
+    for (const fn of listeners[event] ?? []) {
+      fn(...args);
+    }
+  };
+
+  // Giả lập click chuột trái LMB vào vị trí của SKILL_1 (780, 354)
+  emitScene('pointerdown', {
+    id: 1,
+    x: 780,
+    y: 354,
+    wasTouch: false,
+    pointerType: 'mouse',
+  });
+  let state = touch.update();
+  assert(!state.pressed.has('SKILL_1'), 'Mouse LMB click at (780, 354) must NOT trigger SKILL_1 in TouchAdapter');
+  assert(!state.held.has('SKILL_1'), 'Mouse LMB click must NOT be held in TouchAdapter');
+
+  // Giả lập chạm màn hình cảm ứng Touch vào vị trí của SKILL_1 (780, 354)
+  emitScene('pointerdown', {
+    id: 1,
+    x: 780,
+    y: 354,
+    wasTouch: true,
+    pointerType: 'touch',
+  });
+  state = touch.update();
+  assert(state.pressed.has('SKILL_1'), 'Touch tap at (780, 354) MUST trigger SKILL_1 in TouchAdapter');
+  assert(state.held.has('SKILL_1'), 'Touch tap must be held in TouchAdapter');
+
+  // Nhả chạm cảm ứng
+  emitScene('pointerup', {
+    id: 1,
+    wasTouch: true,
+    pointerType: 'touch',
+  });
+  state = touch.update();
+  assert(!state.held.has('SKILL_1'), 'Touch release must release SKILL_1');
+  assert(state.released.has('SKILL_1'), 'Touch release must emit released SKILL_1');
+
+  // Kiểm tra setEnabled(false) vô hiệu hóa adapter hoàn toàn
+  touch.setEnabled(false);
+  emitScene('pointerdown', {
+    id: 2,
+    x: 780,
+    y: 354,
+    wasTouch: true,
+    pointerType: 'touch',
+  });
+  state = touch.update();
+  assert(!state.pressed.has('SKILL_1'), 'TouchAdapter when disabled must NOT trigger any actions');
+
+  touch.destroy();
+
+  // Kiểm tra KeyboardMouseAdapter.isPointerOverUI bỏ qua isTouchControl và visible === false
+  let hitObjects: Array<{ visible?: boolean; depth?: number; getData?: (k: string) => unknown }> = [];
+  const kbScene = {
+    events: { once: () => {}, on: () => {}, off: () => {} },
+    input: {
+      on: () => {},
+      off: () => {},
+      hitTestPointer: () => hitObjects,
+    },
+    cameras: {
+      main: { getWorldPoint: (x: number, y: number) => ({ x, y }) },
+    },
+  } as unknown as Phaser.Scene;
+
+  const kbAdapter = new KeyboardMouseAdapter(kbScene, DEFAULT_KEY_BINDINGS);
+
+  // 1. Hit object là touch control -> Không được tính là UI hit
+  hitObjects = [{
+    visible: true,
+    depth: 2000,
+    getData: (k: string) => (k === 'isTouchControl' ? true : undefined),
+  }];
+  assert(!kbAdapter.isPointerOverUI({ x: 780, y: 354 }), 'Touch control object must NOT block mouse pointer in isPointerOverUI');
+
+  // 2. Hit object có visible === false -> Không được tính là UI hit
+  hitObjects = [{
+    visible: false,
+    depth: 2000,
+    getData: () => undefined,
+  }];
+  assert(!kbAdapter.isPointerOverUI({ x: 780, y: 354 }), 'Invisible UI object must NOT block mouse pointer in isPointerOverUI');
+
+  // 3. Hit object là UI thực tế (isUI = true, depth = 2000) -> Phải chặn
+  hitObjects = [{
+    visible: true,
+    depth: 2000,
+    getData: (k: string) => (k === 'isUI' ? true : undefined),
+  }];
+  assert(kbAdapter.isPointerOverUI({ x: 780, y: 354 }), 'Real UI object must block mouse pointer in isPointerOverUI');
+
+  kbAdapter.destroy();
+}
+
+/**
  * Hàm điều phối toàn bộ test suite.
  */
 export function runInputSelfCheck(): true {
@@ -353,5 +499,8 @@ export function runInputSelfCheck(): true {
   testResetHeldStateOnBlur();
   testSettingsSerializationAndCorruptedJson();
   testMultiTouchIsolation();
+  testPointerTypeIsolation();
   return true;
 }
+
+export const runAllInputSelfChecks = runInputSelfCheck;
