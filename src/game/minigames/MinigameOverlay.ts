@@ -38,7 +38,7 @@ import { MinigameHistoryUI } from './MinigameHistoryUI';
 import { InputContext, type InputContextManager } from '../input/InputContext';
 import { uiTokens, uiTypography } from '../ui/design-tokens';
 
-export type MinigameOverlayTab = 'gameplay' | 'rules' | 'rewards' | 'history';
+export type MinigameOverlayTab = 'gameplay' | 'rules' | 'rewards' | 'history' | 'game';
 
 export interface MinigameOverlayOptions {
   scene: Phaser.Scene;
@@ -50,6 +50,7 @@ export class MinigameOverlay {
   private scene: Phaser.Scene;
   private contextManager?: InputContextManager;
   private onCloseCallback?: () => void;
+  private currentNpcId?: string;
 
   private overlayContainer: Phaser.GameObjects.Container | null = null;
   private currentTab: MinigameOverlayTab = 'gameplay';
@@ -71,7 +72,30 @@ export class MinigameOverlay {
   // Keyboard handler for Esc and Input Isolation
   private readonly onKeyDown: (event: KeyboardEvent) => void;
 
-  constructor(options: MinigameOverlayOptions) {
+  constructor(
+    optionsOrScene: MinigameOverlayOptions | Phaser.Scene,
+    initialGameId?: MinigameId,
+    npcId?: string,
+    extraOptions?: Partial<MinigameOverlayOptions>
+  ) {
+    let options: MinigameOverlayOptions;
+    if (optionsOrScene && 'scene' in (optionsOrScene as any)) {
+      options = optionsOrScene as MinigameOverlayOptions;
+    } else {
+      options = {
+        scene: optionsOrScene as Phaser.Scene,
+        contextManager: extraOptions?.contextManager,
+        onClose: extraOptions?.onClose,
+      };
+    }
+
+    if (initialGameId) {
+      this.currentGameId = initialGameId;
+    }
+    if (npcId) {
+      this.currentNpcId = npcId;
+    }
+
     this.scene = options.scene;
     this.contextManager = options.contextManager ?? this.findContextManager();
     this.onCloseCallback = options.onClose;
@@ -128,13 +152,16 @@ export class MinigameOverlay {
   /**
    * Mở Minigame Modal với gameId chỉ định ('7321' | 'lucky_dice' | 'animal_guess')
    */
-  public open(gameId: MinigameId): void {
+  public open(gameId?: MinigameId, initialTab: MinigameOverlayTab = 'gameplay'): void {
     if (this.isOpen()) {
       this.close();
     }
 
-    this.currentGameId = gameId;
-    this.currentTab = 'gameplay';
+    if (gameId) {
+      this.currentGameId = gameId;
+    }
+    const resolvedTab: MinigameOverlayTab = initialTab === 'game' ? 'gameplay' : initialTab;
+    this.currentTab = resolvedTab;
 
     // 1. Nạp textures procedural nếu chưa có
     ensureMinigameTextures(this.scene);
@@ -148,7 +175,7 @@ export class MinigameOverlay {
     this.buildModal();
 
     // 4. Khởi tạo bàn chơi tương ứng
-    this.switchTab('gameplay');
+    this.switchTab(resolvedTab);
 
     // 5. Đồng bộ lượt chơi từ backend hoặc offline client
     this.fetchDailyLimit();
@@ -364,11 +391,12 @@ export class MinigameOverlay {
   }
 
   public switchTab(tab: MinigameOverlayTab): void {
-    this.currentTab = tab;
+    const resolvedTab: MinigameOverlayTab = tab === 'game' ? 'gameplay' : tab;
+    this.currentTab = resolvedTab;
 
     // Cập nhật phong cách các nút Tab
     for (const [id, btn] of this.tabButtons.entries()) {
-      const active = id === tab;
+      const active = id === resolvedTab || (id === 'gameplay' && tab === 'game');
       btn.bg.setFillStyle(active ? 0x2e463c : 0x182421);
       btn.bg.setStrokeStyle(1.2, active ? 0xf3c66f : 0x8a6248);
       btn.text.setColor(active ? MINIGAME_PALETTE.goldBright : '#CBD1CB');
@@ -377,13 +405,13 @@ export class MinigameOverlay {
     // Ẩn tất cả sub-views
     this.hideAllSubViews();
 
-    if (tab === 'gameplay') {
+    if (resolvedTab === 'gameplay') {
       this.showGameplayView();
-    } else if (tab === 'rules') {
+    } else if (resolvedTab === 'rules') {
       this.showRulesView();
-    } else if (tab === 'rewards') {
+    } else if (resolvedTab === 'rewards') {
       this.showRewardsView();
-    } else if (tab === 'history') {
+    } else if (resolvedTab === 'history') {
       this.showHistoryView();
     }
   }

@@ -26,6 +26,9 @@ import { loadIconArtwork, ICON_TEXTURE_KEY, ITEM_ICON_FRAMES, SKILL_ICON_FRAMES 
 import { getEquippedWeaponOrDefault } from '../../data/weapons';
 import { graphicsSettings } from '../rendering/GraphicsSettings';
 import { DIVINE_POWERS, getSkillsByDivinePower, type DivinePowerId, type SkillDefinition } from '../../data/skills';
+import { ensureMinigameTextures } from '../minigames/MinigameArtwork';
+import { getFestivalNpcs, type FestivalNpc } from '../minigames/MinigameNpcRegistry';
+import { MinigameOverlay, type MinigameOverlayTab } from '../minigames/MinigameOverlay';
 
 type NpcInfo = ReturnType<typeof getVillageNpcs>[number];
 interface Choice { title: string; select: () => void; }
@@ -35,6 +38,7 @@ export class VillageScene extends Phaser.Scene {
   private hud!: Hud;
   private combat!: CombatSystem;
   private overlay: Phaser.GameObjects.Container | null = null;
+  private minigameOverlay: MinigameOverlay | null = null;
   private tabContentContainer: Phaser.GameObjects.Container | null = null;
   private menuModel: RpgMenuModel | null = null;
   private currentTab: RpgMenuTab = 'inventory';
@@ -52,6 +56,7 @@ export class VillageScene extends Phaser.Scene {
   private skillTooltipBox: Phaser.GameObjects.Container | null = null;
 
   private npcs: NpcInfo[] = [];
+  private festivalNpcs: readonly FestivalNpc[] = [];
   private npcSprites = new Map<string, Phaser.GameObjects.Sprite>();
 
   constructor() { super('Village'); }
@@ -60,14 +65,20 @@ export class VillageScene extends Phaser.Scene {
     loadGameAssets(this);
     loadNpcArtwork(this);
     loadIconArtwork(this);
+    ensureMinigameTextures(this);
   }
 
   create(data?: { notice?: string }): void {
     createGameAnimations(this);
     createNpcAnimations(this);
     this.npcSprites = new Map();
-    this.events.once('shutdown', () => { this.npcSprites = new Map(); });
-    this.pause = new PauseOverlay(this, () => !this.overlay);
+    this.minigameOverlay = null;
+    this.events.once('shutdown', () => {
+      this.npcSprites = new Map();
+      this.minigameOverlay?.destroy();
+      this.minigameOverlay = null;
+    });
+    this.pause = new PauseOverlay(this, () => !this.overlay && !this.minigameOverlay);
     audioManager.startMusic('village');
     this.overlay = null;
     this.tabContentContainer = null;
@@ -86,9 +97,29 @@ export class VillageScene extends Phaser.Scene {
       }).setOrigin(0.5).setDepth(110);
       this.add.zone(npc.x, npc.y, 78, 90).setInteractive({ useHandCursor: true })
         .setDepth(100).on('pointerdown', () => {
-          if (!this.overlay && Phaser.Math.Distance.Between(this.player.x, this.player.y,
+          if (!this.overlay && !this.minigameOverlay && Phaser.Math.Distance.Between(this.player.x, this.player.y,
             npc.x, npc.y) < 118) this.interact(npc.name);
-          else if (!this.overlay) toast(this, 'Đến gần NPC để trò chuyện.');
+          else if (!this.overlay && !this.minigameOverlay) toast(this, 'Đến gần NPC để trò chuyện.');
+        });
+    });
+
+    // Tạo 3 Festival NPCs minigame trong Làng Lạc Thủy
+    this.festivalNpcs = getFestivalNpcs();
+    this.festivalNpcs.forEach((npc) => {
+      this.drawFestivalNpc(npc);
+      this.add.text(npc.x, npc.y + 25, 'F: CHƠI', {
+        fontSize: '12px',
+        color: '#fff3cb',
+        backgroundColor: '#1c392a',
+      }).setOrigin(0.5).setDepth(110);
+      this.add.zone(npc.x, npc.y, 78, 90).setInteractive({ useHandCursor: true })
+        .setDepth(100).on('pointerdown', () => {
+          if (!this.overlay && !this.minigameOverlay && Phaser.Math.Distance.Between(this.player.x, this.player.y,
+            npc.x, npc.y) < 118) {
+            this.interactFestivalNpc(npc);
+          } else if (!this.overlay && !this.minigameOverlay) {
+            toast(this, 'Đến gần NPC để chơi minigame.');
+          }
         });
     });
 
@@ -99,7 +130,7 @@ export class VillageScene extends Phaser.Scene {
       skill: (skill, damage, direction) => this.combat.skill(this.player, skill, damage, direction),
       interact: () => this.interactClosest(),
       dead: animationMs => this.onDeath(animationMs),
-    }, () => Boolean(this.overlay) || this.pause.isOpen(), VILLAGE_BARRIERS);
+    }, () => Boolean(this.overlay) || Boolean(this.minigameOverlay) || this.pause.isOpen(), VILLAGE_BARRIERS);
 
     this.hud = new Hud(this, 'Làng Lạc Thủy · Khu an toàn');
 
@@ -120,17 +151,17 @@ export class VillageScene extends Phaser.Scene {
 
     // Thiết lập phím tắt mở/đóng Menu RPG
     const onKeyDown = (event: KeyboardEvent): void => {
-      if (event.repeat) return;
+      if (event.repeat || Boolean(this.minigameOverlay)) return;
       const code = event.code;
       if (code === 'KeyB') {
         if (this.isRpgMenuOpen) this.closeRpgMenu();
-        else if (!this.overlay) this.openRpgMenu();
+        else if (!this.overlay && !this.minigameOverlay) this.openRpgMenu();
       } else if (code === 'KeyI') {
         if (this.isRpgMenuOpen && this.currentTab === 'inventory') this.closeRpgMenu();
-        else if (!this.overlay || this.isRpgMenuOpen) this.openRpgMenu('inventory');
+        else if ((!this.overlay && !this.minigameOverlay) || this.isRpgMenuOpen) this.openRpgMenu('inventory');
       } else if (code === 'KeyM') {
         if (this.isRpgMenuOpen) this.closeRpgMenu();
-        else if (!this.overlay) this.openRpgMenu();
+        else if (!this.overlay && !this.minigameOverlay) this.openRpgMenu();
       } else if (code === 'Escape') {
         if (this.isRpgMenuOpen) this.closeRpgMenu();
         else if (this.overlay) this.closeModal();
@@ -143,12 +174,14 @@ export class VillageScene extends Phaser.Scene {
     this.events.once('shutdown', () => {
       this.pause.destroy();
       window.removeEventListener('keydown', onKeyDown);
+      this.minigameOverlay?.destroy();
+      this.minigameOverlay = null;
       gameState.save();
     });
   }
 
   update(_time: number, delta: number): void {
-    if (this.player.isDead || this.overlay || this.pause.isOpen()) return;
+    if (this.player.isDead || this.overlay || Boolean(this.minigameOverlay) || this.pause.isOpen()) return;
     gameState.tickPlaytime(delta);
     this.player.update(delta);
     this.hud.refresh();
@@ -166,13 +199,27 @@ export class VillageScene extends Phaser.Scene {
   }
 
   private interactClosest(): void {
-    let best: NpcInfo | null = null;
+    let bestStory: NpcInfo | null = null;
+    let bestFestival: FestivalNpc | null = null;
     let bestDistance = 110;
     for (const npc of this.npcs) {
       const distance = Phaser.Math.Distance.Between(this.player.x, this.player.y, npc.x, npc.y);
-      if (distance < bestDistance) { bestDistance = distance; best = npc; }
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        bestStory = npc;
+        bestFestival = null;
+      }
     }
-    if (best) this.interact(best.name);
+    for (const npc of (this.festivalNpcs ?? [])) {
+      const distance = Phaser.Math.Distance.Between(this.player.x, this.player.y, npc.x, npc.y);
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        bestStory = null;
+        bestFestival = npc;
+      }
+    }
+    if (bestFestival) this.interactFestivalNpc(bestFestival);
+    else if (bestStory) this.interact(bestStory.name);
     else toast(this, 'Lại gần một người dân và nhấn F.');
   }
 
@@ -190,12 +237,87 @@ export class VillageScene extends Phaser.Scene {
     this.add.container(npc.x, npc.y, [shadow, sprite, caption]).setDepth(30 + npc.y / 10);
   }
 
+  private drawFestivalNpc(npc: FestivalNpc): void {
+    const shadow = this.add.ellipse(0, 19, 34, 10, 0x112b26, 0.65);
+    let avatar: Phaser.GameObjects.GameObject;
+    if (this.textures.exists(npc.portraitKey)) {
+      avatar = this.add.image(0, -2, npc.portraitKey).setDisplaySize(44, 44);
+    } else {
+      avatar = this.add.circle(0, 0, 18, npc.color).setStrokeStyle(2, 0x112b26);
+    }
+    const caption = label(this, 0, -32, npc.name, 13, '#fff5d2', 'center');
+    this.add.container(npc.x, npc.y, [shadow, avatar, caption]).setDepth(30 + npc.y / 10);
+  }
+
+  private interactFestivalNpc(npc: FestivalNpc): void {
+    if (this.player.isDead || this.overlay || Boolean(this.minigameOverlay)) return;
+    const dialogue = `${npc.title}\n"${npc.dialogues[0]}"`;
+    this.modal(
+      npc.name,
+      dialogue,
+      [
+        {
+          title: 'Vào chơi ngay',
+          select: () => {
+            this.closeModal();
+            this.openMinigame(npc, 'game');
+          },
+        },
+        {
+          title: 'Tìm hiểu luật',
+          select: () => {
+            this.closeModal();
+            this.openMinigame(npc, 'rules');
+          },
+        },
+        {
+          title: 'Xem phần thưởng',
+          select: () => {
+            this.closeModal();
+            this.openMinigame(npc, 'rewards');
+          },
+        },
+        {
+          title: 'Lịch sử chơi',
+          select: () => {
+            this.closeModal();
+            this.openMinigame(npc, 'history');
+          },
+        },
+        {
+          title: 'Rời đi',
+          select: () => {
+            this.closeModal();
+          },
+        },
+      ],
+      npc.id
+    );
+  }
+
+  private openMinigame(npc: FestivalNpc, tab: MinigameOverlayTab = 'gameplay'): void {
+    if (this.minigameOverlay) {
+      this.minigameOverlay.destroy();
+      this.minigameOverlay = null;
+    }
+    this.minigameOverlay = new MinigameOverlay(this, npc.gameId, npc.id, {
+      onClose: () => {
+        this.minigameOverlay = null;
+      },
+    });
+    this.minigameOverlay.open(npc.gameId, tab);
+  }
+
   private npcPortrait(npcId: string): Phaser.GameObjects.Image | null {
-    const npc = this.npcs.find(entry => entry.id === npcId);
+    const fest = this.festivalNpcs?.find(entry => entry.id === npcId);
+    if (fest && this.textures?.exists(fest.portraitKey)) {
+      return this.add.image(192, 207, fest.portraitKey).setDisplaySize(96, 96);
+    }
+    const npc = this.npcs?.find(entry => entry.id === npcId);
     if (!npc) return null;
     const art = NPC_ARTWORK_BY_ID[npc.id];
-    if (!art || !this.textures.exists(art.portraitKey)) return null;
-    this.npcSprites.get(npc.id)?.play(art.dialogueAnimation);
+    if (!art || !this.textures?.exists(art.portraitKey)) return null;
+    this.npcSprites?.get(npc.id)?.play(art.dialogueAnimation);
     return this.add.image(192, 207, art.portraitKey);
   }
 
@@ -206,7 +328,7 @@ export class VillageScene extends Phaser.Scene {
   }
 
   private interact(name: string): void {
-    if (this.player.isDead || this.overlay) return;
+    if (this.player.isDead || this.overlay || Boolean(this.minigameOverlay)) return;
     const npc = this.npcs.find(entry => entry.name === name);
     if (npc && ['village-chief', 'village-smith', 'village-healer'].includes(npc.id)) {
       this.modal(npc.name, npc.dialogues[0], [
