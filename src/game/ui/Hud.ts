@@ -11,6 +11,8 @@ import { ResponsiveLayout } from './ResponsiveLayout';
 import { SkillButton, type SkillInfo } from './components/SkillButton';
 import { getSkill, type SkillDefinition } from '../../data/skills';
 import { graphicsSettings } from '../rendering/GraphicsSettings';
+import { NetworkBadge } from './NetworkBadge';
+import { PartyHUD } from './PartyHUD';
 
 /**
  * Hud Component — Thần Mệnh: Hậu Duệ Văn Lang
@@ -27,6 +29,10 @@ import { graphicsSettings } from '../rendering/GraphicsSettings';
  */
 export class Hud {
   private layout: ResponsiveLayout;
+
+  // --- Multiplayer UI & Network Status ---
+  private networkBadge?: NetworkBadge;
+  private partyHud?: PartyHUD;
 
   // --- Cụm Trạng thái Góc Trên-Trái (Top-Left Status) ---
   private statusContainer: Phaser.GameObjects.Container;
@@ -61,7 +67,7 @@ export class Hud {
   private bossHpFill: Phaser.GameObjects.Rectangle;
   private bossHpLabel: Phaser.GameObjects.Text;
 
-  constructor(private scene: Phaser.Scene, private readonly place: string) {
+  constructor(private scene: Phaser.Scene, private readonly place: string, options?: any) {
     const width = scene.cameras?.main?.width ?? 960;
     const height = scene.cameras?.main?.height ?? 540;
     this.layout = new ResponsiveLayout(width, height);
@@ -249,8 +255,27 @@ export class Hud {
     this.bossContainer.add([bossHpBg, this.bossHpFill, this.bossHpLabel]);
     this.renderBossBarFrame();
 
-    // Tự động giải phóng khi Scene shutdown
-    scene.events.once('shutdown', () => this.destroy());
+    // =========================================================================
+    // 5. CỤM MULTIPLAYER HUD & NETWORK BADGE
+    // =========================================================================
+    try {
+      this.networkBadge = new NetworkBadge(options);
+      this.networkBadge.mount();
+    } catch {
+      // Safe fallback cho môi trường mock không đầy đủ DOM
+    }
+
+    try {
+      this.partyHud = new PartyHUD(options);
+      this.partyHud.mount();
+    } catch {
+      // Safe fallback cho môi trường mock không đầy đủ DOM
+    }
+
+    // Tự động giải phóng khi Scene shutdown hoặc destroy
+    const onSceneShutdown = () => this.destroy();
+    scene.events.once('shutdown', onSceneShutdown);
+    scene.events.once('destroy', onSceneShutdown);
 
     this.refresh();
   }
@@ -488,8 +513,18 @@ export class Hud {
     }
   }
 
+  public getNetworkBadge(): NetworkBadge | undefined {
+    return this.networkBadge;
+  }
+
+  public getPartyHud(): PartyHUD | undefined {
+    return this.partyHud;
+  }
+
   public destroy(): void {
     if (this.scene) {
+      this.scene.events?.off('shutdown', this.destroy);
+      this.scene.events?.off('destroy', this.destroy);
       this.scene.tweens?.killTweensOf(this.statusContainer);
       this.scene.tweens?.killTweensOf(this.questContainer);
       this.scene.tweens?.killTweensOf(this.skillbarContainer);
@@ -499,6 +534,12 @@ export class Hud {
     this.questContainer.destroy(true);
     this.skillbarContainer.destroy(true);
     this.bossContainer.destroy(true);
+
+    this.networkBadge?.destroy();
+    this.networkBadge = undefined;
+
+    this.partyHud?.destroy();
+    this.partyHud = undefined;
   }
 }
 
