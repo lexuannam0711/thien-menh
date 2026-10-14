@@ -27,6 +27,46 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- Ensure columns exist even if public.profiles pre-existed from an earlier project
+DO $$
+DECLARE
+    r RECORD;
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'display_name'
+    ) THEN
+        ALTER TABLE public.profiles ADD COLUMN display_name TEXT;
+        IF EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'username'
+        ) THEN
+            EXECUTE 'UPDATE public.profiles SET display_name = COALESCE(NULLIF(trim(username), ''''), ''user_'' || substr(id::text, 1, 8)) WHERE display_name IS NULL';
+        ELSE
+            EXECUTE 'UPDATE public.profiles SET display_name = ''user_'' || substr(id::text, 1, 8) WHERE display_name IS NULL';
+        END IF;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'avatar_url'
+    ) THEN
+        ALTER TABLE public.profiles ADD COLUMN avatar_url TEXT;
+    END IF;
+
+    -- Drop NOT NULL on legacy columns that have no default to prevent insert failures
+    FOR r IN (
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'profiles'
+          AND is_nullable = 'NO'
+          AND column_default IS NULL
+          AND column_name NOT IN ('id', 'display_name', 'created_at', 'updated_at')
+    ) LOOP
+        EXECUTE format('ALTER TABLE public.profiles ALTER COLUMN %I DROP NOT NULL', r.column_name);
+    END LOOP;
+END $$;
+
 COMMENT ON TABLE public.profiles IS 'User profile information accessible by the owning authenticated user.';
 COMMENT ON COLUMN public.profiles.id IS 'References auth.users.id; primary key ensuring 1 profile per auth user.';
 COMMENT ON COLUMN public.profiles.display_name IS 'Unique player display name, trimmed, between 3 and 24 characters.';
