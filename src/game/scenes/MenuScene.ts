@@ -7,7 +7,8 @@ import { audioManager } from '../audio/AudioManager';
 import { graphicsSettings } from '../rendering/GraphicsSettings';
 import { ControlsSettings } from '../ui/screens/ControlsSettings';
 import { AuthStore, authStore, validateCredentials, type AuthState } from '../online/auth';
-import { MultiplayerAdapter, type MultiplayerConnectionState } from '../online/multiplayer';
+import { multiplayer, type MultiplayerConnectionState } from '../online/multiplayer';
+import { getOrCreateCharacter, isValidUuid, CharacterLifecycleError, type CharacterRow } from '../online/characters';
 
 export class MenuScene extends Phaser.Scene {
   private muteButtonText?: Phaser.GameObjects.Text;
@@ -21,13 +22,16 @@ export class MenuScene extends Phaser.Scene {
   private authStoreInstance: AuthStore = authStore;
   private authUnsubscribe?: () => void;
   private networkUnsubscribe?: () => void;
-  private multiplayerAdapter?: MultiplayerAdapter;
+  private authGeneration = 0;
+  private isSceneDestroyed = false;
+  private activeCharacter: CharacterRow | null = null;
 
   constructor() {
     super('Menu');
   }
 
   create(): void {
+    this.isSceneDestroyed = false;
     // 1. Đồng bộ trạng thái âm thanh đã lưu trong localStorage với Phaser sound manager
     settingsModel.syncSound(this.sound);
     audioManager.loadFromStorage();
@@ -371,7 +375,9 @@ export class MenuScene extends Phaser.Scene {
     signIn.addEventListener('click', () => submit('signIn'));
     signUp.addEventListener('click', () => submit('signUp'));
     signOut.addEventListener('click', () => {
-      this.multiplayerAdapter?.disconnect();
+      this.authGeneration++;
+      this.activeCharacter = null;
+      multiplayer.disconnect();
       void this.authStoreInstance.signOut();
     });
     authPanel.append(email, password, signIn, signUp, signOut, authStatus);
@@ -412,9 +418,33 @@ export class MenuScene extends Phaser.Scene {
     container.appendChild(networkPanel);
 
     const connectMultiplayer = async (userState?: AuthState): Promise<void> => {
-      if (!this.multiplayerAdapter) return;
+      const currentGeneration = ++this.authGeneration;
       const currentAuth = userState ?? this.authStoreInstance.snapshot;
-      if (currentAuth.status !== 'authenticated') return;
+      if (currentAuth.status !== 'authenticated' || !currentAuth.user) return;
+
+      const userId = currentAuth.user.id;
+      if (!isValidUuid(userId)) {
+        authStatus.textContent = 'Mã tài khoản không hợp lệ. Bạn vẫn có thể chơi offline.';
+        return;
+      }
+
+      let character = this.activeCharacter;
+      if (!character || character.user_id !== userId) {
+        try {
+          authStatus.textContent = 'Đang tải thông tin nhân vật...';
+          character = await getOrCreateCharacter(this.authStoreInstance.client, userId);
+        } catch (err) {
+          if (this.isSceneDestroyed || this.authGeneration !== currentGeneration) return;
+          const msg = err instanceof CharacterLifecycleError ? err.message : 'Không thể tải nhân vật. Bạn vẫn có thể chơi offline.';
+          authStatus.textContent = msg;
+          networkStatus.textContent = 'Chưa thể kết nối phòng trực tuyến: ' + msg;
+          return;
+        }
+      }
+
+      if (this.isSceneDestroyed || this.authGeneration !== currentGeneration) return;
+      this.activeCharacter = character;
+      authStatus.textContent = `Đã kết nối tài khoản (${character.name}).`;
 
       // Token chỉ tồn tại trong bộ nhớ (in-memory variable), tuyệt đối không hiển thị hay ghi log
       let token: string | undefined;
@@ -427,13 +457,20 @@ export class MenuScene extends Phaser.Scene {
         // Giữ nguyên undefined và hoạt động fail-closed nếu lỗi phiên
       }
 
+      if (this.isSceneDestroyed || this.authGeneration !== currentGeneration) return;
+
       const roomId = 'village-hub';
-      const characterId = currentAuth.user?.id ? `char-${currentAuth.user.id}` : 'char-hero-1';
-      await this.multiplayerAdapter.connect({
+      const characterId = character.id;
+      await multiplayer.connect({
         roomId,
         characterId,
         token,
       });
+
+      if (this.isSceneDestroyed || this.authGeneration !== currentGeneration) {
+        multiplayer.disconnect();
+        return;
+      }
     };
 
     connectBtn.addEventListener('click', () => {
@@ -441,7 +478,7 @@ export class MenuScene extends Phaser.Scene {
     });
 
     disconnectBtn.addEventListener('click', () => {
-      this.multiplayerAdapter?.disconnect();
+      multiplayer.disconnect();
     });
 
     const renderNetwork = (netState: MultiplayerConnectionState): void => {
@@ -481,10 +518,7 @@ export class MenuScene extends Phaser.Scene {
       disconnectBtn.disabled = !isConnected;
     };
 
-    if (typeof MultiplayerAdapter === 'function') {
-      this.multiplayerAdapter = new MultiplayerAdapter();
-      this.networkUnsubscribe = this.multiplayerAdapter.onStateChange(renderNetwork);
-    }
+    this.networkUnsubscribe = multiplayer.onStateChange(renderNetwork);
 
     const renderAuth = (state: AuthState): void => {
       authStatus.textContent = state.message || (state.status === 'authenticated' ? `Đã đăng nhập: ${state.user?.email ?? 'tài khoản'}` : state.configured ? 'Chưa đăng nhập. Tiến trình vẫn lưu cục bộ khi chơi offline.' : state.message);
@@ -496,8 +530,10 @@ export class MenuScene extends Phaser.Scene {
         networkPanel.hidden = false;
         void connectMultiplayer(state);
       } else {
+        this.authGeneration++;
+        this.activeCharacter = null;
         networkPanel.hidden = true;
-        this.multiplayerAdapter?.disconnect();
+        multiplayer.disconnect();
       }
     };
     this.authUnsubscribe = this.authStoreInstance.subscribe(renderAuth);
@@ -878,6 +914,8 @@ export class MenuScene extends Phaser.Scene {
   }
 
   private cleanup(): void {
+    this.isSceneDestroyed = true;
+    this.authGeneration++;
     if (this.keydownHandler) {
       window.removeEventListener('keydown', this.keydownHandler);
       this.keydownHandler = undefined;
@@ -885,11 +923,6 @@ export class MenuScene extends Phaser.Scene {
     if (this.controlsSettings) {
       this.controlsSettings.destroy(true);
       this.controlsSettings = undefined;
-    }
-    if (this.multiplayerAdapter) {
-      this.multiplayerAdapter.disconnect();
-      this.multiplayerAdapter.destroy();
-      this.multiplayerAdapter = undefined;
     }
     this.networkUnsubscribe?.();
     this.networkUnsubscribe = undefined;

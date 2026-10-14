@@ -3,7 +3,9 @@ import { Room, Server, WebSocketTransport, type Client } from "@colyseus/colyseu
 import express, { type Request, type Response } from "express";
 import { createMinigameRouter } from "./minigames/routes.js";
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "jose";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
+import { createClient } from "@supabase/supabase-js";
+import { CharacterRepository, type CharacterProgressWrite } from "./characterRepository.js";
 
 export const ROOM_NAME = "than-menh.v1";
 export const TICK_RATE = 25;
@@ -184,16 +186,71 @@ export class WorldState extends Schema {
   @type({ map: EnemyState }) enemies = new MapSchema<EnemyState>();
 }
 
-type Session = { userId: string; intent: MoveIntent; lastSeq: number };
+type Session = { userId: string; characterId?: string; progress?: import("./characterRepository.js").CharacterProgress; progressBusy?: boolean; intent: MoveIntent; lastSeq: number };
+type ProgressRepository = Pick<CharacterRepository, "load" | "save">;
+const PROGRESS_CHANNEL = "character_progress";
+
+export function validateCharacterId(value: unknown): string | undefined {
+  return typeof value === "string" && UUID.test(value) ? value : undefined;
+}
+
+export function validateCharacterProgressRequest(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const input = value as Record<string, unknown>;
+  const requestId = typeof input.requestId === "string" && /^[A-Za-z0-9:_-]{1,64}$/.test(input.requestId) ? input.requestId : "";
+  if ((input.type === "load" || input.type === "save") && Object.keys(input).length === 2 && requestId) return { type: input.type, requestId };
+  return null;
+}
+
+export async function handleCharacterProgressRequest(value: unknown, userId: string, characterId: string | undefined, repository?: ProgressRepository, authoritativeProgress?: import("./characterRepository.js").CharacterProgress) {
+  const requestId = value && typeof value === "object" && typeof (value as Record<string, unknown>).requestId === "string" && /^[A-Za-z0-9:_-]{1,64}$/.test((value as Record<string, unknown>).requestId as string) ? (value as Record<string, unknown>).requestId as string : "";
+  const request = validateCharacterProgressRequest(value);
+  const reject = (code: "INVALID_REQUEST" | "UNAVAILABLE" | "NOT_READY" | "NOT_FOUND" | "PERSISTENCE_FAILED") => ({ requestId, type: "rejected" as const, code });
+  if (!request) return reject("INVALID_REQUEST");
+  if (!characterId || !UUID.test(characterId) || !UUID.test(userId)) return reject("NOT_FOUND");
+  if (!repository) return reject("UNAVAILABLE");
+  const safeProgress = (progress: unknown) => {
+    if (!progress || typeof progress !== "object") return null;
+    const p = progress as Record<string, unknown>;
+    if (p.id !== characterId || typeof p.id !== "string" || !Number.isInteger(p.level) || (p.level as number) < 1 || (p.level as number) > 99 || !Number.isInteger(p.xp) || (p.xp as number) < 0 || !Number.isInteger(p.gold) || (p.gold as number) < 0 || typeof p.checkpoint !== "string" || p.checkpoint.length > 128 || !Array.isArray(p.inventory)) return null;
+    try { if (JSON.stringify(p.inventory).length > 16_384) return null; } catch { return null; }
+    if (typeof p.updated_at !== "string" || p.updated_at.length > 64) return null;
+    return { id: p.id, level: p.level as number, xp: p.xp as number, gold: p.gold as number, checkpoint: p.checkpoint, inventory: p.inventory, updated_at: p.updated_at };
+  };
+  try {
+    if (request.type === "load") {
+      const progress = await repository.load(userId, characterId);
+      const safe = safeProgress(progress);
+      return safe ? { requestId: request.requestId, type: "loaded" as const, progress: safe } : reject("NOT_FOUND");
+    }
+    if (!authoritativeProgress) return reject("NOT_READY");
+    if (authoritativeProgress.id !== characterId) return reject("NOT_READY");
+    const { level, xp, gold, checkpoint, inventory } = authoritativeProgress;
+    const write: CharacterProgressWrite = { level, xp, gold, checkpoint, inventory };
+    const idempotencyKey = createHash("sha256").update(`${userId}:${characterId}:${request.requestId}`).digest("hex");
+    const result = await repository.save(userId, characterId, write, idempotencyKey, authoritativeProgress.updated_at);
+    const safe = safeProgress(result.progress);
+    return safe ? { requestId: request.requestId, type: "saved" as const, progress: safe } : reject("PERSISTENCE_FAILED");
+  } catch {
+    return reject("PERSISTENCE_FAILED");
+  }
+}
 
 export class PlayerRoom extends Room<{ state: WorldState }> {
   maxClients = 64;
   private sessions = new Map<string, Session>();
   private parties = new PartyRegistry();
   private partyRequests = new Map<string, Set<string>>();
+  private progressRepository?: CharacterRepository;
 
   onCreate() {
     this.setState(new WorldState());
+    const url = process.env.SUPABASE_URL?.trim();
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+    if (url && serviceKey) {
+      try { this.progressRepository = new CharacterRepository(createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } })); }
+      catch { this.progressRepository = undefined; }
+    }
     this.state.enemies.set("training:0", new EnemyState());
     this.setSimulationInterval((deltaMs) => this.tick(deltaMs), 1000 / TICK_RATE);
     this.onMessage("intent", (client, message) => {
@@ -204,6 +261,19 @@ export class PlayerRoom extends Room<{ state: WorldState }> {
       else this.reject(client, (message && typeof message === "object" && "type" in message) ? String((message as { type?: unknown }).type) : "unknown", "MALFORMED", "invalid combat intent");
     });
     this.onMessage("party_intent", (client, message) => this.handleParty(client, message));
+    this.onMessage(PROGRESS_CHANNEL, (client, message) => {
+      const session = this.sessions.get(client.sessionId);
+      if (!session) { client.send(PROGRESS_CHANNEL, { requestId: "", type: "rejected", code: "INVALID_REQUEST" }); return; }
+      const request = validateCharacterProgressRequest(message);
+      if (session.progressBusy) { client.send(PROGRESS_CHANNEL, { requestId: request?.requestId ?? "", type: "rejected", code: "BUSY" }); return; }
+      session.progressBusy = true;
+      void handleCharacterProgressRequest(message, session.userId, session.characterId, this.progressRepository, session.progress)
+        .then((response) => {
+          if (this.sessions.get(client.sessionId) !== session) return;
+          if (response.type === "loaded" || response.type === "saved") session.progress = response.progress;
+          client.send(PROGRESS_CHANNEL, response);
+        }).finally(() => { if (this.sessions.get(client.sessionId) === session) session.progressBusy = false; });
+    });
   }
 
   async onAuth(_client: Client, options: unknown): Promise<AuthClaims> {
@@ -214,12 +284,14 @@ export class PlayerRoom extends Room<{ state: WorldState }> {
   }
 
   onJoin(client: Client, options: unknown, auth: AuthClaims) {
+    const characterId = options && typeof options === "object" ? (options as Record<string, unknown>).characterId : undefined;
+    const boundCharacterId = validateCharacterId(characterId);
     const partyId = options && typeof options === "object" ? (options as Record<string, unknown>).partyId : undefined;
     if (partyId !== undefined && (typeof partyId !== "string" || !this.parties.canJoin(auth.sub, partyId))) throw new Error("unauthorized party");
     const player = new PlayerState();
     player.userId = auth.sub;
     this.state.players.set(client.sessionId, player);
-    this.sessions.set(client.sessionId, { userId: auth.sub, intent: { type: "move", x: 0, y: 0 }, lastSeq: -1 });
+    this.sessions.set(client.sessionId, { userId: auth.sub, ...(boundCharacterId ? { characterId: boundCharacterId } : {}), intent: { type: "move", x: 0, y: 0 }, lastSeq: -1 });
   }
 
   onLeave(client: Client) {

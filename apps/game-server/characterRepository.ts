@@ -23,22 +23,29 @@ type ProgressRpcResult = Readonly<{ applied: boolean; progress: CharacterProgres
 export class CharacterRepository {
   public constructor(private readonly db: SupabaseClient) {}
 
-  public async load(characterId: string): Promise<CharacterProgress | null> {
+  public async load(userId: string, characterId: string): Promise<CharacterProgress | null> {
+    this.assertUserId(userId);
     this.assertCharacterId(characterId);
     const { data, error } = await this.db
       .from('characters')
       .select('id,level,xp,gold,checkpoint,inventory,updated_at')
       .eq('id', characterId)
+      .eq('user_id', userId)
       .maybeSingle();
     if (error) throw new Error(`Character load failed: ${error.message}`);
     return data as CharacterProgress | null;
   }
 
-  public async save(characterId: string, progress: CharacterProgressWrite, idempotencyKey: string): Promise<ProgressRpcResult> {
+  public async save(userId: string, characterId: string, progress: CharacterProgressWrite, idempotencyKey: string, expectedUpdatedAt: string): Promise<ProgressRpcResult> {
+    this.assertUserId(userId);
     this.assertCharacterId(characterId);
     this.assertWrite(progress, idempotencyKey);
+    if (typeof expectedUpdatedAt !== 'string' || !Number.isFinite(Date.parse(expectedUpdatedAt))) throw new Error('Invalid expected timestamp');
+    if (!await this.load(userId, characterId)) throw new Error('Character not found');
     const { data, error } = await this.db.rpc('save_character_progress', {
+      p_user_id: userId,
       p_character_id: characterId,
+      p_expected_updated_at: expectedUpdatedAt,
       p_level: progress.level,
       p_xp: progress.xp,
       p_gold: progress.gold,
@@ -52,6 +59,10 @@ export class CharacterRepository {
 
   private assertCharacterId(value: string): void {
     if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)) throw new Error('Invalid character id');
+  }
+
+  private assertUserId(value: string): void {
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)) throw new Error('Invalid user id');
   }
 
   private assertWrite(progress: CharacterProgressWrite, idempotencyKey: string): void {
