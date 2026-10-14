@@ -1,4 +1,4 @@
-﻿{
+{
   "compilerOptions": {
     "target": "ES2022",
     "module": "NodeNext",
@@ -11,5 +11,5 @@
     "types": ["node"],
     "outDir": "../../dist/game-server"
   },
-  "include": ["./server.ts"]
+  "include": ["./**/*.ts"]
 }

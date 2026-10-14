@@ -37,7 +37,8 @@
     "check:all": "npm run build && npm run check:save && npm run check:rpg && npm run check:content-audio && npm run check:rpg-menu && npm run check:graphics && npm run check:sprites && npm run check:equipment && npm run check:npcs && npm run check:enemies && npm run check:environments && npm run check:combat-vfx && npm run check:icons && npm run check:environment-atmosphere && npm run check:rpg-visual && npm run check:scene-presentation && npm run check:player-status && npm run check:campaign-control && npm run check:graphics-stress-control && npm run check:equipment-browser-control && npm run check:controls",
     "server:typecheck": "tsc -p apps/game-server/tsconfig.json --noEmit",
     "server:start": "tsc -p apps/game-server/tsconfig.json && node --enable-source-maps dist/game-server/server.js",
-    "check:game-server": "node scripts/check-game-server.cjs"
+    "check:game-server": "node scripts/check-game-server.cjs",
+    "check:minigames": "node scripts/check-minigames-engine.cjs"
   },
   "dependencies": {
     "@colyseus/colyseus": "npm:colyseus@^0.18.9",
