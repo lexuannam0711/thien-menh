@@ -3,6 +3,7 @@ import { Room, Server, WebSocketTransport, type Client } from "@colyseus/colyseu
 import express, { type Request, type Response } from "express";
 import { createMinigameRouter } from "./minigames/routes.js";
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "jose";
+import { randomUUID } from "node:crypto";
 
 export const ROOM_NAME = "than-menh.v1";
 export const TICK_RATE = 25;
@@ -23,6 +24,61 @@ export type CastSkillIntent = { type: "cast_skill"; seq: number; skillId: string
 export type DodgeIntent = { type: "dodge"; seq: number; directionX: number; directionY: number };
 export type CombatIntent = AttackIntent | CastSkillIntent | DodgeIntent;
 export type AuthClaims = JWTPayload & { sub: string };
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const PARTY_ACTIONS = ["create", "invite", "accept", "decline", "leave", "kick", "transfer_leader", "disband"] as const;
+export type PartyAction = typeof PARTY_ACTIONS[number];
+export type PartyIntent = { action: PartyAction; requestId: string; targetUserId?: string; partyId?: string };
+
+export function validatePartyIntent(value: unknown): PartyIntent | null {
+  if (!value || typeof value !== "object") return null;
+  const input = value as Record<string, unknown>;
+  const keys = Object.keys(input);
+  if (keys.some((key) => !["action", "requestId", "targetUserId", "partyId"].includes(key))) return null;
+  if (!(PARTY_ACTIONS as readonly string[]).includes(input.action as string)) return null;
+  if (typeof input.requestId !== "string" || input.requestId.length < 1 || input.requestId.length > 64 || !/^[A-Za-z0-9:_-]+$/.test(input.requestId)) return null;
+  if (input.targetUserId !== undefined && (typeof input.targetUserId !== "string" || !UUID.test(input.targetUserId))) return null;
+  if (input.partyId !== undefined && (typeof input.partyId !== "string" || input.partyId.length < 1 || input.partyId.length > 64 || !/^[A-Za-z0-9-]+$/.test(input.partyId))) return null;
+  const action = input.action as PartyAction;
+  if (["invite", "kick", "transfer_leader"].includes(action) && input.targetUserId === undefined) return null;
+  if (["accept", "decline"].includes(action) && input.partyId === undefined) return null;
+  return { action, requestId: input.requestId, ...(input.targetUserId ? { targetUserId: input.targetUserId } : {}), ...(input.partyId ? { partyId: input.partyId } : {}) };
+}
+
+type PartyRecord = { leaderId: string; members: Set<string>; invites: Map<string, { partyId: string; leaderId: string }> };
+export class PartyRegistry {
+  private parties = new Map<string, PartyRecord>();
+  private users = new Map<string, string>();
+  handle(userId: string, intent: PartyIntent): { ok: boolean; partyId?: string; code?: string } {
+    const current = this.users.get(userId);
+    if (intent.action === "create") {
+      if (current) return { ok: false, code: "ALREADY_IN_PARTY" };
+      const partyId = randomUUID(); this.parties.set(partyId, { leaderId: userId, members: new Set([userId]), invites: new Map() }); this.users.set(userId, partyId!); return { ok: true, partyId: partyId! };
+    }
+    const partyId = intent.partyId ?? current;
+    const party = partyId ? this.parties.get(partyId) : undefined;
+    if (intent.action === "accept") {
+      if (!party) return { ok: false, code: "UNKNOWN_PARTY" };
+      if (!party.invites.has(userId)) return { ok: false, code: "NOT_INVITED" };
+      if (current || party.members.size >= 4) return { ok: false, code: current ? "ALREADY_IN_PARTY" : "PARTY_FULL" };
+      party.invites.delete(userId); party.members.add(userId); this.users.set(userId, partyId!); return { ok: true, partyId: partyId! };
+    }
+    if (intent.action === "decline") { if (!party || !party.invites.delete(userId)) return { ok: false, code: "NOT_INVITED" }; return { ok: true, partyId }; }
+    if (!party) return { ok: false, code: "NOT_IN_PARTY" };
+    if (intent.action === "leave") { if (!party.members.delete(userId)) return { ok: false, code: "NOT_IN_PARTY" }; this.users.delete(userId); if (!party.members.size) this.parties.delete(partyId!); else if (party.leaderId === userId) party.leaderId = [...party.members][0]; return { ok: true, partyId }; }
+    if (!party.members.has(userId)) return { ok: false, code: "NOT_IN_PARTY" };
+    if (intent.action === "invite") { if (party.leaderId !== userId) return { ok: false, code: "LEADER_ONLY" }; const target = intent.targetUserId!; if (this.users.has(target) || party.members.has(target)) return { ok: false, code: "TARGET_IN_PARTY" }; party.invites.set(target, { partyId: partyId!, leaderId: userId }); return { ok: true, partyId }; }
+    if (party.leaderId !== userId) return { ok: false, code: "LEADER_ONLY" };
+    const target = intent.targetUserId;
+    if (intent.action === "kick") { if (!target || !party.members.delete(target)) return { ok: false, code: "TARGET_NOT_MEMBER" }; this.users.delete(target); return { ok: true, partyId }; }
+    if (intent.action === "transfer_leader") { if (!target || !party.members.has(target)) return { ok: false, code: "TARGET_NOT_MEMBER" }; party.leaderId = target; return { ok: true, partyId }; }
+    if (intent.action === "disband") { for (const member of party.members) this.users.delete(member); this.parties.delete(partyId!); return { ok: true, partyId: partyId! }; }
+    return { ok: false, code: "MALFORMED" };
+  }
+  canJoin(userId: string, partyId: string) { const party = this.parties.get(partyId); return !!party && party.members.has(userId); }
+  snapshot(userId: string) { const partyId = this.users.get(userId); const party = partyId ? this.parties.get(partyId) : undefined; const invites = [...this.parties.values()].flatMap((p) => p.invites.get(userId) ? [p.invites.get(userId)!] : []); return { type: "party_snapshot" as const, partyId: partyId ?? null, leaderId: party?.leaderId ?? null, members: party ? [...party.members] : [], invites }; }
+  recipients(partyId: string) { const party = this.parties.get(partyId); return party ? [...party.members, ...party.invites.keys()] : []; }
+  recipientsForUser(userId: string) { const partyId = this.users.get(userId); return partyId ? this.recipients(partyId) : [userId]; }
+}
 
 export function extractBearer(value: unknown): string | null {
   if (typeof value !== "string") return null;
@@ -94,7 +150,7 @@ export function createJwtVerifier() {
     const token = extractBearer(authorization);
     if (!token) throw new Error("missing bearer token");
     const result = await jwtVerify(token, keys, { audience, ...(issuer ? { issuer } : {}) });
-    if (typeof result.payload.sub !== "string" || !result.payload.sub) throw new Error("token subject missing");
+    if (typeof result.payload.sub !== "string" || !UUID.test(result.payload.sub)) throw new Error("token subject missing");
     return result.payload as AuthClaims;
   };
 }
@@ -133,6 +189,8 @@ type Session = { userId: string; intent: MoveIntent; lastSeq: number };
 export class PlayerRoom extends Room<{ state: WorldState }> {
   maxClients = 64;
   private sessions = new Map<string, Session>();
+  private parties = new PartyRegistry();
+  private partyRequests = new Map<string, Set<string>>();
 
   onCreate() {
     this.setState(new WorldState());
@@ -145,6 +203,7 @@ export class PlayerRoom extends Room<{ state: WorldState }> {
       if (combat) this.handleCombat(client, combat);
       else this.reject(client, (message && typeof message === "object" && "type" in message) ? String((message as { type?: unknown }).type) : "unknown", "MALFORMED", "invalid combat intent");
     });
+    this.onMessage("party_intent", (client, message) => this.handleParty(client, message));
   }
 
   async onAuth(_client: Client, options: unknown): Promise<AuthClaims> {
@@ -154,7 +213,9 @@ export class PlayerRoom extends Room<{ state: WorldState }> {
     return createJwtVerifier()(authorization);
   }
 
-  onJoin(client: Client, _options: unknown, auth: AuthClaims) {
+  onJoin(client: Client, options: unknown, auth: AuthClaims) {
+    const partyId = options && typeof options === "object" ? (options as Record<string, unknown>).partyId : undefined;
+    if (partyId !== undefined && (typeof partyId !== "string" || !this.parties.canJoin(auth.sub, partyId))) throw new Error("unauthorized party");
     const player = new PlayerState();
     player.userId = auth.sub;
     this.state.players.set(client.sessionId, player);
@@ -162,8 +223,30 @@ export class PlayerRoom extends Room<{ state: WorldState }> {
   }
 
   onLeave(client: Client) {
+    const session = this.sessions.get(client.sessionId);
+    if (session) { const result = this.parties.handle(session.userId, { action: "leave", requestId: `leave:${client.sessionId}` }); if (result.partyId) this.sendPartySnapshots(result.partyId); }
     this.sessions.delete(client.sessionId);
     this.state.players.delete(client.sessionId);
+  }
+
+  private handleParty(client: Client, value: unknown) {
+    const intent = validatePartyIntent(value); const session = this.sessions.get(client.sessionId);
+    if (!intent || !session) { client.send("party_reject", { type: "party_reject", requestId: "", code: "MALFORMED" }); return; }
+    let seen = this.partyRequests.get(client.sessionId); if (!seen) { seen = new Set(); this.partyRequests.set(client.sessionId, seen); }
+    if (seen.has(intent.requestId)) return; seen.add(intent.requestId); if (seen.size > 256) seen.delete(seen.values().next().value!);
+    const notify = new Set(this.parties.recipientsForUser(session.userId));
+    const result = this.parties.handle(session.userId, intent);
+    if (!result.ok) { client.send("party_reject", { type: "party_reject", requestId: intent.requestId, code: result.code ?? "REJECTED" }); return; }
+    if (result.partyId) { if (intent.action !== "create") for (const userId of this.parties.recipients(result.partyId)) notify.add(userId); this.sendPartyUsers(notify); } else client.send("party_snapshot", this.parties.snapshot(session.userId));
+  }
+
+  private sendPartyUsers(users: Set<string>) {
+    for (const [sessionId, session] of this.sessions) if (users.has(session.userId)) this.clients.find((c) => c.sessionId === sessionId)?.send("party_snapshot", this.parties.snapshot(session.userId));
+  }
+
+  private sendPartySnapshots(partyId: string) {
+    const recipients = new Set(this.parties.recipients(partyId));
+    for (const [sessionId, session] of this.sessions) if (recipients.has(session.userId)) this.clients.find((c) => c.sessionId === sessionId)?.send("party_snapshot", this.parties.snapshot(session.userId));
   }
 
   private reject(client: Client, intentType: string, code: string, reason: string, seq?: number) {
@@ -240,6 +323,3 @@ if (import.meta.url === `file://${process.argv[1]?.replaceAll("\\", "/")}`) {
   const port = Number(process.env.PORT ?? 2567);
   createGameServer().listen(port).then(() => console.log(`game-server listening on ${port}`));
 }
-
-
-

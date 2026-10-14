@@ -46,6 +46,28 @@ import {
   type SnapshotAdapterOptions,
 } from './snapshotAdapter';
 
+import {
+  PartyAdapter,
+  type PartyState,
+  type PartyIntent,
+  type ServerPartySnapshot,
+  type ServerPartyReject,
+  type ServerPartyInvite,
+  type ServerPartyEvent,
+  INITIAL_PARTY_STATE,
+  createPartyIntent,
+  createInviteIntent,
+  createAcceptInviteIntent,
+  createDeclineInviteIntent,
+  createLeavePartyIntent,
+  createKickMemberIntent,
+  createTransferLeaderIntent,
+  createDisbandPartyIntent,
+  validatePartyIntent,
+  validatePartySnapshot,
+  validatePartyReject,
+} from './partyAdapter';
+
 export {
   SnapshotAdapter,
   AuthoritativeSnapshotAdapter,
@@ -53,7 +75,27 @@ export {
   type InterpolationPair,
   type InterpolatedEntityPosition,
   type SnapshotAdapterOptions,
+  PartyAdapter,
+  type PartyState,
+  type PartyIntent,
+  type ServerPartySnapshot,
+  type ServerPartyReject,
+  type ServerPartyInvite,
+  type ServerPartyEvent,
+  INITIAL_PARTY_STATE,
+  createPartyIntent,
+  createInviteIntent,
+  createAcceptInviteIntent,
+  createDeclineInviteIntent,
+  createLeavePartyIntent,
+  createKickMemberIntent,
+  createTransferLeaderIntent,
+  createDisbandPartyIntent,
+  validatePartyIntent,
+  validatePartySnapshot,
+  validatePartyReject,
 };
+
 
 export type ConnectionStatus =
   | 'offline'
@@ -116,6 +158,9 @@ export class MultiplayerAdapter {
   // Authoritative server state adapter (M3 vertical slice)
   private readonly snapshotAdapterInstance: SnapshotAdapter;
 
+  // Authoritative party adapter (M4 vertical slice)
+  private readonly partyAdapterInstance: PartyAdapter;
+
   // Metrics
   private rejectedCount = 0;
   private lastServerReject: Readonly<ServerRejectMessage> | null = null;
@@ -133,6 +178,7 @@ export class MultiplayerAdapter {
   ) {
     this.config = config;
     this.snapshotAdapterInstance = new SnapshotAdapter(snapshotOptions);
+    this.partyAdapterInstance = new PartyAdapter();
     this.connState = Object.freeze({
       status: config ? 'disconnected' : 'offline',
       roomId: null,
@@ -196,6 +242,22 @@ export class MultiplayerAdapter {
     return this.snapshotAdapterInstance;
   }
 
+  get partyAdapter(): PartyAdapter {
+    return this.partyAdapterInstance;
+  }
+
+  get party(): PartyAdapter {
+    return this.partyAdapterInstance;
+  }
+
+  get partyState(): Readonly<PartyState> {
+    return this.partyAdapterInstance.state;
+  }
+
+  get partySnapshot(): Readonly<ServerPartySnapshot> | null {
+    return this.partyAdapterInstance.latestSnapshot;
+  }
+
   getRemotePlayer(id: string): Readonly<ServerPlayerState> | null {
     return this.snapshotAdapterInstance.getRemotePlayer(id);
   }
@@ -242,6 +304,7 @@ export class MultiplayerAdapter {
       return false;
     }
     this.closeRoom();
+    this.partyAdapterInstance.setCurrentUserId(options.characterId);
     this.setConnectionState({
       status: 'connecting',
       roomId: options.roomId,
@@ -259,12 +322,16 @@ export class MultiplayerAdapter {
       room.onMessage('snapshot', (message: unknown) => this.handleIncomingMessage(message));
       room.onMessage('reject', (message: unknown) => this.handleIncomingMessage(message));
       room.onMessage('event', (message: unknown) => this.handleIncomingMessage(message));
+      room.onMessage('party_snapshot', (message: unknown) => this.handlePartyMessage(message, 'party_snapshot'));
+      room.onMessage('party_reject', (message: unknown) => this.handlePartyMessage(message, 'party_reject'));
+      room.onMessage('party_event', (message: unknown) => this.handlePartyMessage(message, 'party_event'));
       room.onError((code: number, message?: string) =>
         this.notifyError(`Game server connection error (${code}): ${message}`)
       );
       room.onLeave((code: number, _reason?: string) => {
         this.room = null;
         this.snapshotAdapterInstance.clear();
+        this.partyAdapterInstance.clear();
         this.setConnectionState({
           status: 'disconnected',
           serverTick: 0,
@@ -278,6 +345,7 @@ export class MultiplayerAdapter {
     } catch {
       this.room = null;
       this.snapshotAdapterInstance.clear();
+      this.partyAdapterInstance.clear();
       this.setConnectionState({ status: 'error', message: 'Unable to establish game server connection.' });
       return false;
     }
@@ -286,6 +354,7 @@ export class MultiplayerAdapter {
   disconnect(code = 1000, reason = 'Client disconnect'): void {
     this.closeRoom(code, reason);
     this.snapshotAdapterInstance.clear();
+    this.partyAdapterInstance.clear();
     this.setConnectionState({
       status: 'disconnected',
       roomId: null,
@@ -303,6 +372,7 @@ export class MultiplayerAdapter {
     this.eventListeners.clear();
     this.errorListeners.clear();
     this.snapshotAdapterInstance.destroy();
+    this.partyAdapterInstance.destroy();
   }
 
   // ============================================================================
@@ -352,6 +422,60 @@ export class MultiplayerAdapter {
   }
 
   // ============================================================================
+  // PARTY INTENTS (Validated, fail-closed)
+  // ============================================================================
+
+  sendPartyIntent(intent: PartyIntent): boolean {
+    if (!this.isConnected || !this.room) {
+      return false;
+    }
+    const validation = validatePartyIntent(intent);
+    if (!validation.ok || !validation.value) {
+      this.notifyError(`Party intent validation failed: ${validation.error}`);
+      return false;
+    }
+    try {
+      this.room.send('party_intent', validation.value);
+      return true;
+    } catch {
+      this.notifyError('Failed to send party intent.');
+      return false;
+    }
+  }
+
+  createParty(requestId?: string): boolean {
+    return this.sendPartyIntent(createPartyIntent(requestId));
+  }
+
+  inviteToParty(targetUserId: string, requestId?: string): boolean {
+    return this.sendPartyIntent(createInviteIntent(targetUserId, requestId));
+  }
+
+  acceptPartyInvite(partyId: string, requestId?: string): boolean {
+    return this.sendPartyIntent(createAcceptInviteIntent(partyId, requestId));
+  }
+
+  declinePartyInvite(partyId: string, requestId?: string): boolean {
+    return this.sendPartyIntent(createDeclineInviteIntent(partyId, requestId));
+  }
+
+  leaveParty(requestId?: string): boolean {
+    return this.sendPartyIntent(createLeavePartyIntent(requestId));
+  }
+
+  kickPartyMember(targetUserId: string, requestId?: string): boolean {
+    return this.sendPartyIntent(createKickMemberIntent(targetUserId, requestId));
+  }
+
+  transferPartyLeader(targetUserId: string, requestId?: string): boolean {
+    return this.sendPartyIntent(createTransferLeaderIntent(targetUserId, requestId));
+  }
+
+  disbandParty(requestId?: string): boolean {
+    return this.sendPartyIntent(createDisbandPartyIntent(requestId));
+  }
+
+  // ============================================================================
   // SUBSCRIPTIONS
   // ============================================================================
 
@@ -391,6 +515,22 @@ export class MultiplayerAdapter {
     return () => this.eventListeners.delete(listener);
   }
 
+  onPartyChange(listener: (state: Readonly<PartyState>) => void): () => void {
+    return this.partyAdapterInstance.onPartyChange(listener);
+  }
+
+  onPartySnapshot(listener: (snapshot: Readonly<ServerPartySnapshot> | null) => void): () => void {
+    return this.partyAdapterInstance.onPartySnapshot(listener);
+  }
+
+  onPartyReject(listener: (reject: Readonly<ServerPartyReject>) => void): () => void {
+    return this.partyAdapterInstance.onPartyReject(listener);
+  }
+
+  onPartyEvent(listener: (event: Readonly<ServerPartyEvent>) => void): () => void {
+    return this.partyAdapterInstance.onPartyEvent(listener);
+  }
+
   onError(listener: (error: string) => void): () => void {
     this.errorListeners.add(listener);
     return () => this.errorListeners.delete(listener);
@@ -401,6 +541,25 @@ export class MultiplayerAdapter {
   // ============================================================================
 
   handleIncomingMessage(rawData: unknown): void {
+    if (rawData && typeof rawData === 'object' && 'type' in (rawData as Record<string, unknown>)) {
+      const msgType = String((rawData as Record<string, unknown>).type);
+      if (msgType.startsWith('party_')) {
+        this.partyAdapterInstance.handleIncomingMessage(rawData);
+        return;
+      }
+    }
+    if (typeof rawData === 'string' && rawData.includes('"party_')) {
+      try {
+        const parsed = JSON.parse(rawData);
+        if (parsed && typeof parsed === 'object' && typeof parsed.type === 'string' && parsed.type.startsWith('party_')) {
+          this.partyAdapterInstance.handleIncomingMessage(parsed);
+          return;
+        }
+      } catch {
+        // Fall through to regular deserialize
+      }
+    }
+
     const serialized = typeof rawData === 'string' ? rawData : JSON.stringify(rawData);
     if (!serialized) return;
     const result = deserializeServerMessage(serialized);
@@ -422,6 +581,15 @@ export class MultiplayerAdapter {
         break;
     }
   }
+
+  private handlePartyMessage(message: unknown, fallbackType?: string): void {
+    const payload =
+      message && typeof message === 'object' && !('type' in (message as Record<string, unknown>)) && fallbackType
+        ? { type: fallbackType, ...(message as object) }
+        : message;
+    this.partyAdapterInstance.handleIncomingMessage(payload);
+  }
+
 
   private dispatchRawIntent(intent: ClientIntent): boolean {
     const validation = validateClientIntent(intent);

@@ -27,6 +27,7 @@ const ts = require('typescript');
 const root = process.cwd();
 const protocolPath = path.join(root, 'src', 'game', 'online', 'protocol.ts');
 const snapshotAdapterPath = path.join(root, 'src', 'game', 'online', 'snapshotAdapter.ts');
+const partyAdapterPath = path.join(root, 'src', 'game', 'online', 'partyAdapter.ts');
 const multiplayerPath = path.join(root, 'src', 'game', 'online', 'multiplayer.ts');
 const scriptPath = path.join(root, 'scripts', 'check-network-contract.cjs');
 
@@ -40,12 +41,15 @@ console.log('[M2/M3-NETWORK-CHECK] 1. Checking file existence and source contrac
 
 assert.ok(fs.existsSync(protocolPath), `Missing protocol file at ${protocolPath}`);
 assert.ok(fs.existsSync(snapshotAdapterPath), `Missing snapshotAdapter file at ${snapshotAdapterPath}`);
+assert.ok(fs.existsSync(partyAdapterPath), `Missing partyAdapter file at ${partyAdapterPath}`);
 assert.ok(fs.existsSync(multiplayerPath), `Missing multiplayer file at ${multiplayerPath}`);
 assert.ok(fs.existsSync(scriptPath), `Missing self-check file at ${scriptPath}`);
 
 const protocolSrc = fs.readFileSync(protocolPath, 'utf8');
 const snapshotAdapterSrc = fs.readFileSync(snapshotAdapterPath, 'utf8');
+const partyAdapterSrc = fs.readFileSync(partyAdapterPath, 'utf8');
 const multiplayerSrc = fs.readFileSync(multiplayerPath, 'utf8');
+
 
 // 1.1 Protocol versioning and identifier
 assert.match(protocolSrc, /export\s+const\s+PROTOCOL_VERSION\s*=\s*['"]1\.0\.0['"]/, 'PROTOCOL_VERSION must be 1.0.0');
@@ -73,11 +77,17 @@ assert.match(protocolSrc, /deepFreeze/, 'protocol.ts must provide deepFreeze uti
 assert.match(snapshotAdapterSrc, /export\s+class\s+SnapshotAdapter/, 'snapshotAdapter.ts must export SnapshotAdapter');
 assert.match(snapshotAdapterSrc, /isAuthoritative[\s\S]*?return\s+false/, 'SnapshotAdapter must explicitly declare client is never authoritative');
 assert.match(snapshotAdapterSrc, /deepFreeze/, 'snapshotAdapter.ts must use deepFreeze for immutability');
+assert.match(partyAdapterSrc, /export\s+class\s+PartyAdapter/, 'partyAdapter.ts must export PartyAdapter');
+assert.match(partyAdapterSrc, /isAuthoritative[\s\S]*?return\s+false/, 'PartyAdapter must explicitly declare client is never authoritative');
+assert.match(partyAdapterSrc, /MAX_PARTY_MEMBERS\s*=\s*4/, 'partyAdapter.ts must limit max party members to 4');
+assert.match(partyAdapterSrc, /deepFreeze/, 'partyAdapter.ts must use deepFreeze for immutability');
 assert.match(multiplayerSrc, /isAuthoritative[\s\S]*?return\s+false/, 'Client adapter must explicitly declare client is never authoritative');
+assert.match(multiplayerSrc, /partyAdapterInstance/, 'multiplayer.ts must instantiate PartyAdapter');
 
 // 1.5 Secrets protection in logging
 assert.doesNotMatch(protocolSrc, /console\.log\([^)]*token[^)]*\)/i, 'protocol.ts must not log plain tokens');
 assert.doesNotMatch(snapshotAdapterSrc, /console\.log\([^)]*token[^)]*\)/i, 'snapshotAdapter.ts must not log plain tokens');
+assert.doesNotMatch(partyAdapterSrc, /console\.log\([^)]*token[^)]*\)/i, 'partyAdapter.ts must not log plain tokens');
 assert.doesNotMatch(multiplayerSrc, /console\.log\([^)]*token[^)]*\)/i, 'multiplayer.ts must not log plain tokens');
 assert.match(multiplayerSrc, /REDACTED/, 'multiplayer.ts must redact sensitive tokens in error messages');
 
@@ -135,13 +145,18 @@ const protocolModule = compileAndLoad(protocolSrc, 'protocol.ts');
 const snapshotAdapterModule = compileAndLoad(snapshotAdapterSrc, 'snapshotAdapter.ts', {
   './protocol': protocolModule,
 });
+const partyAdapterModule = compileAndLoad(partyAdapterSrc, 'partyAdapter.ts', {
+  './protocol': protocolModule,
+});
 const multiplayerModule = compileAndLoad(multiplayerSrc, 'multiplayer.ts', {
   './protocol': protocolModule,
   './snapshotAdapter': snapshotAdapterModule,
+  './partyAdapter': partyAdapterModule,
   'colyseus.js': colyseusModule,
 });
 
 console.log('  -> [PASS] Modules successfully transpiled and loaded in memory.');
+
 
 // ============================================================================
 // PART 3: VALID CLIENT INTENT GENERATION & IMMUTABILITY
@@ -711,5 +726,282 @@ unsubSinglePlayer();
 unsubSingleMonster();
 
 console.log('  -> [PASS] Authoritative snapshot listener receives immutable state and disconnect clears it.');
+
+// ============================================================================
+// PART 10: M4 AUTHORITATIVE PARTY ADAPTER & MULTIPLAYER INTEGRATION
+// ============================================================================
+
+console.log('[M4-NETWORK-CHECK] 10. Testing M4 authoritative PartyAdapter & Multiplayer integration...');
+
+const {
+  PartyAdapter,
+  createPartyIntent,
+  createInviteIntent,
+  createAcceptInviteIntent,
+  createDeclineInviteIntent,
+  createLeavePartyIntent,
+  createKickMemberIntent,
+  createTransferLeaderIntent,
+  createDisbandPartyIntent,
+  validatePartyIntent,
+  validatePartySnapshot,
+  validatePartyReject,
+  validatePartyEvent,
+  INITIAL_PARTY_STATE,
+  MAX_PARTY_MEMBERS,
+} = partyAdapterModule;
+
+// 10.1 Intent creators and immutability
+const testUuid1 = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
+const testUuid2 = 'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22';
+const testUuid3 = 'c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a33';
+const testPartyId = 'p-party-001';
+
+const createIntent = createPartyIntent('req-1');
+assert.equal(createIntent.action, 'create');
+assert.equal(createIntent.requestId, 'req-1');
+assert.ok(Object.isFrozen(createIntent));
+assert.equal(validatePartyIntent(createIntent).ok, true);
+
+const inviteIntent = createInviteIntent(testUuid1, 'req-2');
+assert.equal(inviteIntent.action, 'invite');
+assert.equal(inviteIntent.targetUserId, testUuid1);
+assert.ok(Object.isFrozen(inviteIntent));
+assert.equal(validatePartyIntent(inviteIntent).ok, true);
+
+const acceptIntent = createAcceptInviteIntent(testPartyId, 'req-3');
+assert.equal(acceptIntent.action, 'accept');
+assert.equal(acceptIntent.partyId, testPartyId);
+assert.ok(Object.isFrozen(acceptIntent));
+assert.equal(validatePartyIntent(acceptIntent).ok, true);
+
+const declineIntent = createDeclineInviteIntent(testPartyId, 'req-4');
+assert.equal(declineIntent.action, 'decline');
+assert.equal(declineIntent.partyId, testPartyId);
+assert.ok(Object.isFrozen(declineIntent));
+assert.equal(validatePartyIntent(declineIntent).ok, true);
+
+const leaveIntent = createLeavePartyIntent('req-5');
+assert.equal(leaveIntent.action, 'leave');
+assert.ok(Object.isFrozen(leaveIntent));
+assert.equal(validatePartyIntent(leaveIntent).ok, true);
+
+const kickIntent = createKickMemberIntent(testUuid2, 'req-6');
+assert.equal(kickIntent.action, 'kick');
+assert.equal(kickIntent.targetUserId, testUuid2);
+assert.ok(Object.isFrozen(kickIntent));
+assert.equal(validatePartyIntent(kickIntent).ok, true);
+
+const transferIntent = createTransferLeaderIntent(testUuid2, 'req-7');
+assert.equal(transferIntent.action, 'transfer_leader');
+assert.equal(transferIntent.targetUserId, testUuid2);
+assert.ok(Object.isFrozen(transferIntent));
+assert.equal(validatePartyIntent(transferIntent).ok, true);
+
+const disbandIntent = createDisbandPartyIntent('req-8');
+assert.equal(disbandIntent.action, 'disband');
+assert.ok(Object.isFrozen(disbandIntent));
+assert.equal(validatePartyIntent(disbandIntent).ok, true);
+
+// 10.2 Party intent validation: rejection of malformed, unknown, and forbidden authority
+for (const malformed of [null, undefined, 123, 'party', [], true]) {
+  const res = validatePartyIntent(malformed);
+  assert.equal(res.ok, false);
+  assert.equal(res.code, 'MALFORMED');
+}
+
+for (const unknownAction of ['teleport', 'kill_party', 'make_admin', '']) {
+  const res = validatePartyIntent({ action: unknownAction, requestId: 'req-1' });
+  assert.equal(res.ok, false);
+  assert.equal(res.code, 'UNKNOWN_INTENT');
+}
+
+// Extra/unknown keys rejected
+assert.equal(validatePartyIntent({ action: 'create', requestId: 'req-1', extraField: 'bad' }).ok, false);
+
+// Anti-cheat: authority injection in party intent
+for (const authorityField of ['hp', 'damage', 'gold', 'level', 'xp', 'isDead']) {
+  const res = validatePartyIntent({ action: 'create', requestId: 'req-1', [authorityField]: 999 });
+  assert.equal(res.ok, false);
+  assert.equal(res.code, 'UNAUTHORIZED');
+}
+
+// User IDs must be valid UUIDs
+assert.equal(validatePartyIntent({ action: 'invite', requestId: 'req-1', targetUserId: 'not-a-valid-uuid' }).ok, false);
+assert.equal(validatePartyIntent({ action: 'invite', requestId: 'req-1', targetUserId: 'user 1 with spaces' }).ok, false);
+assert.equal(validatePartyIntent({ action: 'invite', requestId: 'req-1' }).ok, false, 'invite without targetUserId rejected');
+assert.equal(validatePartyIntent({ action: 'kick', requestId: 'req-1' }).ok, false, 'kick without targetUserId rejected');
+assert.equal(validatePartyIntent({ action: 'transfer_leader', requestId: 'req-1' }).ok, false, 'transfer_leader without targetUserId rejected');
+assert.equal(validatePartyIntent({ action: 'accept', requestId: 'req-1' }).ok, false, 'accept without partyId rejected');
+assert.equal(validatePartyIntent({ action: 'decline', requestId: 'req-1' }).ok, false, 'decline without partyId rejected');
+
+// 10.3 Server party snapshot validation
+const validEmptySnapshot = {
+  type: 'party_snapshot',
+  partyId: null,
+  leaderId: null,
+  members: [],
+  invites: [],
+};
+const emptySnapRes = validatePartySnapshot(validEmptySnapshot);
+assert.equal(emptySnapRes.ok, true);
+assert.ok(Object.isFrozen(emptySnapRes.value));
+
+const validActiveSnapshot = {
+  type: 'party_snapshot',
+  partyId: 'party-van-lang-1',
+  leaderId: testUuid1,
+  members: [testUuid1, testUuid2],
+  invites: [{ partyId: 'party-van-lang-1', leaderId: testUuid1 }],
+};
+const activeSnapRes = validatePartySnapshot(validActiveSnapshot);
+assert.equal(activeSnapRes.ok, true);
+assert.equal(activeSnapRes.value.partyId, 'party-van-lang-1');
+assert.equal(activeSnapRes.value.leaderId, testUuid1);
+assert.equal(activeSnapRes.value.members.length, 2);
+assert.ok(Object.isFrozen(activeSnapRes.value));
+assert.ok(Object.isFrozen(activeSnapRes.value.members));
+
+// Snapshots with > 4 members rejected
+const oversizedParty = {
+  type: 'party_snapshot',
+  partyId: 'party-oversized',
+  leaderId: testUuid1,
+  members: [
+    testUuid1,
+    testUuid2,
+    testUuid3,
+    'd0eebc99-9c0b-4ef8-bb6d-6bb9bd380a44',
+    'e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55',
+  ],
+  invites: [],
+};
+assert.equal(validatePartySnapshot(oversizedParty).ok, false, 'Party with 5 members must be rejected');
+
+// Inconsistent snapshots rejected
+assert.equal(validatePartySnapshot({ ...validActiveSnapshot, leaderId: 'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a99' }).ok, false, 'Leader not in members rejected');
+assert.equal(validatePartySnapshot({ type: 'party_snapshot', partyId: null, leaderId: testUuid1, members: [testUuid1], invites: [] }).ok, false, 'Null partyId with non-null leader rejected');
+assert.equal(validatePartySnapshot({ ...validActiveSnapshot, members: ['not-a-uuid'] }).ok, false, 'Non-UUID member rejected');
+
+// Snapshot immutability check
+assert.throws(() => {
+  'use strict';
+  activeSnapRes.value.members[0] = testUuid3;
+}, /Cannot assign to read only property|read-only/i, 'Forging party members on client snapshot must throw');
+
+// 10.4 Server party reject validation
+const samplePartyReject = {
+  type: 'party_reject',
+  requestId: 'req-invite-1',
+  code: 'PARTY_FULL',
+  reason: 'Nhóm đã đạt số lượng tối đa 4 người.',
+};
+const partyRejectRes = validatePartyReject(samplePartyReject);
+assert.equal(partyRejectRes.ok, true);
+assert.equal(partyRejectRes.value.code, 'PARTY_FULL');
+assert.ok(Object.isFrozen(partyRejectRes.value));
+
+assert.equal(validatePartyReject({ type: 'party_reject', requestId: '' }).ok, false);
+assert.equal(validatePartyReject({ type: 'not_reject', requestId: 'r1', code: 'C' }).ok, false);
+
+// 10.5 PartyAdapter state, listener isolation, and clean disconnect
+const partyAdapter = new PartyAdapter(testUuid1);
+assert.equal(partyAdapter.isAuthoritative, false, 'PartyAdapter must declare client is not authoritative');
+assert.equal(partyAdapter.isInParty, false);
+assert.equal(partyAdapter.isLeader, false);
+assert.equal(partyAdapter.partyId, null);
+assert.deepEqual(partyAdapter.members, []);
+
+let partyStateNotified = null;
+let partySnapshotNotified = null;
+let notifyCount = 0;
+
+const unsubPartyChange = partyAdapter.onPartyChange((s) => {
+  partyStateNotified = s;
+  notifyCount++;
+});
+const unsubPartySnap = partyAdapter.onPartySnapshot((s) => {
+  partySnapshotNotified = s;
+});
+
+// Listener isolation test: throwing subscriber does not break adapter
+const unsubThrowing = partyAdapter.onPartyChange(() => {
+  throw new Error('Buggy party subscriber should not crash adapter');
+});
+
+// Apply active snapshot
+partyAdapter.applySnapshot(validActiveSnapshot);
+assert.equal(partyAdapter.isInParty, true);
+assert.equal(partyAdapter.isLeader, true, 'User testUuid1 is the leader');
+assert.equal(partyAdapter.partyId, 'party-van-lang-1');
+assert.equal(partyAdapter.memberCount, 2);
+assert.ok(partyAdapter.isMember(testUuid2));
+assert.equal(partyStateNotified?.isInParty, true);
+assert.equal(partySnapshotNotified?.partyId, 'party-van-lang-1');
+assert.ok(Object.isFrozen(partyStateNotified));
+
+// Check immutability of adapter state
+assert.throws(() => {
+  'use strict';
+  partyAdapter.state.isInParty = false;
+}, /Cannot assign to read only property|read-only/i);
+
+
+// Reject handling
+let rejectReceived = null;
+const unsubReject = partyAdapter.onPartyReject((r) => { rejectReceived = r; });
+partyAdapter.applyReject(samplePartyReject);
+assert.equal(rejectReceived?.code, 'PARTY_FULL');
+assert.equal(partyAdapter.lastReject?.code, 'PARTY_FULL');
+
+// Clear / disconnect
+partyAdapter.clear();
+assert.equal(partyAdapter.isInParty, false);
+assert.equal(partyAdapter.isLeader, false);
+assert.equal(partyAdapter.partyId, null);
+assert.deepEqual(partyAdapter.members, []);
+assert.equal(partyAdapter.latestSnapshot, null);
+assert.equal(partySnapshotNotified, null, 'Snapshot subscriber receives null on clear');
+assert.equal(partyStateNotified?.isInParty, false, 'State subscriber receives initial state on clear');
+
+unsubThrowing();
+unsubPartyChange();
+unsubPartySnap();
+unsubReject();
+
+// 10.6 MultiplayerAdapter Party integration
+const offlineMultiplayer = new MultiplayerAdapter(null);
+assert.equal(offlineMultiplayer.partyState.isInParty, false);
+assert.equal(offlineMultiplayer.partySnapshot, null);
+assert.equal(offlineMultiplayer.partyAdapter.isAuthoritative, false);
+
+// Offline safety: party intents fail closed
+assert.equal(offlineMultiplayer.createParty(), false, 'createParty must fail closed offline');
+assert.equal(offlineMultiplayer.inviteToParty(testUuid2), false, 'inviteToParty must fail closed offline');
+assert.equal(offlineMultiplayer.acceptPartyInvite('p1'), false, 'acceptPartyInvite must fail closed offline');
+assert.equal(offlineMultiplayer.declinePartyInvite('p1'), false, 'declinePartyInvite must fail closed offline');
+assert.equal(offlineMultiplayer.leaveParty(), false, 'leaveParty must fail closed offline');
+assert.equal(offlineMultiplayer.kickPartyMember(testUuid2), false, 'kickPartyMember must fail closed offline');
+assert.equal(offlineMultiplayer.transferPartyLeader(testUuid2), false, 'transferPartyLeader must fail closed offline');
+assert.equal(offlineMultiplayer.disbandParty(), false, 'disbandParty must fail closed offline');
+
+// Incoming party messages routing via handleIncomingMessage
+let multiPartyStateReceived = null;
+const unsubMultiParty = offlineMultiplayer.onPartyChange((s) => { multiPartyStateReceived = s; });
+
+offlineMultiplayer.handleIncomingMessage(validActiveSnapshot);
+assert.equal(offlineMultiplayer.partyState.isInParty, true);
+assert.equal(offlineMultiplayer.partyState.partyId, 'party-van-lang-1');
+assert.equal(offlineMultiplayer.partySnapshot?.partyId, 'party-van-lang-1');
+
+// Disconnect clears party state on MultiplayerAdapter
+offlineMultiplayer.disconnect();
+assert.equal(offlineMultiplayer.partyState.isInParty, false, 'disconnect clears party state on MultiplayerAdapter');
+assert.equal(offlineMultiplayer.partySnapshot, null, 'disconnect clears party snapshot on MultiplayerAdapter');
+assert.equal(multiPartyStateReceived?.isInParty, false);
+
+unsubMultiParty();
+
+console.log('  -> [PASS] PartyAdapter, fail-closed validation, immutability, and Multiplayer integration confirmed.');
 console.log('----------------------------------------------------------------------');
-console.log('[SUCCESS] All M2 and M3 network protocol and snapshot adapter checks passed!');
+console.log('[SUCCESS] All M2, M3, and M4 network protocol and party adapter checks passed!');

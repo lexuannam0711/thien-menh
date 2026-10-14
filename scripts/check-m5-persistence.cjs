@@ -1,0 +1,22 @@
+#!/usr/bin/env node
+const fs = require('node:fs');
+const path = require('node:path');
+const assert = require('node:assert/strict');
+const root = process.cwd();
+const migration = path.join(root, 'supabase', 'migrations', '20261014010000_m5_character_progress.sql');
+const repository = path.join(root, 'apps', 'game-server', 'characterRepository.ts');
+assert.ok(fs.existsSync(migration), 'M5 migration missing');
+assert.ok(fs.existsSync(repository), 'characterRepository.ts missing');
+const sql = fs.readFileSync(migration, 'utf8');
+const ts = fs.readFileSync(repository, 'utf8');
+assert.match(sql, /ALTER TABLE\s+public\.characters\s+ADD COLUMN IF NOT EXISTS inventory\s+JSONB/i);
+for (const token of ['user_id', 'auth.users', 'CHECK (xp >= 0)', 'CHECK (level BETWEEN 1 AND 99)', 'CHECK (gold >= 0)', 'CHECK (jsonb_typeof(inventory) = \'array\')', 'updated_at', 'ENABLE ROW LEVEL SECURITY', 'REVOKE UPDATE (level, xp, gold, checkpoint, inventory)', 'service_role', 'idempotency_key', 'ON CONFLICT']) assert.ok(sql.toLowerCase().includes(token.toLowerCase()), `missing SQL token: ${token}`);
+for (const token of ['SECURITY DEFINER', 'pg_advisory_xact_lock', 'FOR UPDATE', 'trg_enforce_character_progress_server_fields']) assert.ok(sql.toLowerCase().includes(token.toLowerCase()), `missing authority/transaction token: ${token}`);
+assert.match(ts, /export (?:class|function|const) CharacterRepository/);
+assert.match(ts, /load\s*\(/);
+assert.match(ts, /save\s*\(/);
+assert.match(ts, /\.rpc\(['"]save_character_progress['"]/);
+assert.doesNotMatch(ts, /\.update\(|\.insert\(/);
+assert.doesNotMatch(ts, /\.(?:from|rpc)\(\s*`/);
+assert.match(ts, /readonly|private/);
+console.log('[M5-PERSISTENCE-CHECK] PASS');
