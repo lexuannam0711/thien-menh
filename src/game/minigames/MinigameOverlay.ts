@@ -79,7 +79,15 @@ export class MinigameOverlay {
     extraOptions?: Partial<MinigameOverlayOptions>
   ) {
     let options: MinigameOverlayOptions;
-    if (optionsOrScene && 'scene' in (optionsOrScene as any)) {
+    if (optionsOrScene && ('add' in (optionsOrScene as any) || 'sys' in (optionsOrScene as any))) {
+      // Nhận diện chuẩn Phaser.Scene (có GameObjectFactory và ScenePlugin)
+      options = {
+        scene: optionsOrScene as Phaser.Scene,
+        contextManager: extraOptions?.contextManager,
+        onClose: extraOptions?.onClose,
+      };
+    } else if (optionsOrScene && 'scene' in (optionsOrScene as any)) {
+      // Nhận diện đối tượng cấu hình MinigameOverlayOptions
       options = optionsOrScene as MinigameOverlayOptions;
     } else {
       options = {

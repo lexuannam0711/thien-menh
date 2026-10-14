@@ -373,6 +373,16 @@ export function createGameServer() {
   const server = new Server({
     transport: new WebSocketTransport(),
     express: (app) => {
+      app.use((req, res, next) => {
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-User-Id");
+        if (req.method === "OPTIONS") {
+          res.sendStatus(204);
+          return;
+        }
+        next();
+      });
       app.use(express.json());
       app.get("/health", (_req: Request, res: Response) => { res.status(200).json({ ok: true, room: ROOM_NAME }); });
       let verifier: ReturnType<typeof createJwtVerifier> | undefined;

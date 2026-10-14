@@ -570,7 +570,11 @@ export class MenuScene extends Phaser.Scene {
             statusText = 'Đang thử kết nối lại máy chủ...';
             break;
           case 'error':
-            statusText = netState.message || 'Lỗi kết nối máy chủ. Bạn vẫn có thể chơi offline.';
+            if (netState.message?.includes('establish')) {
+              statusText = 'Máy chủ phòng chơi (ws://localhost:2567) đang tắt. Bạn có thể nhấn [🎮 CHƠI OFFLINE NGAY] để chơi bình thường, hoặc chạy "npm run server:start" trong terminal để bật máy chủ.';
+            } else {
+              statusText = netState.message || 'Lỗi kết nối máy chủ. Bạn vẫn có thể chơi offline.';
+            }
             break;
           case 'disconnected':
           default:
