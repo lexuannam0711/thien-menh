@@ -163,21 +163,33 @@ export class TouchControls {
       .setStrokeStyle(2, 0xe0d8a5, 0.5)
       .setDepth(UI_DEPTH)
       .setInteractive();
+    this.joystickBase.setData?.('isTouchControl', true);
 
     this.joystickKnob = scene.add
       .circle(this.origin.x, this.origin.y, 29, 0xd7be84, 0.55)
       .setStrokeStyle(2, 0xffeac1, 0.8)
       .setDepth(UI_DEPTH + 1)
       .setInteractive();
+    this.joystickKnob.setData?.('isTouchControl', true);
 
-    const begin = (pointer: Phaser.Input.Pointer): void => {
-      if (!this.enabled() || this.activePointerId !== null) return;
-      this.activePointerId = pointer.id;
-      this.updateJoystick(pointer);
+    const begin = (pointer?: Phaser.Input.Pointer): void => {
+      if (!this.enabled() || !this.isVisible) return;
+      const p = pointer as { pointerType?: string; wasTouch?: boolean } | undefined;
+      if (
+        p &&
+        (p.pointerType === 'mouse' ||
+          p.pointerType === 'pen' ||
+          (typeof p.wasTouch === 'boolean' && !p.wasTouch))
+      ) {
+        return;
+      }
+      if (this.activePointerId !== null) return;
+      this.activePointerId = pointer?.id ?? 1;
+      if (pointer) this.updateJoystick(pointer);
     };
 
-    this.joystickBase.on('pointerdown', begin);
-    this.joystickKnob.on('pointerdown', begin);
+    this.joystickBase.on('pointerdown', (pointer?: Phaser.Input.Pointer) => begin(pointer));
+    this.joystickKnob.on('pointerdown', (pointer?: Phaser.Input.Pointer) => begin(pointer));
 
     const move = (pointer: Phaser.Input.Pointer): void => {
       if (pointer.id === this.activePointerId) {
@@ -257,7 +269,11 @@ export class TouchControls {
 
     // 5. Tự động thích ứng trên Desktop
     const autoDetect = options.autoDetectTouch ?? true;
-    if (autoDetect && this.layout.isDesktop() && !safeHasTouch()) {
+    const isDesktopWithMouse =
+      typeof window !== 'undefined' &&
+      ((typeof window.matchMedia === 'function' && window.matchMedia('(pointer: fine)').matches) ||
+        (this.layout.isDesktop() && !safeHasTouch()));
+    if (autoDetect && isDesktopWithMouse) {
       this.setVisible(false);
     }
   }
@@ -275,6 +291,7 @@ export class TouchControls {
       .setStrokeStyle(2, 0xece0c2, 0.85)
       .setDepth(UI_DEPTH)
       .setInteractive();
+    shape.setData?.('isTouchControl', true);
 
     const text = this.scene.add
       .text(x, y, title, {
@@ -286,15 +303,27 @@ export class TouchControls {
       .setOrigin(0.5)
       .setDepth(UI_DEPTH + 1)
       .setInteractive();
+    text.setData?.('isTouchControl', true);
 
     let container: Phaser.GameObjects.Container | undefined;
     if (typeof this.scene.add?.container === 'function') {
       container = this.scene.add.container(x, y, [shape, text]);
       container.setDepth(UI_DEPTH);
+      container.setData?.('isTouchControl', true);
     }
 
-    const down = (): void => {
-      if (!this.enabled()) return;
+    const down = (pointer?: Phaser.Input.Pointer): void => {
+      if (!this.enabled() || !this.isVisible) return;
+      const p = pointer as { pointerType?: string; wasTouch?: boolean } | undefined;
+      // Nếu có pointer truyền vào từ browser và là chuột/pen -> bỏ qua, không kích hoạt
+      if (
+        p &&
+        (p.pointerType === 'mouse' ||
+          p.pointerType === 'pen' ||
+          (typeof p.wasTouch === 'boolean' && !p.wasTouch))
+      ) {
+        return;
+      }
       this.perform(action);
 
       const isReduced =
@@ -313,8 +342,8 @@ export class TouchControls {
       }
     };
 
-    shape.on('pointerdown', down);
-    text.on('pointerdown', down);
+    shape.on('pointerdown', (pointer?: Phaser.Input.Pointer) => down(pointer));
+    text.on('pointerdown', (pointer?: Phaser.Input.Pointer) => down(pointer));
 
     return { shape, text, container };
   }
@@ -421,30 +450,35 @@ export class TouchControls {
 
   public setInteractVisible(visible: boolean): void {
     this.interactVisible = visible;
-    this.buttons.interact.shape.setVisible?.(visible);
-    this.buttons.interact.text.setVisible?.(visible);
-    this.buttons.interact.container?.setVisible?.(visible);
+    const show = this.isVisible && visible;
+    this.buttons.interact.shape.setVisible?.(show);
+    this.buttons.interact.text.setVisible?.(show);
+    this.buttons.interact.container?.setVisible?.(show);
+    if (this.buttons.interact.shape.input) this.buttons.interact.shape.input.enabled = show;
+    if (this.buttons.interact.text.input) this.buttons.interact.text.input.enabled = show;
   }
 
   public getSkillButton(index: number): MobileSkillSlot | undefined {
     return this.skillSlots[index];
   }
 
+  public isControlsVisible(): boolean {
+    return this.isVisible;
+  }
+
   public setVisible(visible: boolean): void {
     this.isVisible = visible;
     this.joystickBase.setVisible?.(visible);
     this.joystickKnob.setVisible?.(visible);
+    if (this.joystickBase.input) this.joystickBase.input.enabled = visible;
+    if (this.joystickKnob.input) this.joystickKnob.input.enabled = visible;
     for (const [key, btn] of Object.entries(this.buttons)) {
-      if (key === 'interact') {
-        const show = visible && this.interactVisible;
-        btn.shape.setVisible?.(show);
-        btn.text.setVisible?.(show);
-        btn.container?.setVisible?.(show);
-      } else {
-        btn.shape.setVisible?.(visible);
-        btn.text.setVisible?.(visible);
-        btn.container?.setVisible?.(visible);
-      }
+      const show = key === 'interact' ? (visible && this.interactVisible) : visible;
+      btn.shape.setVisible?.(show);
+      btn.text.setVisible?.(show);
+      btn.container?.setVisible?.(show);
+      if (btn.shape.input) btn.shape.input.enabled = show;
+      if (btn.text.input) btn.text.input.enabled = show;
     }
   }
 

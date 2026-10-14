@@ -110,10 +110,14 @@ export class KeyboardMouseAdapter {
         const hits = inputPlugin.hitTestPointer(pointer);
         if (hits && hits.length > 0) {
           for (const obj of hits) {
+            const gameObj = obj as { visible?: boolean; depth?: number; getData?: (k: string) => unknown };
+            // Bỏ qua object đang ẩn hoặc là touch control
+            if (gameObj.visible === false) continue;
+            if (typeof gameObj.getData === 'function' && gameObj.getData('isTouchControl')) continue;
             // Độ sâu UI trong game thường >= 1000 (UI_DEPTH = 2000)
-            if (typeof obj.depth === 'number' && obj.depth >= 1000) return true;
-            if (typeof obj.getData === 'function') {
-              if (obj.getData('isUI') || obj.getData('ui') || obj.getData('dialogue')) return true;
+            if (typeof gameObj.depth === 'number' && gameObj.depth >= 1000) return true;
+            if (typeof gameObj.getData === 'function') {
+              if (gameObj.getData('isUI') || gameObj.getData('ui') || gameObj.getData('dialogue')) return true;
             }
           }
         }

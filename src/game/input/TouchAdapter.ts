@@ -20,7 +20,36 @@ export interface TouchButtonConfig {
   text?: unknown;
 }
 
+export function isTouchPointer(p?: Phaser.Input.Pointer | unknown): boolean {
+  if (!p || typeof p !== 'object') {
+    // Cho phép gọi trong test harness / synthetic mock không truyền pointer
+    return true;
+  }
+  const pointer = p as {
+    wasTouch?: boolean;
+    pointerType?: string;
+    event?: { type?: string; pointerType?: string };
+    button?: number;
+  };
+
+  // Nếu được xác nhận là touch rõ ràng
+  if (pointer.wasTouch === true) return true;
+  if (pointer.pointerType === 'touch') return true;
+  if (pointer.event?.pointerType === 'touch') return true;
+  if (pointer.event?.type && pointer.event.type.startsWith('touch')) return true;
+
+  // Nếu xác nhận rõ ràng là chuột hoặc bút vẽ stylus trên PC
+  if (pointer.wasTouch === false) return false;
+  if (pointer.pointerType === 'mouse' || pointer.pointerType === 'pen') return false;
+  if (pointer.event?.pointerType === 'mouse' || pointer.event?.pointerType === 'pen') return false;
+  if (pointer.event?.type && pointer.event.type.startsWith('mouse')) return false;
+
+  return true;
+}
+
 export class TouchAdapter {
+  private isEnabled = true;
+
   // Trạng thái Joystick
   private joystickPointerId: number | null = null;
   private joystickOrigin = { x: 109, y: 421 };
@@ -48,6 +77,17 @@ export class TouchAdapter {
       this.buildVisuals(scene);
       this.attachSceneListeners(scene);
     }
+  }
+
+  public setEnabled(enabled: boolean): void {
+    this.isEnabled = enabled;
+    if (!enabled) {
+      this.reset();
+    }
+  }
+
+  public getEnabled(): boolean {
+    return this.isEnabled;
   }
 
   public setSettings(settings: MobileInputSettings): void {
@@ -113,6 +153,7 @@ export class TouchAdapter {
   // --- Multi-touch Pointer Event Handling ---
 
   public onTouchStart(pointerId: number, x: number, y: number): void {
+    if (!this.isEnabled) return;
     // 1. Kiểm tra bấm trúng nút ảo
     for (const btn of this.buttons) {
       const dist = Math.hypot(x - btn.x, y - btn.y);
@@ -149,6 +190,7 @@ export class TouchAdapter {
   }
 
   public onTouchMove(pointerId: number, x: number, y: number): void {
+    if (!this.isEnabled) return;
     // 1. Nếu là pointer điều khiển Joystick
     if (pointerId === this.joystickPointerId) {
       this.updateJoystick(x, y);
@@ -169,6 +211,7 @@ export class TouchAdapter {
   }
 
   public onTouchEnd(pointerId: number): void {
+    if (!this.isEnabled) return;
     // 1. Nếu là pointer của Joystick -> nhả joystick độc lập
     if (pointerId === this.joystickPointerId) {
       this.resetJoystick();
@@ -277,9 +320,21 @@ export class TouchAdapter {
   private attachSceneListeners(scene: Phaser.Scene): void {
     if (!scene.input) return;
 
-    const onDown = (p: Phaser.Input.Pointer) => this.onTouchStart(p.id, p.x, p.y);
-    const onMove = (p: Phaser.Input.Pointer) => this.onTouchMove(p.id, p.x, p.y);
-    const onUp = (p: Phaser.Input.Pointer) => this.onTouchEnd(p.id);
+    const onDown = (p: Phaser.Input.Pointer) => {
+      if (!this.isEnabled) return;
+      if (!isTouchPointer(p)) return;
+      this.onTouchStart(p.id, p.x, p.y);
+    };
+    const onMove = (p: Phaser.Input.Pointer) => {
+      if (!this.isEnabled) return;
+      if (!isTouchPointer(p)) return;
+      this.onTouchMove(p.id, p.x, p.y);
+    };
+    const onUp = (p: Phaser.Input.Pointer) => {
+      if (!this.isEnabled) return;
+      if (!isTouchPointer(p)) return;
+      this.onTouchEnd(p.id);
+    };
     const onBlur = () => this.reset();
 
     scene.input.on('pointerdown', onDown);
