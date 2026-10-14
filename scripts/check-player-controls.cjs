@@ -559,46 +559,53 @@ runTest('Chặn đánh xuyên UI: click on UI elements does not trigger attack',
 });
 
 // -------------------------------------------------------------
-// Suite 4: Mouse Aiming
+// Suite 4: Attack Direction (Movement & Facing Direction)
 // -------------------------------------------------------------
-console.log('\nSuite 4: Mouse Aiming');
+console.log('\nSuite 4: Attack Direction (Movement & Facing Direction)');
 
-runTest('Player attacks towards mouse aim point when mouseAiming is enabled', () => {
+runTest('Player attacks in movement direction on LMB regardless of mouse cursor position', () => {
   const harness = createTestHarness({ x: 200, y: 200 });
-  // Aim to the bottom-right (300, 300) -> vector (100, 100) -> normalized (1/sqrt(2), 1/sqrt(2))
-  harness.pointerMove(300, 300);
-  harness.pointerDown(300, 300, 0);
+  // Move right with KeyD
+  harness.pressKey('KeyD');
+  // Aim cursor to top-left (100, 100) -> opposite of movement direction
+  harness.pointerMove(100, 100);
+  // Attack with LMB
+  harness.pointerDown(100, 100, 0);
   harness.player.update(16);
-  harness.pointerUp(300, 300, 0);
+  harness.pointerUp(100, 100, 0);
+  harness.releaseKey('KeyD');
 
   assert.equal(harness.recordedActions.basicAttacks.length, 1);
   const dir = harness.recordedActions.basicAttacks[0].dir;
-  assert.ok(Math.abs(dir.x - Math.SQRT1_2) < 0.01, `dir.x must be SQRT1_2, got ${dir.x}`);
-  assert.ok(Math.abs(dir.y - Math.SQRT1_2) < 0.01, `dir.y must be SQRT1_2, got ${dir.y}`);
-  assert.ok(Math.abs(harness.player.direction.x - Math.SQRT1_2) < 0.01);
+  assert.equal(dir.x, 1, `Attack direction x must be 1 (movement direction), got ${dir.x}`);
+  assert.equal(dir.y, 0, `Attack direction y must be 0, got ${dir.y}`);
+  assert.equal(harness.player.direction.x, 1);
+  assert.equal(harness.player.direction.y, 0);
 });
 
-runTest('Player attacks in movement/facing direction when mouseAiming is disabled', () => {
+runTest('Player attacks in current facing direction when stationary regardless of mouse cursor position', () => {
   const harness = createTestHarness({ x: 200, y: 200 });
-  // Disable mouse aiming
-  harness.player.inputManager.settingsManager.update({ pc: { mouseAiming: false, mouseMove: false, rightClickDodge: false } });
-  harness.player.inputManager.keyboardMouseAdapter.setPcSettings({ mouseAiming: false, mouseMove: false, rightClickDodge: false });
-
-  // Face left
+  // Face left by briefly moving left
   harness.pressKey('KeyA');
   harness.player.update(50);
   harness.releaseKey('KeyA');
+  // Player is now stationary facing left
   assert.equal(harness.player.direction.x, -1);
+  assert.equal(harness.player.direction.y, 0);
 
-  // Aim to top-right with mouse
+  // Aim to top-right (500, 100) with mouse cursor
   harness.pointerMove(500, 100);
-  harness.pressKey('KeyJ');
+  // Attack with LMB
+  harness.pointerDown(500, 100, 0);
   harness.player.update(16);
-  harness.releaseKey('KeyJ');
+  harness.pointerUp(500, 100, 0);
 
+  assert.equal(harness.recordedActions.basicAttacks.length, 1);
   const dir = harness.recordedActions.basicAttacks[0].dir;
-  assert.equal(dir.x, -1, 'Attack direction must remain facing left when mouse aiming is disabled');
+  assert.equal(dir.x, -1, 'Attack direction must remain facing left when stationary');
   assert.equal(dir.y, 0);
+  assert.equal(harness.player.direction.x, -1);
+  assert.equal(harness.player.direction.y, 0);
 });
 
 // -------------------------------------------------------------
