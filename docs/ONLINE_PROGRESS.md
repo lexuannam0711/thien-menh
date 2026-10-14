@@ -17,11 +17,11 @@
 |---|---|---|---|---|---|---|
 | **M0** | Architecture & Offline Baseline | `src/game/*`, `package.json` | `check:save`, `check:rpg`, `check:player-status`, `check:controls`, `build` | Không yêu cầu | Visual/gameplay baseline chưa được xác minh độc lập trong vòng này | **PARTIAL (focused offline checks pass)** |
 | **M1** | Supabase Auth & Character Schema | `src/game/online/auth.ts`, `supabase/migrations/20261014000000_m1_profiles_and_characters.sql`, `src/game/scenes/MenuScene.ts` | `check-auth.cjs`, `check-m1-schema.cjs` | Live Supabase DB push, real Email OTP/OAuth | Client runtime character query/selection (`MenuScene.ts:431` dùng pseudo `char-${userId}`) | **PARTIAL / BLOCKED ON RUNTIME CHAR SELECTION & LIVE DB** |
-| **M2** | Colyseus Authoritative Server & Room Connection | `apps/game-server/server.ts`, `src/game/online/protocol.ts`, `src/game/online/multiplayer.ts` | `check-network-contract.cjs`, `check-game-server.cjs` | Production WSS, Internet latency/jitter | Two-browser E2E harness; gameplay scenes (`ForestScene`, `DungeonScene`) chưa nối WSS | **IN PROGRESS (No Two-Browser Evidence; NOT DONE)** |
-| **M3** | Server-Authoritative Combat & Sync | `apps/game-server/server.ts:104-134`, `src/game/online/snapshotAdapter.ts`, `src/game/online/protocol.ts` | `check-network-contract.cjs`, `check-game-server.cjs` | Multi-client network combat sync | `CombatSystem.ts` & `Player.ts` chưa nối `MultiplayerAdapter`; 2 browser co-op đánh quái chưa test | **PARTIAL (Protocol verified; Scene wiring open)** |
-| **M4** | Party System & Instanced Boss Battles | `apps/game-server/server.ts:34-83` (`PartyRegistry`), `src/game/online/partyAdapter.ts` | `check-game-server.cjs` (5-user party flow), `check-network-contract.cjs` | 4-client boss co-op qua mạng, reconnect grace period | In-game party HUD, instanced boss room transfer, wipe/revive multiplayer logic | **IN PROGRESS (Party state machine verified; Co-op boss unverified)** |
+| **M2** | Colyseus Authoritative Server & Room Connection | `apps/game-server/server.ts`, `src/game/online/protocol.ts`, `src/game/online/multiplayer.ts`, `src/game/online/remotePlayerRenderer.ts`, `src/game/scenes/VillageScene.ts` | `check-network-contract.cjs`, `check-game-server.cjs`, `check-village-multiplayer.cjs`, `check-multiplayer-e2e.cjs` (2 SDK clients kết nối WebSocket thật qua JWKS, sync vị trí) | Production WSS, Internet latency/jitter | Two-browser Playwright harness; gameplay scenes (`ForestScene`, `DungeonScene`) chưa nối WSS | **PARTIAL / LOCALLY VERIFIED (E2E 2-client SDK verified; Remote WSS unverified)** |
+| **M3** | Server-Authoritative Combat & Sync | `apps/game-server/server.ts:104-134`, `src/game/online/snapshotAdapter.ts`, `src/game/online/protocol.ts`, `src/game/systems/CombatSystem.ts` (intent dispatch, không mang trường cấm) | `check-network-contract.cjs`, `check-game-server.cjs`, `check-combat-multiplayer.cjs`, `check-multiplayer-e2e.cjs` (quái nhận sát thương tất định 10 HP và chặn fake damage 999999/fake gold 50000) | Multi-client network combat sync qua live internet server | Co-op boss instanced room chưa nối; Forest/Dungeon scenes chưa chạy server AI 25Hz | **PARTIAL / LOCALLY VERIFIED (Authoritative combat intent & anti-cheat verified)** |
+| **M4** | Party System & Instanced Boss Battles | `apps/game-server/server.ts:34-83` (`PartyRegistry`), `src/game/online/partyAdapter.ts`, `src/game/ui/PartyHUD.ts` | `check-game-server.cjs` (5-user party flow), `check-party-hud.cjs` (4/4 suites), `check-multiplayer-e2e.cjs` (đồng bộ party state giữa 2 client) | 4-client boss co-op qua mạng Internet thật, reconnect grace period | In-game instanced boss room transfer, wipe/revive multiplayer logic | **PARTIAL / LOCALLY VERIFIED (Party state machine & PartyHUD verified; Boss instancing unverified)** |
 | **M5** | Persistent RPG, Inventory & Economy | `supabase/migrations/20261014010000_m5_character_progress.sql`, `apps/game-server/characterRepository.ts`, `apps/game-server/server.ts:193-233`, minigames schema/engine | `check-m5-persistence.cjs`, `check-m5-runtime.cjs`, `check-minigames-db.cjs`, `check-minigames-engine.cjs` | Live DB transaction under load, cross-device persistence | Server persistence transport qua WSS (`check-online-transport.cjs` lỗi UUID guard; pending this wave) | **PENDING THIS WAVE / IN PROGRESS (NOT DONE)** |
-| **M6** | Online HUD, Social UX & Controls Mapping | `src/game/ui/screens/ControlsSettings.ts`, `TouchControls.ts`, `MenuScene.ts`, `MinigameOverlay.ts` | `check:controls` (8/8), `check:minigames-client` (5/5), `check:minigames-world` (5/5) | Mobile low-end network UX, multi-user chat spam | In-game party health HUD, chat panel, network ping indicator | **PARTIAL (Input & offline HUD complete; Online social HUD open)** |
+| **M6** | Online HUD, Social UX & Controls Mapping | `src/game/ui/screens/ControlsSettings.ts`, `TouchControls.ts`, `NetworkBadge.ts`, `PartyHUD.ts`, `ChatBox.ts`, `chatManager.ts`, `Hud.ts` | `check:controls` (8/8), `check-party-hud.cjs` (4/4), `check-hud-multiplayer.cjs` (3/3), `check-chat-system.cjs` (9/9), `check:minigames-client` (5/5) | Mobile low-end network UX qua 4G/Wifi thật, multi-user chat spam load test | Mobile virtual keyboard viewport handling trên iOS Safari; live production ping indicator | **PARTIAL / LOCALLY VERIFIED (NetworkBadge, PartyHUD, ChatBox DOM isolation verified)** |
 | **M7** | Full Narrative Campaign & 4 Mythological Bosses | 4 chương cốt truyện, 4 boss thần thoại (`ForestScene`, `DungeonScene`, `VillageScene`, `BossSystem`) | `check:rpg` (5/5 boss suites), `check:campaign-control` | 4-player online campaign co-op | Server-side quest sync khi party lệch chapter, party loot distribution | **OFFLINE VERIFIED / ONLINE CO-OP PENDING** |
 | **M8** | Load Testing, Security & Operations | Rate limiting (`server.ts:91-125`), CSPRNG 100k roll simulation (`check-minigames-engine.cjs`) | `check-minigames-engine.cjs` (Suite 4), `check-game-server.cjs` | 100–500 headless bot load test, packet loss injection, staging failover | Prometheus/Grafana observability, automated backup restore drill, staging deploy | **BLOCKED / NOT STARTED** |
 | **M9** | Production Release Candidate (Online 1.0) | Production client build (`dist/`), game-server build (`dist/game-server/`) | `npm run build`, `npm run server:typecheck` | HTTPS/WSS hosting, production secrets, DNS | 12/12 DoD verification sign-off, live playthrough approval, release runbook | **NOT RELEASE READY** |
@@ -68,15 +68,17 @@
 - **Bằng chứng mã nguồn (Code Present):**
   - Colyseus Server: `apps/game-server/server.ts:1-387` (`PlayerRoom`, `WorldState`, `PlayerState`, `createJwtVerifier()` dùng `jose`).
   - Client Protocol & Adapter: `src/game/online/protocol.ts:1-781` (`PROTOCOL_VERSION = '1.0.0'`, `FORBIDDEN_CLIENT_AUTHORITY_FIELDS`, `validateClientIntent`), `src/game/online/multiplayer.ts:1-710` (`MultiplayerAdapter`, Colyseus SDK wrapper, fail-closed offline).
+  - Remote Player Rendering & Village Sync: `src/game/online/remotePlayerRenderer.ts:1-260` (`RemotePlayerRenderer`, interpolation, sprite animation, name tag), `src/game/scenes/VillageScene.ts:1-320` (tích hợp `MultiplayerAdapter`, quản lý remote player spawn/update/despawn lifecycle, fallback an toàn).
 - **Bằng chứng kiểm thử cục bộ (Locally Tested):**
   - `node scripts/check-network-contract.cjs` — **PASS** (10/10 anti-cheat rejection, snapshot parsing, disconnect cleanup).
   - `node scripts/check-game-server.cjs` — **PASS** (JWT verifier rejection, intent bounding, party registry).
-  - `node scripts/check-online-transport.cjs` (Worker run): Server ném `MatchMakeError: invalid character id` do kiểm tra regex UUID nghiêm ngặt (`server.ts:272`).
+  - `node scripts/check-village-multiplayer.cjs` — **PASS** (3/3 suites: export integrity, runtime simulation mock Phaser/adapter, VillageScene integration & offline fallback).
+  - `node scripts/check-multiplayer-e2e.cjs` — **PASS** (5/5 suites: 2 SDK clients kết nối WebSocket thật qua JWKS, sync vị trí, presence 2 người chơi đồng bộ trên phòng `village-hub`).
 - **Phần còn thiếu & Lỗ hổng (Gaps & Missing):**
-  - Chưa có test harness tự động hóa 2 trình duyệt thật (Playwright/Puppeteer two-browser E2E).
-  - Các scene gameplay (`ForestScene.ts`, `DungeonScene.ts`, `VillageScene.ts`) chưa import hay lắng nghe `MultiplayerAdapter` (hiện chỉ có `MenuScene.ts` import).
-  - Chưa cấu hình WSS production trên server process thật.
-- **Đánh giá cổng:** **IN PROGRESS (Tuyệt đối không đánh dấu hoàn thành khi chưa có bằng chứng 2 browser thật)**.
+  - Chưa có test harness tự động hóa 2 trình duyệt thật (Playwright/Puppeteer two-browser E2E headless/headful).
+  - Chưa cấu hình WSS production trên server process thật có domain/reverse proxy.
+  - Các scene gameplay khác (`ForestScene.ts`, `DungeonScene.ts`) chưa nối đầy đủ multiplayer adapter như `VillageScene.ts`.
+- **Đánh giá cổng:** **PARTIAL / LOCALLY VERIFIED (E2E 2-client SDK & Village integration PASS; Two-browser harness & Remote WSS unverified)**.
 
 ---
 
@@ -85,12 +87,15 @@
 - **Bằng chứng mã nguồn (Code Present):**
   - Server Combat Authority: `apps/game-server/server.ts:104-134` (`validateCombatIntent` chặn `damage/gold/hp/mp`, `calculateDamage` tính sát thương tất định, `createReject`).
   - Snapshot Adapter: `src/game/online/snapshotAdapter.ts:1-553` (`AuthoritativeSnapshotAdapter`, `interpolatePosition`, deep immutability, listener isolation).
+  - Client Combat Intent Dispatch: `src/game/systems/CombatSystem.ts` (khi kết nối online, dispatch intent đánh thường `attack` và kỹ năng `cast_skill` qua `MultiplayerAdapter`, không trừ máu cục bộ, tuyệt đối không gửi các trường cấm `damage`, `gold`, `hp`, `mp`; hỗ trợ fallback an toàn khi mất kết nối).
 - **Bằng chứng kiểm thử cục bộ (Locally Tested):**
   - `node scripts/check-network-contract.cjs` — **PASS** (Suite 9: Authoritative snapshot consumption, client authority claims rejected with UNAUTHORIZED).
   - `node scripts/check-game-server.cjs` — **PASS** (forged damage rejected, combo bounds enforced, dodge bounds enforced, deterministic damage calculation).
+  - `node scripts/check-combat-multiplayer.cjs` — **PASS** (3/3 suites: offline direct combat mode, online authoritative intent dispatch không mang trường cấm, fail-safe handling & error resilience).
+  - `node scripts/check-multiplayer-e2e.cjs` — **PASS** (Test Case 3 & 4: quái nhận sát thương tất định 10 HP từ 120 -> 110 HP phát broadcast tới cả 2 client; chặn fake damage `999999` và fake gold `50000` với mã MALFORMED, bảo vệ HP quái).
 - **Phần còn thiếu & Lỗ hổng (Gaps & Missing):**
-  - `CombatSystem.ts` và `Enemy.ts` trên client vẫn chạy logic offline độc lập; chưa nhận event `s2c_damage_feedback` từ server để trừ máu quái thật trong scene.
-- **Đánh giá cổng:** **PARTIAL (Contract & Adapter PASS; In-game scene integration OPEN)**.
+  - Quái vật và Boss ở scene hầm ngục/rừng rậm (`DungeonScene`, `ForestScene`) chưa hoàn toàn đồng bộ với server AI tick 25Hz qua internet; chưa có boss instanced room co-op.
+- **Đánh giá cổng:** **PARTIAL / LOCALLY VERIFIED (Authoritative combat contract, intent dispatch & anti-cheat PASS; Co-op dungeon boss unverified)**.
 
 ---
 
@@ -99,14 +104,16 @@
 - **Bằng chứng mã nguồn (Code Present):**
   - Server Party Registry: `apps/game-server/server.ts:34-83` (`PartyRegistry` quản lý invite/accept/kick/disband, chặn quá 4 thành viên với mã `PARTY_FULL`).
   - Client Party Adapter: `src/game/online/partyAdapter.ts:1-350` (`PartyAdapter`, `MAX_PARTY_MEMBERS = 4`, state transitions bất biến).
+  - In-Game Party HUD: `src/game/ui/PartyHUD.ts:1-280` (hiển thị danh sách tối đa 4 thành viên, chỉ số HP bar, level, icon leader, modal mời/chấp nhận/từ chối tổ đội, responsive DOM container).
 - **Bằng chứng kiểm thử cục bộ (Locally Tested):**
   - `node scripts/check-game-server.cjs` — **PASS** (kịch bản 5 users: tạo party, invite, accept, từ chối non-member kick, chặn thành viên thứ 5 với `PARTY_FULL`, transfer leader, disband).
   - `node scripts/check-network-contract.cjs` — **PASS** (Suite 10: PartyAdapter contract, fail-closed validation, deepFreeze immutability).
+  - `node scripts/check-party-hud.cjs` — **PASS** (4/4 suites: render NetworkBadge, cập nhật snapshot party và thanh máu thành viên, modal mời/chấp nhận/từ chối, dọn dẹp sạch DOM không rò rỉ listener).
+  - `node scripts/check-multiplayer-e2e.cjs` — **PASS** (Test Case 5: Client A tạo party, gửi lời mời sang Client B, Client B chấp nhận; cả 2 client đồng bộ party state: Leader Lạc Tướng, 2 thành viên).
 - **Phần còn thiếu & Lỗ hổng (Gaps & Missing):**
-  - Chưa có UI party in-game (danh sách thành viên party, thanh máu đồng đội trên HUD).
   - Chưa có phân vùng boss instancing đa phòng (Colyseus dynamic room creation cho từng party).
-  - Chưa kiểm thử 4 người chơi co-op đánh boss thực tế.
-- **Đánh giá cổng:** **IN PROGRESS (Party core logic PASS; Boss co-op instancing NOT COMPLETE)**.
+  - Chưa kiểm thử 4 người chơi co-op đánh boss thực tế qua mạng internet.
+- **Đánh giá cổng:** **PARTIAL / LOCALLY VERIFIED (Party core logic, PartyHUD UI & 2-client sync PASS; Boss instancing unverified)**.
 
 ---
 
@@ -134,14 +141,18 @@
   - Hệ thống điều khiển & cài đặt: `src/game/ui/screens/ControlsSettings.ts`, `src/game/ui/TouchControls.ts`, `src/game/input/InputManager.ts`.
   - Màn hình Auth & Trạng thái mạng: `src/game/scenes/MenuScene.ts:273-500` (panel đăng nhập, overlay trạng thái kết nối mạng).
   - Minigames Client UI & World NPCs: `src/game/ui/MinigameOverlay.ts`, `src/game/scenes/VillageScene.ts:180-260`.
+  - In-game Social & HUD Components: `src/game/ui/NetworkBadge.ts` (trạng thái online/offline/reconnecting, ping latency), `src/game/ui/PartyHUD.ts` (thanh máu tổ đội), `src/game/ui/ChatBox.ts` (giao diện chat, focus/blur, cách ly hoàn toàn phím di chuyển/kỹ năng WASD và 1-4), `src/game/online/chatManager.ts` (bộ lọc XSS HTML, regex che giấu email/token JWT, rate limiting 3 tin/5s, buffer 50 tin), `src/game/ui/Hud.ts` (tích hợp NetworkBadge và PartyHUD vào HUD chính, quản lý vòng đời mount/unmount).
 - **Bằng chứng kiểm thử cục bộ (Locally Tested):**
   - `npm run check:controls` — **PASS** (8/8 master test suites: remapping, layout responsive, multi-touch isolation, Vietnamese text integrity).
+  - `node scripts/check-chat-system.cjs` — **PASS** (9/9 tests: XSS injection sanitization, PII masking, rate limiting, bounded buffer, ChatBox render, input isolation phím WASD/1-4, Enter/Escape dispatch, DOM cleanup).
+  - `node scripts/check-hud-multiplayer.cjs` — **PASS** (3/3 suites: khởi tạo NetworkBadge & PartyHUD trong Hud, vòng đời destroy/shutdown dọn sạch DOM node/listener, an toàn 100% trong môi trường headless).
+  - `node scripts/check-party-hud.cjs` — **PASS** (4/4 suites).
   - `node scripts/check-minigames-client.cjs` — **PASS** (5/5 suites: modal barrier, input isolation, daily limits).
   - `node scripts/check-minigames-world.cjs` — **PASS** (5/5 suites: festival NPC registry, barrier bounds, collision safety).
 - **Phần còn thiếu & Lỗ hổng (Gaps & Missing):**
-  - Chưa có in-game party HUD hiển thị HP thành viên trong scene chiến đấu.
-  - Chưa có hệ thống Chat UI khu vực/party với bộ lọc từ khóa vi phạm.
-- **Đánh giá cổng:** **PARTIAL (Offline input/settings hoàn chỉnh; Online party HUD & Chat chưa có)**.
+  - Chưa kiểm thử hiển thị trên thiết bị di động thật (iOS Safari virtual keyboard viewport adjustment khi mở ChatBox).
+  - Chưa có live production WSS server để đo ping thời gian thực qua Internet.
+- **Đánh giá cổng:** **PARTIAL / LOCALLY VERIFIED (Offline input/settings, PartyHUD, NetworkBadge & Chat System hoàn chỉnh; Mobile physical verification open)**.
 
 ---
 
@@ -195,12 +206,12 @@ Theo **Mục 19** trong `THAN_MENH_ONLINE_MULTIPLAYER_SUPABASE_MASTER_PROMPT.md`
 |---|---|---|---|---|
 | **1** | Đăng ký/đăng nhập Supabase, tạo nhân vật, logout/relogin thành công | **PARTIAL** | `src/game/online/auth.ts`, `MenuScene.ts:273-500`; `check-auth.cjs` PASS | `MenuScene.ts:431` dùng pseudo characterId; chưa có API truy vấn `characters` table thật từ Supabase; chưa có live instance |
 | **2** | Dữ liệu nhân vật và tiến trình lưu đúng, đọc được từ thiết bị/trình duyệt khác | **IN PROGRESS** | Migration `20261014010000_m5_character_progress.sql`, `characterRepository.ts`; `check-m5-runtime.cjs` PASS | Chưa kết nối live Postgres; transport test pending; chưa kiểm chứng đa thiết bị thật |
-| **3** | Hai hoặc nhiều người chơi cùng xuất hiện, di chuyển và tương tác trong một khu vực online | **NOT DONE** | `apps/game-server/server.ts`, `src/game/online/multiplayer.ts`; `check-network-contract.cjs` PASS | Chưa có kiểm thử 2 browser thật; các gameplay scenes chưa wire với `MultiplayerAdapter` |
-| **4** | Party 2–4 người hình thành, gia nhập instance và chiến đấu với quái/boss cùng nhau | **IN PROGRESS** | `PartyRegistry` trong `server.ts:50-83`, `partyAdapter.ts`; `check-game-server.cjs` PASS (5-user party test) | Chưa có instance phòng riêng cho boss; chưa có kiểm thử 4 client co-op trong trận đánh boss |
-| **5** | Tất cả kết quả combat quan trọng được server xác nhận, không thể tự gửi fake gold/damage | **PARTIAL** | `validateCombatIntent` trong `server.ts:104-125`; `check-network-contract.cjs` PASS (10/10 anti-cheat claims rejected) | Combat trong Phaser scenes hiện tại vẫn là client-authoritative cục bộ, chưa chuyển sang nhận server hit events |
+| **3** | Hai hoặc nhiều người chơi cùng xuất hiện, di chuyển và tương tác trong một khu vực online | **PARTIAL / LOCALLY VERIFIED** | `apps/game-server/server.ts`, `src/game/online/multiplayer.ts`, `remotePlayerRenderer.ts`, `VillageScene.ts`; `check-village-multiplayer.cjs` PASS, `check-multiplayer-e2e.cjs` PASS (Test Case 1 & 2: 2 SDK client kết nối WebSocket thật qua JWKS, presence sync 2 players, di chuyển và nhận snapshot tọa độ đồng bộ) | Chưa có test harness Playwright 2 browser tự động; chưa có production domain WSS hosting; các scene `ForestScene`, `DungeonScene` chưa hoàn tất co-op |
+| **4** | Party 2–4 người hình thành, gia nhập instance và chiến đấu với quái/boss cùng nhau | **PARTIAL / LOCALLY VERIFIED** | `PartyRegistry` trong `server.ts:50-83`, `partyAdapter.ts`, `PartyHUD.ts`; `check-game-server.cjs` PASS (5-user party flow), `check-party-hud.cjs` PASS (4/4 suites), `check-multiplayer-e2e.cjs` PASS (Test Case 5: 2 client tạo party, gửi lời mời, chấp nhận, đồng bộ state) | Chưa có dynamic instanced boss room transfer; chưa có bài test 4 client co-op trong instance boss riêng biệt |
+| **5** | Tất cả kết quả combat quan trọng được server xác nhận, không thể tự gửi fake gold/damage | **PARTIAL / LOCALLY VERIFIED** | `validateCombatIntent` trong `server.ts:104-125`, `src/game/systems/CombatSystem.ts`; `check-network-contract.cjs` PASS, `check-combat-multiplayer.cjs` PASS (3/3 suites: intent dispatch không mang trường cấm, offline fallback), `check-multiplayer-e2e.cjs` PASS (Test Case 3 & 4: quái nhận 10 damage tất định, chặn fake damage `999999`/fake gold `50000` mã MALFORMED) | Boss và dungeon scenes chưa đồng bộ server AI tick 25Hz qua internet; chưa có testbed giả lập mạng trễ chống lag switch |
 | **6** | Có NPC, nhiệm vụ, inventory, trang bị, skill và progression kết nối với persistent storage | **PARTIAL** | Hệ thống RPG offline đầy đủ (`check:rpg` PASS); Minigames persistent schema & engine PASS (`check-minigames-db.cjs`) | Chưa đồng bộ túi đồ và quest của campaign chính từ client lên bảng `characters.inventory` qua server RPC |
 | **7** | Hoạt động ổn định khi refresh/reconnect/hết phiên trong các tình huống kiểm thử | **IN PROGRESS** | Session state machine trong `MultiplayerAdapter` và `SessionManager.ts` | Chưa có kiểm thử giả lập ngắt mạng 60s và khôi phục phiên (reconnect grace period) trên browser |
-| **8** | UI online gọn, đẹp, dễ nhìn, thao tác tốt trên PC/mobile; không đổi phím 1–4 hoặc thể loại Hack & Slash | **OPEN** | `check:controls` (offline self-check), `TouchControls.ts`, `ControlsSettings.ts` | Chưa chứng minh online party/chat UX hoặc visual/device acceptance |
+| **8** | UI online gọn, đẹp, dễ nhìn, thao tác tốt trên PC/mobile; không đổi phím 1–4 hoặc thể loại Hack & Slash | **PARTIAL / LOCALLY VERIFIED** | `src/game/ui/NetworkBadge.ts`, `PartyHUD.ts`, `ChatBox.ts`, `chatManager.ts`, `Hud.ts`, `TouchControls.ts`, `ControlsSettings.ts`; `check:controls` (8/8), `check-chat-system.cjs` (9/9), `check-hud-multiplayer.cjs` (3/3), `check-party-hud.cjs` (4/4) | Chưa kiểm tra trên thiết bị di động vật lý (iOS Safari virtual keyboard viewport adjustment khi mở chat); chưa có live latency ping đo từ xa |
 | **9** | RLS, privilege isolation, validated protocol và anti-abuse cơ bản đã được kiểm thử | **PARTIAL (static/mock only)** | `check-m1-schema.cjs`, `check-minigames-db.cjs`, `check-network-contract.cjs` | SQL/mock assertions không chứng minh RLS thực thi; cần kiểm tra PostgreSQL/Supabase thật và runtime abuse |
 | **10** | Nội dung cốt truyện và các khu vực bắt buộc của bản 1.0 hoạt động trong mô hình online | **PENDING** | 4 chapter và 4 boss hoạt động hoàn hảo ở chế độ offline (`check:rpg`, `check:campaign-control` PASS) | Chưa có gameplay co-op online cho 4 chapter cốt truyện |
 | **11** | Build production frontend + backend thành công; cấu hình HTTPS/WSS và dữ liệu phù hợp | **PARTIAL** | `npm run build` PASS, `npm run server:typecheck` PASS | Chưa cấu hình chứng chỉ TLS/WSS và máy chủ triển khai production |
@@ -239,6 +250,19 @@ Theo **Mục 19** trong `THAN_MENH_ONLINE_MULTIPLAYER_SUPABASE_MASTER_PROMPT.md`
 15. `npm run check:controls` — **PASS** (8/8 master QA suites pass).
 16. `npm run build` — **PASS** (173 modules transformed, bundle JS 2,232.13 kB, chunk warning >500 kB).
 17. `npm run server:typecheck` — **PASS** (TypeScript compilation của `apps/game-server/tsconfig.json` sạch sẽ).
+18. `node scripts/check-multiplayer-e2e.cjs` — **PASS**
+    - *Kết quả:* 5/5 test cases (Room join & presence sync M2, movement sync M2/M3, server-authoritative combat 10 HP M3, anti-cheat fake damage `999999` & fake gold `50000` rejection MALFORMED, party co-op sync M4).
+19. `node scripts/check-chat-system.cjs` — **PASS**
+    - *Kết quả:* 9/9 tests (XSS sanitization, PII masking email/Bearer token, rate limit 3 tin/5s, buffer 50 tin, ChatBox focus/blur, WASD/1-4 input isolation, Enter/Escape dispatch, DOM cleanup).
+20. `node scripts/check-combat-multiplayer.cjs` — **PASS**
+    - *Kết quả:* 3/3 suites (offline combat direct damage, online intent dispatch không mang trường cấm, fail-safe error handling & fallback).
+21. `node scripts/check-hud-multiplayer.cjs` — **PASS**
+    - *Kết quả:* 3/3 suites (khởi tạo NetworkBadge & PartyHUD trong Hud, vòng đời destroy/shutdown dọn sạch DOM node/listener, headless safety).
+22. `node scripts/check-village-multiplayer.cjs` — **PASS**
+    - *Kết quả:* 3/3 suites (RemotePlayerRenderer export integrity, runtime simulation mock Phaser/adapter, VillageScene integration & offline fallback).
+23. `node scripts/check-party-hud.cjs` — **PASS**
+    - *Kết quả:* 4/4 suites (NetworkBadge render trạng thái, PartyHUD snapshot & HP bar cập nhật, modal mời/chấp nhận/từ chối, dọn dẹp DOM sạch sẽ).
+24. `npm run check:all` — **PASS** (Toàn bộ test suite bao gồm build, offline checks, minigames và 6 bài kiểm thử multiplayer mới chạy liên tục không gãy).
 
 ### 4.2. Bằng chứng được xác thực độc lập bởi Coordinator (Attributed Evidence):
 - **Kiểm tra biên dịch & Bundle:** `npm run build` PASS (cảnh báo chunk >500KB, bundle 2.23MB).
