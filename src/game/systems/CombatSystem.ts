@@ -13,6 +13,7 @@ import {
   getEquippedWeaponOrDefault,
   type WeaponDefinition,
 } from '../../data/weapons';
+import { multiplayer, type MultiplayerAdapter } from '../online/multiplayer';
 
 function makeVec2(x = 0, y = 0): Phaser.Math.Vector2 {
   if (typeof Phaser !== 'undefined' && Phaser.Math?.Vector2) {
@@ -22,7 +23,44 @@ function makeVec2(x = 0, y = 0): Phaser.Math.Vector2 {
 }
 
 export class CombatSystem {
-  constructor(private scene: Phaser.Scene, private enemies: () => Enemy[], private bossSystem?: BossSystem) {}
+  constructor(
+    private scene: Phaser.Scene,
+    private enemies: () => Enemy[],
+    private bossSystem?: BossSystem,
+    private networkAdapter: any = multiplayer
+  ) {}
+
+  private dispatchAttack(combo: number, dir: Phaser.Math.Vector2): boolean {
+    const adapter = this.networkAdapter ?? multiplayer;
+    try {
+      if (adapter?.isConnected && typeof adapter.sendAttack === 'function') {
+        const sent = adapter.sendAttack(combo, dir.x, dir.y);
+        if (sent === false && typeof adapter.sendIntent === 'function') {
+          adapter.sendAttack(combo, undefined, dir.x, dir.y);
+        }
+        return true;
+      }
+    } catch {
+      // Fail-safe offline fallback
+    }
+    return false;
+  }
+
+  private dispatchSkill(skillId: string, dir: Phaser.Math.Vector2): boolean {
+    const adapter = this.networkAdapter ?? multiplayer;
+    try {
+      if (adapter?.isConnected && typeof adapter.sendCastSkill === 'function') {
+        const sent = adapter.sendCastSkill(skillId, dir.x, dir.y);
+        if (sent === false && typeof adapter.sendIntent === 'function') {
+          adapter.sendCastSkill(skillId, undefined, dir.x, dir.y);
+        }
+        return true;
+      }
+    } catch {
+      // Fail-safe offline fallback
+    }
+    return false;
+  }
 
   basic(player: Player, combo: number, dir?: Phaser.Math.Vector2): void {
     const s = gameState.data;
@@ -41,6 +79,9 @@ export class CombatSystem {
 
     this.slashEffect(player.x, player.y, effectiveDir, combo, weapon);
     audioManager.playCue('sword_slash', { pitchMultiplier: 1 + combo * 0.04 });
+
+    if (this.dispatchAttack(combo, effectiveDir)) return;
+
     let hit = 0;
     for (const enemy of this.enemies()) {
       if (!enemy.isAlive) continue;
@@ -79,6 +120,9 @@ export class CombatSystem {
 
     this.skillEffect(player.x, player.y, skill, effectiveDir);
     audioManager.playCue(skill.element === 'flame' ? 'skill_flame' : 'skill_earth', { priority: 2 });
+
+    if (this.dispatchSkill(skill.id, effectiveDir)) return;
+
     if (damage <= 0) return;
     for (const enemy of this.enemies()) {
       if (!enemy.isAlive || !skillHitsTarget(skill, player, effectiveDir, enemy)) continue;
